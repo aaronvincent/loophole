@@ -67,10 +67,23 @@ _check_moment(moment::Symbol) = moment in (:number, :energy) ||
 # as continuum waypoints so the adaptive rule resolves the cusps (svavg.m:63-64).
 const _SV_EXTRA_THRESH = (4 * MPI_PM^2, 4 * MPI0^2, 4 * M_ETA^2, 4 * MK^2, 4 * MK0^2,
                           (MPI0 + M_ETA)^2, 4 * M_ETAP^2)
+# Model-specific additions: the three-body thresholds when enabled.
 _model_extra_thresh(m::CrossSectionModel) = ()
+_model_extra_thresh(m::PoleSPPP) = _threebody_thresholds(m.mphi)
+_model_extra_thresh(m::AxialVector) =
+    ((threepi_enabled() ? (9MPI0^2, (2MPI_PM + MPI0)^2) : ())...,
+     (pipiphi_enabled() ? ((2MPI_PM + m.mphi)^2,) : ())...)
 
-# Poles of the ⟨σv⟩ integrand for a channel.
+# Poles of the ⟨σv⟩ integrand for a channel: the model's, plus the A′ pole of
+# the axial J = 1 χχ̄→3π piece in the channels that carry it (svavg.m sv_poles).
 _sv_poles(m::CrossSectionModel, channel::Symbol) = poles(m)
+function _sv_poles(m::AxialVector, channel::Symbol)
+    ps = poles(m)
+    if channel !== :gg && threepi_enabled() && m.mphi > 3MPI0
+        ps = vcat(ps, [(m.mphi^2, m.mphi * mediator_widths(m).total)])
+    end
+    return ps
+end
 
 """
     thermal_pole_integral(logintegrand, sig, kernel_at, s_lo, s_max, pole_s, pole_w;

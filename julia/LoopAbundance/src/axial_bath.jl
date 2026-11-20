@@ -1,4 +1,4 @@
-# axialVector A′ ↔ bath links for freeze_coupled (docs/notes/AA_to_gammagamma.tex):
+# axialVector A′ ↔ bath links for freeze_coupled:
 #   AA_sm_xsec      A′A′ → γγ (charged π/K loop) and A′A′ → π⁺π⁻, K⁺K⁻, K⁰K̄⁰ (tree)
 #   sv_AAsm_grid    log ⟨σv⟩ of the two, Gondolo–Gelmini, on freeze_coupled's T grid
 #   apipi_phi_rate  per-A′ rate of A′π ↔ ππ (contact of the 3π current, crossed)

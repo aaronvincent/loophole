@@ -38,20 +38,22 @@ function mediator_widths(m::ScalarPS)
     return (gg = gg, xx = xx, pipi = pipi, KK = KK, eta = eta, total = gg + xx + pipi + KK + eta)
 end
 
-# SP/PP family: γγ via π⁰/η (or η′) mixing + χχ̄ (β³ for SP, β¹ for PP).  Shares _sppp_widths with the coupling factory.
+# SP/PP family: γγ via π⁰/η (or η′) mixing + χχ̄ (β³ for SP, β¹ for PP), and
+# φ→3π in `pipi` when LOOP_3PI=1.  Shares _sppp_widths with the coupling factory.
 function mediator_widths(m::PoleSPPP)
     w = _sppp_widths(m.mphi, m.mx, m.gx, m.g, _is_pp(m))
     return (gg = w.gg, xx = w.xx, pipi = w.pipi, KK = 0.0, eta = 0.0, total = w.total)
 end
 
-# AxialVector A': A'→χχ̄ (β³).  No γγ or two-meson width (γγ↔χχ runs through
-# the meson poles, not an A' pole).
-# λ_a²m_A′β³/12π: the standard polarization-AVERAGED axial-vector width.  The
-# draft and docs/notes/axialvector.txt carry /4π, missing the 1/3 over the three
-# polarizations of a massive vector.
+# AxialVector A': A'→χχ̄ (β³), plus A'→3π in `pipi` when LOOP_3PI=1.  No γγ or
+# two-meson width (γγ↔χχ runs through the meson poles, not an A' pole); the
+# total regulates the A' pole of the J = 1 χχ̄→3π channel.
+# λ_a²m_A′β³/12π: the standard polarization-AVERAGED axial-vector width (1/3
+# over the three polarizations of a massive vector).
 function mediator_widths(m::AxialVector)
     mphi, mx, gx = m.mphi, m.mx, m.gx
     xx = mphi > 2mx ? gx^2 * max(0.0, mphi^2 - 4mx^2)^1.5 / (12pi * mphi^2) : 0.0
-    return (gg = 0.0, xx = xx, pipi = 0.0, KK = 0.0, eta = 0.0, total = xx)
+    pipi = _axial_3pi_width(mphi, m.g)
+    return (gg = 0.0, xx = xx, pipi = pipi, KK = 0.0, eta = 0.0, total = xx + pipi)
 end
 

@@ -7,6 +7,7 @@ include("constants.jl")     # physical constants (depends on gstarofT for s0)
 
 # --- model interface + built-in models ---
 include("models/interface.jl")
+include("models/threebody.jl")   # SP/PP 3π / ππφ, axial 3π / π+π−A′ (off by default)
 include("models/couplings.jl")   # SP/PP + axial coupling factories (M5)
 include("models/builtins.jl")
 include("models/widths.jl")
@@ -27,6 +28,9 @@ include("relic.jl")             # freeze_loop, freeze_out, Oh2_FI, freeze_couple
 include("neff_simple.jl")    # simple CMB ΔNeff (Boehm-Dolan-McCabe + φ from χ)
 include("observables.jl")       # sigma_nucleon, model_observables
 
+# LOOP_3PI / LOOP_PIPIPHI are read at load time, not precompile time.
+__init__() = (threebody_refresh!(); nothing)
+
 # thermodynamics
 export gstarofT
 
@@ -41,6 +45,10 @@ export HeavyScalar, LightScalar, HeavyScalarPS, LightScalarPS
 export HeavyScalarSP, LightScalarSP, ScalarPP, HeavyScalarPP, LightScalarPP
 export AxialVector, AxialMediatorTooLight
 export model_from_interaction
+
+# three-body final states (LOOP_3PI / LOOP_PIPIPHI)
+export threebody_refresh!, threepi_enabled, pipiphi_enabled
+export threepi_weight, pipiphi_weight, threebody_sigma, axial3pi_weight, axial3pi_sigma, pipiA_weight
 
 # axialVector EFT-validity ceilings/floors
 export axial_gx_ceiling, axial_eta_ceiling, axial_mixing_floor

@@ -268,6 +268,8 @@ def kphi_ratio(mx, mphi, gx, gu, gd, gs, interaction):
 def _sigmav(kind, mx, mphi, gx, Cu, Cd, Cs, cmb=False):
     # Low-velocity <sigma v> [cm^3/s] used by the CMB / INTEGRAL bounds.  Analytic
     # threshold (s = 4 m_chi^2) expressions from mesonandCMBlimits.py.
+    # cmb=True adds the s-wave three-body annihilation (_threebody_cmb_sv), each
+    # channel weighted by its deposited-energy fraction relative to gamma gamma.
     sapprox = 4 * mx**2
     with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
         if kind == "SxS":
@@ -298,7 +300,10 @@ def _sigmav(kind, mx, mphi, gx, Cu, Cd, Cs, cmb=False):
                     Gxx = gchi**2 * np.sqrt(np.clip(mphi**2 / 4 - mx**2, 0.0, None)) / (4 * np.pi)
                 else:
                     Gxx = gchi**2 * np.clip(mphi**2 - 4 * mx**2, 0.0, None)**1.5 / (8 * np.pi * mphi**2)
-                return np.where(mphi**2 >= 4 * mx**2, Gxx + Ggg, Ggg)
+                return np.where(mphi**2 >= 4 * mx**2, Gxx + Ggg, Ggg) + G3pi
+
+            # phi -> 3pi, as in the relic widths (phi_partial_widths.m); 0 when off
+            G3pi = _phi_3pi_width(mphi, Cu, Cd, Cs)
 
             # --- generic pole set {pi0, eta, phi'} ---------------------------
             mpi0phi2, metaphi2 = _pp_couplings(Cu, Cd, Cs)
@@ -317,7 +322,7 @@ def _sigmav(kind, mx, mphi, gx, Cu, Cd, Cs, cmb=False):
             # --- SU(3)-singlet direction Cu=Cd=Cs: {eta', phi'} --------------
             # There the pi0/eta mixings and the induced phi'gamma coupling all
             # vanish, so amp_gen == 0 and chi would decouple from photons.  The
-            # surviving channel is the singlet eta' (docs/notes/SPPPetaprime.tex);
+            # surviving channel is the singlet eta';
             # mirrors sppp_couplings.m so the relic and indirect pipelines agree.
             _GETAP_GG, _GETAP_TOT = 4.34e-6, 1.88e-4
             F_etap = np.sqrt(_ALPHA**2 * _METAP**3 / (64 * np.pi**3 * _GETAP_GG))
@@ -340,8 +345,11 @@ def _sigmav(kind, mx, mphi, gx, Cu, Cd, Cs, cmb=False):
             amp = np.where((Cu == Cd) & (Cd == Cs), amp_sing, amp_gen)
             # 4pi: the source expression is dsigma/dOmega.
             if isPP:
-                return (4 * np.pi * sapprox**2 / (512 * np.pi**2) * np.abs(amp)**2
-                        * 2 * _HBARC**2 * _CC)
+                sv = 4 * np.pi * sapprox**2 / (512 * np.pi**2) * np.abs(amp)**2 * 2 * _HBARC**2 * _CC
+                if cmb:
+                    Gtot = np.where((Cu == Cd) & (Cd == Cs), Gphi_s, Gphi)
+                    sv = sv + _threebody_cmb_sv("PxP", mx, mphi, gx, Cu, Cd, Cs, Gtot)
+                return sv
             jfac = (2.42e17) / (1.30e23)
             return (4 * np.pi * sapprox**1.5 * mx * jfac / (512 * np.pi**2)
                     * np.abs(amp)**2 * _HBARC**2 * _CC)
@@ -366,8 +374,172 @@ def _sigmav(kind, mx, mphi, gx, Cu, Cd, Cs, cmb=False):
                + lametachi * lametagamma / (sapprox - _META**2 + 1j * _META * _GETA)
                + lameta0chi * lameta0gamma / (sapprox - _METAP**2 + 1j * _METAP * _GETA0))
         # 4pi: the source expression is dsigma/dOmega.
-        return (4 * np.pi * mx**2 * sapprox**2 / (128 * np.pi**2) * np.abs(amp)**2
-                * 2 * _HBARC**2 * _CC)
+        sv = 4 * np.pi * mx**2 * sapprox**2 / (128 * np.pi**2) * np.abs(amp)**2 * 2 * _HBARC**2 * _CC
+        if cmb:
+            sv = sv + _threebody_cmb_sv("AxA", mx, mphi, gx, Cu, Cd, Cs, None)
+        return sv
+
+
+# ---------------------------------------------------------------------------
+# Three-particle annihilation (LOOP_3PI / LOOP_PIPIPHI, read from the
+# environment like the relic code).  Ports of matlab/threepi_weight.m,
+# pipiphi_weight.m, axial3pi_weight.m and dalitz_moments.m, with the relic
+# pipeline's constants (as in the meson-invisible section below), so the
+# channels are the ones the relic abundance used.
+#
+# CMB only, and only the s-wave pieces: P(x)P chi chi -> 3pi and pi pi phi, and
+# the axial J = 0 chi chi -> 3pi.  S(x)P carries (s - 4mx^2)/s and the axial
+# J = 1 part carries beta^2, so both vanish at s = 4 mx^2; the INTEGRAL curve is
+# a gamma-line bound, which a pion continuum does not feed.
+#
+# The Slatyer curve bounds gamma gamma, which deposits all 2mx.  Each channel is
+# weighted by the fraction of its energy that ends up in photons and e+-,
+# assuming f_eff(e) ~ f_eff(gamma) at these energies:
+#   pi0 -> gamma gamma: all of it.  pi+- -> mu nu keeps (mpi^2 + mmu^2)/(2 mpi^2)
+#   = 0.787 of the energy, mu -> e nu nu passes 7/20 of that: 0.275.
+#   3pi:     (1 + 2 x 0.275)/3 = 0.52, the pi+pi-pi0 value, used for 3pi0 too.
+#   pi pi phi: the pions' 2/3 share at the charged value, 2/3 x 0.275 = 0.18; the
+#            phi's energy is not counted (it may decay after recombination).
+# Both are lower bounds on the deposited energy, so the bound is conservative.
+# ---------------------------------------------------------------------------
+KAPPA_3PI = 0.52
+KAPPA_PIPIPHI = 0.18
+_T_MPI0, _T_MPIPM = 0.13498, 0.13957
+_T_META, _T_METAP = 0.547862, 0.95778
+_T_GETA, _T_GETAP = 1.31e-6, 1.88e-4
+_T_L4, _T_L5 = 1.87e-3, 1.22e-3
+
+
+def _threepi_on():
+    return os.environ.get("LOOP_3PI", "") == "1"
+
+
+def _pipiphi_on():
+    return os.environ.get("LOOP_PIPIPHI", "") == "1"
+
+
+def _dalitz_moments(s, m1, m2):
+    """I_n(s) = int dE Y(E) X(E)^n over the m1 energy; port of dalitz_moments.m.
+    s and m1 broadcast; the other two particles have mass m2."""
+    n = 32
+    th = np.pi * (np.arange(1, n + 1) - 0.5) / n
+    t = (1 - np.cos(th)) / 2
+    dt = np.sin(th) / 2 * np.pi / n
+    s = np.asarray(s, dtype=float)[..., None]
+    m1 = np.asarray(m1, dtype=float)[..., None]
+    rs = np.sqrt(s)
+    Elo = m1
+    Ehi = (s + m1**2 - 4 * m2**2) / (2 * rs)
+    E = Elo + (Ehi - Elo) * t
+    w = s + m1**2 - 2 * E * rs
+    Y = np.sqrt(np.clip((E**2 - m1**2) * (1 - 4 * m2**2 / w), 0.0, None))
+    X = w - _T_MPI0**2
+    wt = (Ehi - Elo) * dt * Y
+    return wt.sum(-1), (wt * X).sum(-1), (wt * X**2).sum(-1)
+
+
+def _threepi_weight(s, Cu, Cd, Cs):
+    """W(s) over pi+pi-pi0 and 3pi0, mediator propagator stripped; port of
+    threepi_weight.m (eta pole generically, eta' for Cu = Cd = Cs)."""
+    B0, f, dm = _RB0, _RF, _RMD - _RMU
+    mpi0, mpm = _T_MPI0, _T_MPIPM
+    D = Cu - Cd
+    deg = (Cu == Cd) & (Cd == Cs)
+    mj = np.where(deg, _T_METAP, _T_META)
+    Gj = np.where(deg, _T_GETAP, _T_GETA)
+    aj = np.where(deg, B0 * f * np.sqrt(2 / 3) * (Cu + Cd + Cs),
+                  B0 * f * (Cu + Cd - 2 * Cs) / np.sqrt(3))
+    cj = np.where(deg, -np.sqrt(6) / 3 * B0 * dm / f**2, -B0 * dm / (np.sqrt(3) * f**2))
+    bj = np.where(deg, -np.sqrt(6) / 9 * B0 * dm / f**2, -B0 * dm / (3 * np.sqrt(3) * f**2))
+    d2 = mj**2 - mpi0**2
+    pole = aj / (s - mj**2 + 1j * mj * Gj)
+    A = B0 * D / f * s / (s - mpi0**2) + pole * cj
+    W = np.where(s > 9 * mpi0**2, np.abs(A)**2 * _dalitz_moments(s, mpi0, mpi0)[0] / 6, 0.0)
+    P = pole * bj * (1 - s / d2)
+    Q = B0 * D / f / (s - mpi0**2) + pole * bj * 3 / d2
+    I0, I1, I2 = _dalitz_moments(s, mpi0, mpm)
+    Wpm = np.abs(P)**2 * I0 + 2 * np.real(P * np.conj(Q)) * I1 + np.abs(Q)**2 * I2
+    return W + np.where(s > (2 * mpm + mpi0)**2, Wpm, 0.0)
+
+
+def _pipiphi_weight(s, mphi, Cu, Cd, Cs):
+    """W(s) over pi+pi-phi and pi0pi0phi, every propagator kept; port of
+    pipiphi_weight.m."""
+    B0, f = _RB0, _RF
+    b, p2 = B0 * f, _T_MPI0**2
+    mpm, metap, meta = _T_MPIPM, _T_METAP, _T_META
+    D, Sg = Cu - Cd, Cu + Cd
+    deg = (Cu == Cd) & (Cd == Cs)
+    Rf = 1 / (s - mphi**2)
+    Rp = 1 / (s - p2)
+    # degenerate g ~ [1 1 1]: eta' and phi poles
+    t0 = -b * np.sqrt(2 / 3) * (Cu + Cd + Cs) / (mphi**2 - metap**2)
+    Rm = 1 / (s - metap**2 + 1j * metap * _T_GETAP)
+    Nphi = -2 * t0 * (np.sqrt(6) * b * Sg - p2 * t0) / (3 * f**2)
+    Nj = t0 * (np.sqrt(6) * b * Sg - 2 * p2 * t0) / (3 * f**2)
+    # generic: pi0, eta and phi poles
+    tp = -b * D / (mphi**2 - p2)
+    te = -b * (Cu + Cd - 2 * Cs) / np.sqrt(3) / (mphi**2 - meta**2)
+    Re = 1 / (s - meta**2 + 1j * meta * _T_GETA)
+    a = mphi**2 + p2 + s - 3 * p2
+    P_gen = (Rf * (-2 * np.sqrt(3) * b * Sg * te - 2 * b * D * tp + p2 * te**2 - a * tp**2) / (3 * f**2)
+             + Rp * tp * (b * D + a * tp) / (3 * f**2)
+             + Re * te * (np.sqrt(3) * b * Sg - p2 * te) / (3 * f**2))
+    Q_gen = tp**2 / f**2 * (Rf - Rp)
+    A_deg = Nphi * Rf + Nj * Rm
+    P = np.where(deg, A_deg, P_gen)
+    Q = np.where(deg, 0.0, Q_gen)
+    I0, I1, I2 = _dalitz_moments(s, mphi, mpm)
+    Wpm = np.abs(P)**2 * I0 + 2 * np.real(P * np.conj(Q)) * I1 + np.abs(Q)**2 * I2
+    A00 = np.where(deg, A_deg,
+                   -Rf * (2 * np.sqrt(3) * b * Sg * te + 6 * b * D * tp - p2 * te**2 - 3 * p2 * tp**2) / (3 * f**2)
+                   + Rp * tp * (b * D - p2 * tp) / f**2
+                   + Re * te * (np.sqrt(3) * b * Sg - p2 * te) / (3 * f**2))
+    W00 = np.abs(A00)**2 * _dalitz_moments(s, mphi, _T_MPI0)[0] / 2
+    return (np.where(s > (2 * mpm + mphi)**2, Wpm, 0.0)
+            + np.where(s > (2 * _T_MPI0 + mphi)**2, W00, 0.0))
+
+
+def _axial3pi_wl(s, Cu, Cd, Cs):
+    """Longitudinal (J = 0) Dalitz weight W_L of the axial 3pi current; port of
+    axial3pi_weight.m with axial_mixing.m's m_{pi0 A'}."""
+    f, mpi0, mpm = _RF, _T_MPI0, _T_MPIPM
+    corr4 = 1 + 16 * _RB0 * _T_L4 / f**2 * (_RMU + _RMD + _RMS)
+    m_pi0A = f * ((Cu - Cd) * corr4 + 16 * _RB0 * _T_L5 * (Cu * _RMU - Cd * _RMD) / f**2)
+    cL = (m_pi0A / f)**2 * mpi0**4 / f**2
+    WL = np.where(s > 9 * mpi0**2,
+                  cL * s**2 / (s - mpi0**2)**2 * _dalitz_moments(s, mpi0, mpi0)[0] / 6, 0.0)
+    I2 = _dalitz_moments(s, mpi0, mpm)[2]
+    return WL + np.where(s > (2 * mpm + mpi0)**2, cL * I2 / (s - mpi0**2)**2, 0.0)
+
+
+def _phi_3pi_width(mphi, Cu, Cd, Cs):
+    """Gamma(phi -> 3pi) [GeV] = W(mphi^2)/(64 pi^3 mphi); 0 below 3 mpi0 or when off."""
+    if not _threepi_on():
+        return np.zeros(np.shape(mphi))
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        W = _threepi_weight(mphi**2, Cu, Cd, Cs)
+        return np.where(mphi > 3 * _T_MPI0, W / (64 * np.pi**3 * mphi), 0.0)
+
+
+def _threebody_cmb_sv(kind, mx, mphi, gx, Cu, Cd, Cs, Gphi):
+    """Energy-weighted s-wave <sigma v> [cm^3/s] of the three-body channels at
+    s = 4 mx^2 (v_rel = 2 beta), to add to the gamma gamma <sigma v> for the CMB.
+    Gphi: the mediator's total width (PxP; unused for AxA)."""
+    s0 = 4 * mx**2
+    sv = np.zeros(np.shape(mx))
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        if kind == "PxP":
+            if _threepi_on():
+                D2 = (s0 - mphi**2)**2 + mphi**2 * Gphi**2
+                sv = sv + KAPPA_3PI * gx**2 * _threepi_weight(s0, Cu, Cd, Cs) / (64 * np.pi**3 * D2)
+            if _pipiphi_on():
+                sv = sv + KAPPA_PIPIPHI * gx**2 * _pipiphi_weight(s0, mphi, Cu, Cd, Cs) / (64 * np.pi**3)
+        elif kind == "AxA" and _threepi_on():
+            sv = sv + KAPPA_3PI * gx**2 * mx**2 * _axial3pi_wl(s0, Cu, Cd, Cs) / (16 * np.pi**3 * s0**2 * mphi**4)
+    # NaN -> 0: the sum feeds the gamma gamma <sigma v>, which a failed
+    # three-body evaluation must not erase.
+    return np.nan_to_num(sv, nan=0.0) * _HBARC**2 * _CC
 
 
 def _indirect_ratio(mx, mphi, gx, gu, gd, gs, interaction, which):

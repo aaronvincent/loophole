@@ -3,8 +3,7 @@ function [sig_gg, sig_mm] = AA_sm_xsec(s, mA, g)
 %
 %   [sig_gg, sig_mm] = AA_sm_xsec(s, mA, g)    s [GeV^2], mA = m_A', g = [a_u a_d a_s]
 %
-% Both come from the one O(p^2) chiPT vertex quadratic in the source
-% (docs/notes/AA_to_gammagamma.tex, docs/notes/threepi_annihilation.tex sec. pipiA):
+% Both come from the one O(p^2) chiPT vertex quadratic in the source:
 %   L_aa = -sum_{i<j} (a_i - a_j)^2 A'.A' M_ij M_ji,
 % i.e. -(a_u-a_d)^2 A'.A' pi+pi- - (a_u-a_s)^2 A'.A' K+K- - (a_d-a_s)^2 A'.A' K0 K0bar.
 % Diagonal mesons commute with the diagonal source: no pi0/eta/eta' term.
@@ -22,7 +21,7 @@ function [sig_gg, sig_mm] = AA_sm_xsec(s, mA, g)
 % initial polarizations; 1/2 for identical photons.
 %
 % One loop carries corr4^(V-I) = corr4^0: LO Da (no L4 rescaling), unlike the
-% tree-level 3pi / pi pi A' currents (docs/notes/threepi_annihilation.tex).
+% tree-level 3pi / pi pi A' currents.
 
 alpha = 1/137.036;
 mpi = 0.13957;  mK = 0.493677;  mK0 = 0.497611;

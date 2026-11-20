@@ -6,7 +6,7 @@ function G = phi_partial_widths(mphi, mx, gx, g, interaction)
 % Returns a struct G with fields
 %   gg     Gamma(phi -> gamma gamma)
 %   xx     Gamma(phi -> chi chibar)
-%   pipi   Gamma(phi -> pi+pi-, pi0pi0)
+%   pipi   Gamma(phi -> pi+pi-, pi0pi0); for SP/PP and axialVector, Gamma(-> 3pi)
 %   KK     Gamma(phi -> K+K-, K0K0bar)
 %   eta    Gamma(phi -> eta eta, pi0 eta)
 %   total  sum of the above
@@ -20,11 +20,12 @@ function G = phi_partial_widths(mphi, mx, gx, g, interaction)
 %   heavy/lightScalar     chi chibar (beta^3), gamma gamma (D, charged pi/K loop),
 %                         meson pairs pi pi, K Kbar, eta eta, pi0 eta (meson_pairs.m)
 %   heavy/lightScalarPS   chi chibar (beta^1), gamma gamma, meson pairs as above
-%   heavy/lightScalarSP   chi chibar (beta^3), gamma gamma via pi0/eta(/eta') mixing;
-%                         no two-meson channel (parity)
-%   scalarPP, heavy/light chi chibar (beta^1), gamma gamma via mixing
-%   axialVector           chi chibar (beta^3, polarisation-averaged /12pi).  No
-%                         gamma gamma (Landau-Yang), so below 2 mx the A' is stable.
+%   heavy/lightScalarSP   chi chibar (beta^3), gamma gamma via pi0/eta(/eta') mixing,
+%                         3pi (pipi field, LOOP_3PI=1); no two-meson channel (parity)
+%   scalarPP, heavy/light chi chibar (beta^1), gamma gamma via mixing, 3pi (LOOP_3PI=1)
+%   axialVector           chi chibar (beta^3, polarisation-averaged /12pi), 3pi
+%                         (LOOP_3PI=1).  No gamma gamma (Landau-Yang), so below
+%                         min(2 mx, 3 mpi) the A' is stable.
 % Anything else returns all-zero.
 mpi0    = 0.13498;
 mpi_pm  = 0.13957;
@@ -97,12 +98,13 @@ switch interaction
         % decay channel is A' -> chi chibar (beta^3, axial-vector vertex):
         %   Gamma = lambda_a^2 (m_A'^2 - 4 mx^2)^(3/2) / (12 pi m_A'^2)
         % i.e. lambda_a^2 m_A' beta^3 / 12pi, the standard polarization-
-        % AVERAGED axial-vector width.  docs/notes/axialvector.txt and the draft
-        % both carry /4pi, which is missing the 1/3 from averaging over the
-        % three polarizations of a massive vector.
+        % AVERAGED axial-vector width (1/3 from averaging over the three
+        % polarizations of a massive vector).
         % A' has no gamma gamma width (Landau-Yang) and no two-meson width:
         % the gamma gamma <-> chi chi amplitude runs through pi0/eta/eta'
-        % poles, not an A' pole.
+        % poles, not an A' pole.  With LOOP_3PI=1 it gains Gamma(A' -> 3pi)
+        % (below the switch), and the total then regulates the A' pole of the
+        % J = 1 chi chi -> 3pi channel (axial3pi_sigma.m).
         % beta^3 1/mphi^2 prefactor: gate on threshold (massless A' is anyway
         % hard-errored upstream in axial_couplings.m, but keep this finite).
         if mphi > 2*mx
@@ -121,6 +123,16 @@ if ismember(interaction, {'heavyScalar','lightScalar','heavyScalarPS','lightScal
             G.(P(j).family) = G.(P(j).family) + P(j).S * P(j).mu^2 * sqrt(lam) / (16*pi*mphi^3);
         end
     end
+end
+
+% Three-pion channel of the pseudoscalar phi-SM vertex (threepi_weight.m).
+% Gated on threshold so mphi = 0 gives 0, not 0/0 = NaN.
+if mphi > 3*mpi0 && ismember(interaction, {'scalarPP','heavyScalarPP','lightScalarPP','heavyScalarSP','lightScalarSP'})
+    G.pipi = threepi_weight(mphi^2, g) / (64*pi^3*mphi);
+end
+% Axial vector: only the transverse (J = 1) current decays an on-shell A'.
+if mphi > 3*mpi0 && strcmp(interaction, 'axialVector')
+    G.pipi = axial3pi_weight(mphi^2, g) / (192*pi^3*mphi);
 end
 
 G.total = G.gg + G.xx + G.pipi + G.KK + G.eta;

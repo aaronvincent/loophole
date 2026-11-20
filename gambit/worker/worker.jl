@@ -73,7 +73,8 @@ function main()
     let img = try unsafe_string(Base.JLOptions().image_file) catch; "" end
         println(stderr, "WORKER node_cpu=", Sys.CPU_NAME,
                 " sysimage=", isempty(img) ? "<none>" : basename(img),
-                " threads=", Threads.nthreads())
+                " threads=", Threads.nthreads(),
+                " 3pi=", Int(threepi_enabled()), " pipiphi=", Int(pipiphi_enabled()))
         flush(stderr)
     end
 

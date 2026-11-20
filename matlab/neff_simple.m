@@ -22,7 +22,7 @@ function [dNeff, info] = neff_simple(mphi, mx, gx, g, interaction, opts)
 % (Gamma/H falls as T falls) saturates the first.
 %   phi  inverse decay gamma gamma <-> phi, Gamma_gg K1/K2, plus pair
 %        production gamma gamma <-> phi phi (photon exchange, two phi F F
-%        vertices; docs/notes/gg_to_phiphi.tex), per phi 2 R / n_phi^eq.  phi F F~
+%        vertices), per phi 2 R / n_phi^eq.  phi F F~
 %        gives the same sigma in terms of Gamma_gg, so SP/PP use it unchanged.
 %        S⊗S / P⊗S with mphi < 2 m_pi add pi+- gamma <-> pi+- phi
 %        (pigamma_phi_rate; tree level, independent of mphi, dominant for light
@@ -309,12 +309,12 @@ function G = ggphiphi_rate(TT, mphi, mx, gx, g, interaction, Gw, g_phi)
 % normalisation).
 %
 % SxS / PxS: the charged-meson loop, boxes plus seagull triangle, through the
-% low-energy theorem (docs/notes/gg_phiphi_box.tex):
+% low-energy theorem:
 %   sigma = alpha^2 Y^2 s beta / (36864 pi^3),  Y = sum_j mu_j^2 / m_j^4,
 % mu_pi = B0 (g_u+g_d), mu_K = B0 (g_u+g_s).  Photon exchange is O(alpha)
 % smaller (~1e-7 at g = [1 1 1]/3) and is dropped there.  Valid for
 % sqrt(s) << 2 m_pi, i.e. T << 50 MeV.
-% Other models keep t/u-channel photon exchange (docs/notes/gg_to_phiphi.tex), with
+% Other models keep t/u-channel photon exchange, with
 % the vertex fixed by Gamma_gg = g_phigg^2 mphi^3 / (64 pi); at mphi = 0 it is
 % taken from a tiny mphi (g_phigg stays finite).
 G = zeros(size(TT));
@@ -346,14 +346,13 @@ end
 
 function s = sig_ggphiphi_box(s_, m, alphaEM, Y)
 % sigma(gamma gamma -> phi phi) from the charged-meson loop, low-energy theorem
-% (docs/notes/gg_phiphi_box.tex eq. 5; includes the 1/2 for identical phi phi).
+% (includes the 1/2 for identical phi phi).
 b = sqrt(max(0, 1 - 4*m^2 ./ s_));
 s = alphaEM^2 * Y^2 / (36864*pi^3) .* s_ .* b;
 end
 
 function s = sig_ggphiphi(s_, m, g2)
-% sigma(gamma gamma -> phi phi) by photon exchange, docs/notes/gg_to_phiphi.tex
-% eq. (sigma), r = m^2/s.
+% sigma(gamma gamma -> phi phi) by photon exchange, r = m^2/s.
 r = m^2 ./ s_;
 b = sqrt(max(0, 1 - 4*r));
 L = log((1 - 2*r + b) ./ (2*r));

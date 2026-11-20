@@ -3,7 +3,7 @@ function G = apipi_phi_rate(T, mA, g)
 %
 %   G = apipi_phi_rate(T, mA, g)     [GeV], vectorised in T [GeV]
 %
-% The 3pi current of docs/notes/threepi_annihilation.tex crossed to 2 -> 2.  On
+% The chi chi -> 3pi current crossed to 2 -> 2.  On
 % shell the pi0-pole piece is proportional to k.eps = 0, so only the contact
 % term survives:
 %     A'(k) pi0(p)  -> pi+ pi- :  V = (2Da/3F)(p+ + p- + 2p) = (2Da/3F)(k + 3p), so
@@ -24,7 +24,6 @@ function G = apipi_phi_rate(T, mA, g)
 % Scales exactly as m_{pi0 A'}^2, so the shape is cached per (mA, T) at Da = 1.
 % T < m_pi/60 returns 0.  Kaon analogues (A' K -> K pi, ...) are dropped:
 % they pay e^{-m_K/T} at the temperatures where this matters.
-% See docs/notes/AA_to_gammagamma.tex.
 
 m0 = 0.13498;  mc = 0.13957;  F = 0.0924;
 G  = zeros(size(T));

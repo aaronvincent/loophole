@@ -175,7 +175,7 @@ has_dark = any(isfinite(lsvR));
 lsvR(~isfinite(lsvR)) = lfloor - 50;
 svDarkR = griddedInterpolant(logTgrid(:), lsvR(:), 'pchip');
 % axialVector: A'A' -> gamma gamma (charged-meson loop) and meson pairs, the
-% A' number-changing link to the bath (docs/notes/AA_to_gammagamma.tex).  Below 3 m_pi
+% A' number-changing link to the bath.  Below 3 m_pi
 % it is the only one: Gamma(A' -> gamma gamma) = 0 (Landau-Yang).
 % LOOP_AA_SM=0 in the environment turns it off (the pre-2026-11-17 solver).
 has_AA = strcmp(interaction, 'axialVector') && ~strcmp(getenv('LOOP_AA_SM'), '0');

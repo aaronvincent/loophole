@@ -185,6 +185,11 @@ if s > 4*mx^2
             end
         end
 
+        % chi chi -> 3pi (threepi_weight.m); Gamma_arr(2) is the mediator's width.
+        if use_had
+            sig = sig + threepi_sigma(s, mx, mphi, gx, Gamma_arr(2), g, true);
+        end
+
 
     elseif strcmp(interaction,'scalarPP') || strcmp(interaction,'heavyScalarPP') || strcmp(interaction,'lightScalarPP')
         % chi chibar -> all, via pseudoscalar DM + pseudoscalar mediator.
@@ -229,9 +234,14 @@ if s > 4*mx^2
             end
         end
 
+        % chi chi -> 3pi (threepi_weight.m); Gamma_arr(2) is the mediator's width.
+        if use_had
+            sig = sig + threepi_sigma(s, mx, mphi, gx, Gamma_arr(2), g, false);
+        end
+
     elseif strcmp(interaction,'axialVector')
         % chi chibar -> all for the axial-vector mediator A'.  Three pieces
-        % (docs/notes/axialvector.txt, full chi chibar -> all expression):
+        % (full chi chibar -> all expression):
         %   gamma gamma : 3 SM-meson s-channel mixing poles (pi0/eta/eta'),
         %                 BW-regulated; this piece is the detailed-balance
         %                 partner of ggxxxsec.m's gg->xx (factor-2 S_gg there).
@@ -294,6 +304,13 @@ if s > 4*mx^2
                 % verified.
                 sig(mask) = sig(mask) + real( lam_chi(jj)^4 * (t1 + t2) ./ (32*pi*sp) );
             end
+        end
+
+        % --- chi chi -> 3pi, pi+pi-A' (axial3pi_sigma.m); J = 1 part of 3pi
+        % resonant at m_A'^2
+        if use_had && (threepi_enabled() || pipiphi_enabled())
+            GA  = phi_partial_widths(mphi, mx, gx, g, interaction).total;
+            sig = sig + axial3pi_sigma(s, mx, mphi, gx, GA, g);
         end
 
     end

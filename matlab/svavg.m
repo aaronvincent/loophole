@@ -83,6 +83,21 @@ s_max = max([100*T^2, 100*mphi^2, 100*mx^2, 1e2]);
 % them as continuum waypoints so the adaptive rule resolves the cusps.
 m_etap   = 0.95778;
 extra_wp = [4*mpi_pm^2, 4*mpi0^2, 4*m_eta^2, 4*mK^2, 4*0.497611^2, (mpi0+m_eta)^2, 4*mphi^2, 4*m_etap^2];
+if ismember(interaction, {'scalarPP','heavyScalarPP','lightScalarPP','heavyScalarSP','lightScalarSP'})
+    if threepi_enabled()
+        extra_wp = [extra_wp, 9*mpi0^2, (2*mpi_pm + mpi0)^2];          % 3pi thresholds
+    end
+    if pipiphi_enabled()
+        extra_wp = [extra_wp, (2*mpi0 + mphi)^2, (2*mpi_pm + mphi)^2]; % pi pi phi thresholds
+    end
+elseif strcmp(interaction, 'axialVector')
+    if threepi_enabled()
+        extra_wp = [extra_wp, 9*mpi0^2, (2*mpi_pm + mpi0)^2];          % 3pi thresholds
+    end
+    if pipiphi_enabled()
+        extra_wp = [extra_wp, (2*mpi_pm + mphi)^2];                     % pi+pi-A' threshold
+    end
+end
 
 % RelTol 1e-5 / AbsTol 1e-20: sv feeds a pchip interpolant consumed by ode15s
 % at its own RelTol; tighter just burns wall time the downstream can't see.
@@ -110,6 +125,11 @@ switch interaction
         % pi0, eta, eta' SM mixing poles (widths include Gamma(j->chi chi))
         [mj, ~, ~, Gam_j] = axial_couplings(mphi, mx, gx, g);
         pole_s = mj.^2;             pole_w = mj.*Gam_j;
+        % plus the A' pole of the J = 1 chi chi -> 3pi channel (axial3pi_sigma),
+        % in the channels that carry it
+        if threepi_enabled() && mphi > 3*mpi0 && ismember(channel, {'all','sm','had'})
+            pole_s = [pole_s, mphi^2];  pole_w = [pole_w, mphi*Gphi];
+        end
     otherwise
         pole_s = [];                pole_w = [];
 end

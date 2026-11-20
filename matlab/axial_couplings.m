@@ -115,7 +115,7 @@ lam_chi = gx/mphi^2 * [m_pi0Ap, m_etaAp, m_etapAp];
 
 % Meson Breit-Wigner widths: SM total width + Gamma(j -> chi chibar).
 %   Gamma(j -> chi chibar) = lambda_{j chi}^2 mx^2 sqrt(mj^2/4 - mx^2) / pi
-% (docs/notes/axialvector.txt).  Open only when mj > 2 mx.
+% Open only when mj > 2 mx.
 Gam_SM  = [Gpi, G_eta, G_etap];
 Gam_xx  = lam_chi.^2 * mx^2 .* sqrt(max(0, mj.^2/4 - mx^2)) / pi;
 Gam_j   = Gam_SM + Gam_xx;

@@ -24,7 +24,7 @@ function [mj, gcx, ggx, Gam] = sppp_couplings(mphi, mx, gx, g, interaction)
 % vanish, so the generic amplitude is identically zero and chi decouples from
 % photons -- unphysical.  The surviving channel is the SU(3) SINGLET eta'
 % (~ g_u+g_d+g_s), normally neglected as the heaviest meson.  We switch to the
-% {eta', phi'} set from docs/notes/SPPPetaprime.tex (small-mixing limit):
+% {eta', phi'} set (small-mixing limit):
 %   m_{eta' phi'} = B0 f/sqrt(6) (g_u+g_d+g_s)                  (mixing mass)
 %   g_{eta' chi}  = -gx m_{eta' phi'} / (2(mphi^2 - m_eta'^2))
 %   g_{phi' chi}  =  gx

@@ -13,6 +13,7 @@
 #
 # Reference provenance:
 #   m1 m2 m3 m4 m5 m7 simple fc_sc   test/matlab/dump_<tag>.m -> test/ref/<tag>_ref.csv
+#   threebody               dump_threebody.m, run with LOOP_3PI=1 LOOP_PIPIPHI=1
 # Every suite regenerates the same way: matlab -batch "dump_<tag>" from test/matlab/.
 using Printf
 
@@ -28,6 +29,7 @@ const SUITES = [
     "m7"  => "h_P, axial EFT validity",
     "simple" => "neff_simple (simple CMB dNeff)",
     "fc_sc" => "freeze_coupled phi conversions (Primakoff + pi gamma), on/off",
+    "threebody" => "SP/PP 3pi + pi pi phi, axialVector 3pi (LOOP_3PI/LOOP_PIPIPHI on)",
 ]
 
 # A suite reports its verdict as "-> PASS/OK/FAIL" (m1-m7) or one leading

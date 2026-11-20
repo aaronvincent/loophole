@@ -175,6 +175,14 @@ function _sppp_sumprop(m::PoleSPPP, s::Real)
     return sp
 end
 
+# χχ̄ → 3π + ππφ (models/threebody.jl), part of both 'had' and 'all'; exactly
+# 0.0 with LOOP_3PI and LOOP_PIPIPHI off.  m.Gam[2] is the mediator's width in
+# both pole orderings.
+function _sppp_threebody(m::PoleSPPP, s::Real)
+    (threepi_enabled() || pipiphi_enabled()) || return 0.0
+    return threebody_sigma(s, m.mx, m.mphi, m.gx, m.Gam[2], m.g, !_is_pp(m))
+end
+
 # --- SP (scalar χ vertex, β³) ---
 function sigma_ggxx(m::PoleSP, s::Real)
     s <= 4 * m.mx^2 && return 0.0
@@ -193,7 +201,7 @@ function sigma_xxall(m::PoleSP, s::Real)
             sig += _sig_pp_scalar(s, m.mx, m.mj[j], m.gcx[j])  # χχ̄→jj (t-channel)
         end
     end
-    return sig
+    return sig + _sppp_threebody(m, s)
 end
 # meson pairs only: j = 2 is φ' (couplings.jl ordering), a dark final state
 function sigma_xxhad(m::PoleSP, s::Real)
@@ -204,7 +212,7 @@ function sigma_xxhad(m::PoleSP, s::Real)
             sig += _sig_pp_scalar(s, m.mx, m.mj[j], m.gcx[j])
         end
     end
-    return sig
+    return sig + _sppp_threebody(m, s)
 end
 
 # --- PP (pseudoscalar χ vertex, β¹) ---
@@ -225,7 +233,7 @@ function sigma_xxall(m::PolePP, s::Real)
             sig += _sig_pp_ps(s, m.mx, m.mj[j], m.gcx[j])      # χχ̄→jj (t-channel)
         end
     end
-    return sig
+    return sig + _sppp_threebody(m, s)
 end
 function sigma_xxhad(m::PolePP, s::Real)
     s <= 4 * m.mx^2 && return 0.0
@@ -235,7 +243,7 @@ function sigma_xxhad(m::PolePP, s::Real)
             sig += _sig_pp_ps(s, m.mx, m.mj[j], m.gcx[j])
         end
     end
-    return sig
+    return sig + _sppp_threebody(m, s)
 end
 
 """
@@ -296,6 +304,10 @@ function sigma_xxhad(m::AxialVector, s::Real)
         if s > 4 * m.mj[j]^2
             sig += _sig_axial_mesonpair(s, m.mx, m.mj[j], m.lam_chi[j])
         end
+    end
+    # χχ̄ → 3π, π+π−A′ (threebody.jl); exactly 0.0 with both toggles off
+    if threepi_enabled() || pipiphi_enabled()
+        sig += axial3pi_sigma(s, m.mx, m.mphi, m.gx, mediator_widths(m).total, m.g)
     end
     return sig
 end

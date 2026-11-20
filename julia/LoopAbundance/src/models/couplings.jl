@@ -82,7 +82,8 @@ end
 
 # Mediator (gg, xx, total) widths for the SP/PP family.  isPP selects the χχ̄
 # vertex velocity factor: β¹ (PP, pseudoscalar χ vertex) vs β³ (SP, scalar χ
-# vertex).  φ→ππ is parity forbidden, so `pipi` is 0.
+# vertex).  φ→ππ is parity forbidden; `pipi` carries Γ(φ→3π), which is 0
+# unless LOOP_3PI=1 (models/threebody.jl).
 function _sppp_widths(mphi, mx, gx, g, isPP::Bool)
     gphigg = _phi_gg_coupling(mphi, g)
     gg = gphigg^2 * mphi^3 / (64pi)
@@ -91,7 +92,8 @@ function _sppp_widths(mphi, mx, gx, g, isPP::Bool)
     else
         xx = mphi > 2mx ? gx^2 * max(0.0, mphi^2 - 4mx^2)^1.5 / (8pi * mphi^2) : 0.0
     end
-    return (gg = gg, xx = xx, pipi = 0.0, total = gg + xx)
+    pipi = _phi_3pi_width(mphi, g)
+    return (gg = gg, xx = xx, pipi = pipi, total = gg + xx + pipi)
 end
 
 """
@@ -157,7 +159,7 @@ end
 Base.showerror(io::IO, e::AxialMediatorTooLight) = print(io, "axial_couplings:mediatorTooLight: ", e.msg)
 
 # A′–meson mixing masses (m_{π⁰A′}, m_{ηA′}, m_{η′A′}) [GeV].  Shared by
-# _axial_couplings and the A′ widths.  Uses the corr4 L4 `+` sign (see
+# _axial_couplings and the axial 3π current (threebody.jl).  Uses the corr4 L4 `+` sign (see
 # docs/axialvector.md).  Port of axial_mixing.m.
 function _axial_mixings(g)
     summ  = M_UP + M_DN + M_S

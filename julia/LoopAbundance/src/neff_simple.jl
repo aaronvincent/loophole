@@ -1,7 +1,6 @@
 # Simple CMB ΔNeff: Boehm-Dolan-McCabe photon heating from species in contact
 # with the plasma around neutrino decoupling, plus the φ that χ makes and leaves
-# as free-streaming radiation.  Port of matlab/neff_simple.m (derivation:
-# docs/notes/neff_simple.tex).  Keep the two in step; test/validate_simple.jl checks
+# as free-streaming radiation.  Port of matlab/neff_simple.m.  Keep the two in step; test/validate_simple.jl checks
 # them against each other.
 
 using QuadGK: quadgk
@@ -237,7 +236,7 @@ end
 
 # σ(γγ→φφ) as a function of s, or `nothing` if it vanishes.
 # S⊗S / P⊗S: the charged-meson loop, boxes plus seagull triangle, through the
-# low-energy theorem (docs/notes/gg_phiphi_box.tex): σ = α²Y² s β/(36864π³),
+# low-energy theorem: σ = α²Y² s β/(36864π³),
 # Y = Σ_j μ_j²/m_j⁴, μ_π = B0(g_u+g_d), μ_K = B0(g_u+g_s).  Photon exchange is
 # O(α) smaller and dropped there.  Valid for √s ≪ 2m_π.
 # Other models: t/u-channel photon exchange with g_φγγ² from Γ_gg.
@@ -272,7 +271,7 @@ function _nsimple_sig_ggphiphi_box(s, m, Y)
     return ALPHA_EM^2 * Y^2 / (36864pi^3) * s * b
 end
 
-# σ(γγ→φφ) by photon exchange, docs/notes/gg_to_phiphi.tex eq. (sigma); r = m²/s.
+# σ(γγ→φφ) by photon exchange; r = m²/s.
 function _nsimple_sig_ggphiphi(s, m, g2)
     r = m^2 / s
     r >= 0.25 && return 0.0

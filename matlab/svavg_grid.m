@@ -37,6 +37,21 @@ L_hi  = log(s_max);
 
 % ---- Breakpoints at cross-section kinks (meson + phiphi thresholds) ------
 bp = [4*mpi_pm^2, 4*mpi0^2, 4*m_eta^2, 4*mK^2, 4*mK0^2, (mpi0+m_eta)^2, 4*mphi^2, 4*m_etap^2];   % = svavg.m extra_wp
+if ismember(interaction, {'scalarPP','heavyScalarPP','lightScalarPP','heavyScalarSP','lightScalarSP'})
+    if threepi_enabled()
+        bp = [bp, 9*mpi0^2, (2*mpi_pm + mpi0)^2];          % 3pi thresholds
+    end
+    if pipiphi_enabled()
+        bp = [bp, (2*mpi0 + mphi)^2, (2*mpi_pm + mphi)^2]; % pi pi phi thresholds
+    end
+elseif strcmp(interaction, 'axialVector')
+    if threepi_enabled()
+        bp = [bp, 9*mpi0^2, (2*mpi_pm + mpi0)^2];          % 3pi thresholds
+    end
+    if pipiphi_enabled()
+        bp = [bp, (2*mpi_pm + mphi)^2];                     % pi+pi-A' threshold
+    end
+end
 bp = bp(bp > s_lo & bp < s_max);
 L_bp = log(bp);
 

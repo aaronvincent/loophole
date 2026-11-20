@@ -35,7 +35,7 @@ function r = mesonandCMB_ratio(mx, mphi, gx, g, interaction, which)
 %
 %   r = NaN when the constraint is closed / not applicable to the interaction.
 %
-%   Faithful port of matlab/mesonandCMBlimits.py (the "k to pi phi" /
+%   Port of an earlier Python reference, mesonandCMBlimits.py (the "k to pi phi" /
 %   "kaon to pi A'", "CMB" and "INTEGRAL" prints).  The low-velocity <sigma v>
 %   is the reference's analytic threshold expression (s = 4 m_chi^2), NOT a v->0
 %   limit of the relic svavg (that is a genuine thermal average and does not
@@ -99,7 +99,8 @@ function r = mesonandCMB_ratio(mx, mphi, gx, g, interaction, which)
         if strcmp(model, 'SxS') || strcmp(model, 'SxP')
             r = NaN; return;   % velocity-suppressed: no CMB bound in the reference
         end
-        sv = sigmav_indirect(model, P);
+        % + the s-wave three-body channels, energy-weighted (threebody_cmb_sv)
+        sv = sigmav_indirect(model, P) + threebody_cmb_sv(model, P);
         lim = curve_slatyer(mx);
         if ~isfinite(sv) || ~isfinite(lim), r = NaN; return; end
         r = sv / lim;
@@ -167,7 +168,7 @@ function Gamma = kphi_rate(model, P)
         % only the part transverse to q = pK - ppi survives, (lak + lap) ppi_perp:
         %   sum|M|^2 = 2 GF^2 F^4 Vus^2 Vud^2 (lak + lap)^2 lambda / (4 mA^2),
         %   Gamma    = GF^2 F^4 Vus^2 Vud^2 (lak + lap)^2 lambda^(3/2) / (32 pi mA^2 mK^3).
-        % The mesonandCMBlimits.py form used until 2026-11-17 contracted in the
+        % The earlier mesonandCMBlimits.py form contracted in the
         % kaon rest frame (bracket 4 mK^2 [lak^2 mK^2 + 2 lak lap mK Epi +
         % lap^2 (Epi^2 + mA^2)]), x1.69-1.81 low; the NWA residue of the 3-body
         % K -> pi chi chibar rate (kaon_invisible_ratio.m) reproduces this one.
@@ -373,7 +374,7 @@ function [mj, gcx, ggx, Gam] = sppp_poles_indirect(P, isPP)
 % Cu+Cd-2Cs) AND the induced phi'gamma coupling all vanish, so the generic
 % amplitude is identically zero and chi would decouple from photons.  The
 % surviving channel is the SU(3)-singlet eta' (~ Cu+Cd+Cs), normally dropped as
-% the heaviest meson -- see docs/notes/SPPPetaprime.tex and sppp_couplings.m.
+% the heaviest meson -- see sppp_couplings.m.
 %
 % Returned in the caller's convention amp = sum gcx.*ggx./(s - mj.^2 + i mj Gam);
 % |amp|^2 is invariant under the overall sign relative to sppp_couplings.m's
@@ -401,7 +402,8 @@ function [mj, gcx, ggx, Gam] = sppp_poles_indirect(P, isPP)
         else      % SxP: scalar chi vertex, beta^3
             Gam_etapxx = g_etapx^2 * max(0, metap^2 - 4*mx^2)^(3/2) / (8*pi*metap^2);
         end
-        Gammaphi = med_width(gphiprimex, gphiprimegamma, mmed, mx, isPP);
+        Gammaphi = med_width(gphiprimex, gphiprimegamma, mmed, mx, isPP) ...
+                   + phi_3pi_width(mmed, [Cu Cd Cs]);
         mj  = [metap,         mmed          ];
         gcx = [g_etapx,       gphiprimex    ];
         ggx = [g_etapgamma,   gphiprimegamma];
@@ -416,12 +418,51 @@ function [mj, gcx, ggx, Gam] = sppp_poles_indirect(P, isPP)
         ggammaeta = e^2 / (4*sqrt(3)*pi^2*Fpi0);
         ggammaphi = -ggammapi*mpi0phi2/(mmed^2 - mpi0^2) ...
                     - ggammaeta*metaphi2/(mmed^2 - meta^2);
-        Gammaphi = med_width(gphichi, ggammaphi, mmed, mx, isPP);
+        Gammaphi = med_width(gphichi, ggammaphi, mmed, mx, isPP) ...
+                   + phi_3pi_width(mmed, [Cu Cd Cs]);
         mj  = [mpi0,        meta,        mmed     ];
         gcx = [gpichi,      getachi,     gphichi  ];
         ggx = [ggammapi,    ggammaeta,   ggammaphi];
         Gam = [P.Gammapi0,  P.Gammaeta,  Gammaphi ];
     end
+end
+
+function G = phi_3pi_width(mphi, g)
+% Gamma(phi -> 3pi), as in phi_partial_widths.m; 0 below 3 mpi0 or with
+% LOOP_3PI off (threepi_weight returns 0).
+    G = 0;
+    if mphi > 3*0.13498
+        G = threepi_weight(mphi^2, g) / (64*pi^3*mphi);
+    end
+end
+
+function sv = threebody_cmb_sv(model, P)
+% Energy-weighted s-wave <sigma v> [cm^3/s] of the three-body channels at
+% s = 4 mx^2 (v_rel = 2 beta), added to the gamma gamma <sigma v> for the CMB
+% only.  P(x)P: chi chi -> 3pi and pi pi phi; AxA: the J = 0 chi chi -> 3pi.
+% S(x)P and the axial J = 1 part vanish at threshold; the INTEGRAL curve is a
+% gamma-line bound.  The Slatyer curve is for gamma gamma (all 2mx deposited),
+% so each channel carries its deposited-energy fraction, f_eff(e) ~ f_eff(gamma):
+%   3pi       0.52 = (1 + 2 x 0.275)/3, pi+- -> e+- keeps 0.787 x 7/20 = 0.275
+%   pi pi phi 0.18 = 2/3 x 0.275, the pions only (phi may decay after recombination)
+% Lower bounds on the deposited energy, so the bound is conservative.  Same
+% numbers as analysis/mesonandCMB.py.
+    kappa_3pi = 0.52;  kappa_pipiphi = 0.18;
+    mx = P.mx;  mmed = P.mphi;  gx = P.gx;  g = [P.Cu P.Cd P.Cs];
+    s0 = 4*mx^2;
+    sv = 0;
+    switch model
+    case 'PxP'
+        [~, ~, ~, Gam] = sppp_poles_indirect(P, true);    % Gam(end): the mediator
+        D2 = (s0 - mmed^2)^2 + mmed^2*Gam(end)^2;
+        sv = kappa_3pi*gx^2*threepi_weight(s0, g)/(64*pi^3*D2) ...
+           + kappa_pipiphi*gx^2*pipiphi_weight(s0, mmed, g)/(64*pi^3);
+    case 'AxA'
+        [~, WL] = axial3pi_weight(s0, g);
+        sv = kappa_3pi*gx^2*mx^2*WL/(16*pi^3*s0^2*mmed^4);
+    end
+    if ~isfinite(sv), sv = 0; end     % must not erase the gamma gamma bound
+    sv = sv * P.hbarc^2 * P.cc;
 end
 
 function G = med_width(gphichi, ggammaphi, mphi, mx, isPP)
