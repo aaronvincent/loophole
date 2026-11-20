@@ -1,0 +1,18 @@
+# MATLAB outputs
+matlab/output/
+matlab/figures*/
+*.asv
+# Julia
+julia/LoopAbundance/Manifest-v*.toml
+# GAMBIT build products and scan outputs
+*.so
+*.o
+runs/
+merged/
+# analysis outputs and downloaded limits
+analysis/plots/
+analysis/dd/limits/
+analysis/dd/cache*/
+__pycache__/
+*.pyc
+.DS_Store

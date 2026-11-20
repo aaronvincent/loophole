@@ -1,0 +1,630 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb,booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\newcommand{\tr}{\operatorname{Tr}}
+\newcommand{\spm}{s_{+-}}
+\newcommand{\mpi}{m_\pi}
+\newcommand{\Dg}{\Delta g}
+\newcommand{\Da}{\Delta a}
+\newcommand{\lam}{\lambda^{1/2}}
+
+\title{$\chi\bar\chi\to3\pi$ at leading order in $\chi$PT}
+\author{pseudoscalar (S$\otimes$P, P$\otimes$P) and axial-vector mediators}
+\date{2026-10-29; implementation \S\ref{sec:impl} added 2026-11-05}
+
+\begin{document}
+\maketitle
+
+\noindent
+Both channels are now in \texttt{combined/} and the Julia port, off by default and switched on
+together by \texttt{LOOP\_3PI=1}. The pseudoscalar one is \texttt{threepi\_weight.m}
+(\texttt{notes/three\_pi\_annotated.tex}); unlike the estimate below, it keeps the LO $\eta$ pole.
+The axial-vector one is \texttt{axial3pi\_weight.m}, documented in \S\ref{sec:impl}. The
+pseudoscalar table in \S\ref{sec:numbers} is still the original out-of-tree estimate. The
+axial-vector table was recomputed with the code.
+
+%======================================================================
+\section{Selection rules}
+
+$J=0$ three-pion states have $P=(-1)^3(-1)^{2\ell}=-1$, and $3\pi$ is
+$G$-odd. Therefore:
+\begin{itemize}
+\item \textbf{Scalar $\phi$--SM vertex (S$\otimes$S, P$\otimes$S): $\phi^*\to3\pi$ is forbidden.}
+  This is exact, because QCD conserves parity. In $\chi$PT the scalar source enters as
+  $\tr[s(U+U^\dagger)]$, which is even in the pion fields.
+\item \textbf{Pseudoscalar $\phi$--SM vertex (S$\otimes$P, P$\otimes$P): allowed.}
+  The source enters as $\tr[p(U^\dagger-U)]$, which is odd in the pion fields. For the same reason
+  $\phi^*\to\pi\pi$, $K\bar K$ and $\pi^0\eta$ are forbidden, so $3\pi$ is the lightest hadronic
+  $s$-channel final state. The isovector part ($g_u\neq g_d$) proceeds with conserved isospin.
+  The isoscalar part reaches $3\pi$ only through isospin breaking ($\eta,\eta'\to3\pi$), which is
+  omitted here. It reaches $\eta\pi\pi$ above $\sqrt s=0.83$~GeV.
+\item \textbf{Axial vector:} the $J=0$ (longitudinal) part behaves like the pseudoscalar case.
+  The $J=1$ part is $a_1$-like ($1^{++}$). For it $\gamma\gamma$ is forbidden (Landau--Yang),
+  $\pi\pi$ by $P$, and $\pi^0\gamma$ by $C$, so $3\pi$ is its \emph{only} light final state.
+  Before this note the code had no channel for it at all.
+\end{itemize}
+Throughout, $\mathbf g=(g_u,g_d,g_s)$, $\Dg\equiv g_u-g_d$, and $\Da\equiv a_u-a_d$.
+
+%======================================================================
+\section{Pseudoscalar source}
+
+\subsection{Chiral Lagrangian}
+
+We take $U=\exp(i\Phi/F)$, with $\Phi=\boldsymbol\pi\cdot\boldsymbol\tau$ in the two-flavour block,
+$F=92.4$~MeV, and
+\begin{equation}
+  \mathcal L_2=\frac{F^2}{4}\tr(\partial_\mu U\partial^\mu U^\dagger)
+  +\frac{F^2}{4}\tr(\chi U^\dagger+U\chi^\dagger),\qquad
+  \chi=2B_0(\mathcal M+ip),\quad p=\kappa\,\phi\,\mathrm{diag}(\mathbf g).
+\end{equation}
+Since $U^\dagger-U=-2i\sin(\Phi/F)$, the source term is
+\begin{equation}
+  \mathcal L_p=\frac{iF^2B_0}{2}\tr\!\left[p\,(U^\dagger-U)\right]
+  =B_0F\,\tr(p\Phi)-\frac{B_0}{6F}\tr(p\Phi^3)+O(\Phi^5).
+\end{equation}
+With $\tr(G\Phi)=\Dg\,\pi^3$ and $\tr(G\Phi^3)=\Dg\,\pi^3\,\boldsymbol\pi^2$, and writing
+$c\equiv B_0\kappa\,\Dg$, this becomes
+\begin{equation}
+  \mathcal L_p\supset cF\,\phi\pi^3-\frac{c}{6F}\,\phi\,\pi^3\boldsymbol\pi^2 .
+  \label{eq:Lp}
+\end{equation}
+The first term is the mass mixing. In the code's convention
+$\mathcal L\supset-m^2_{\pi^0\phi}\phi\pi^0$, so
+\begin{equation}
+  c=-\,m^2_{\pi^0\phi}/F,\qquad m^2_{\pi^0\phi}\big|_{\rm LO}=\Dg\,B_0F .
+\end{equation}
+\texttt{sppp\_mixing.m} uses the NLO value. Using it here assumes that the contact term scales the
+same way as the mixing. The second term in \eqref{eq:Lp} is a direct $\phi\pi\pi\pi$ contact
+vertex. The pions' own quartic interaction is
+\begin{equation}
+  \mathcal L_4=\frac{1}{6F^2}\left[(\boldsymbol\pi\cdot\partial\boldsymbol\pi)^2
+  -\boldsymbol\pi^2(\partial\boldsymbol\pi)^2\right]+\frac{\mpi^2}{24F^2}(\boldsymbol\pi^2)^2 .
+\end{equation}
+
+\subsection{Amplitudes}
+
+Consider $\phi^*(P)\to\pi(p_1)\pi(p_2)\pi(p_3)$, with $s=P^2$ and $\spm=(p_++p_-)^2$. There are
+two diagrams: the contact term, and $\phi\to\pi^{0*}$ through the mixing followed by
+$\pi^{0*}\to3\pi$ through $\mathcal L_4$. The second has the off-shell leg $\pi^{0*}$, with
+propagator $i/(s-\mpi^2)$, which contributes $-cF\,M_4/(s-\mpi^2)$.
+
+\paragraph{$\pi^+\pi^-\pi^0$.}
+Take all momenta incoming, with $k_1=P$ on the $\pi^{3*}$ leg and $k_{2,3,4}=-p_{+,-,0}$.
+The terms of $\mathcal L_4$ give
+$-\tfrac{1}{3F^2}(k_1+k_4)\!\cdot\!(k_2+k_3)
+ +\tfrac{2}{3F^2}(k_2\!\cdot\!k_3+k_1\!\cdot\!k_4)+\tfrac{\mpi^2}{3F^2}$, so
+\begin{equation}
+  M_4=\frac{3\spm-s-2\mpi^2}{3F^2}.
+\end{equation}
+At $s=\mpi^2$ this reduces to Weinberg's $(\spm-\mpi^2)/F^2$. Adding the contact term, $-c/3F$:
+\begin{equation}
+  \boxed{\,M_{+-0}=-\frac{c}{F}\,\frac{\spm-\mpi^2}{s-\mpi^2}\,}
+\end{equation}
+
+\paragraph{$3\pi^0$.}
+For a single field component the two kinetic terms of $\mathcal L_4$ cancel identically, so
+$M_4=\mpi^2/F^2$, also off shell. The contact term gives $-c/F$:
+\begin{equation}
+  \boxed{\,M_{000}=-\frac{c}{F}\,\frac{s}{s-\mpi^2}\,}
+\end{equation}
+
+\paragraph{Checks.}
+\begin{enumerate}
+\item \textbf{Isospin.} $M_{000}=A(s_{+-})+A(s_{+0})+A(s_{-0})$ holds, using $\sum s_{ij}=s+3\mpi^2$.
+\item \textbf{Parametrisation independence.} In the $\sigma$-model parametrisation,
+  $U=\sqrt{1-\boldsymbol\pi^2/F^2}+i\boldsymbol\pi\cdot\boldsymbol\tau/F$, the source term is
+  exactly $cF\phi\pi^3$ with no contact term, while $\mathcal L_4$ changes. Computed numerically
+  over the Dalitz plot, the on-shell amplitudes agree to machine precision, so the contact term in
+  \eqref{eq:Lp} is required.
+\item \textbf{Shape.} The result has the same structure as LO $\eta\to3\pi$, but without the
+  isospin-breaking prefactor.
+\end{enumerate}
+
+Here $\mpi$ is $m_{\pi^0}$, the code's pole mass, inside the amplitudes. Physical masses enter
+only through the phase space.
+
+\subsection{Off-shell width}
+
+Define $\hat\Gamma(\sqrt s)$ as the $\phi\to3\pi$ width for a $\phi$ of mass $\sqrt s$, using
+$d\Gamma=|M|^2\,ds_{12}\,ds_{23}/(256\pi^3s^{3/2})$. Integrating out $s_{23}$ at fixed $s_{12}$
+gives the Dalitz width $\beta_{12}\,\lam(s,s_{12},m_3^2)$, with
+$\beta_{12}=\sqrt{1-4m_{1}^2/s_{12}}$. The result is
+\begin{equation}
+\begin{split}
+  \hat\Gamma_{3\pi}(\sqrt s)=\frac{m^4_{\pi^0\phi}}{256\pi^3F^4\,s^{3/2}(s-\mpi^2)^2}
+  \Bigg[&\int_{4m_{\pi^\pm}^2}^{(\sqrt s-m_{\pi^0})^2}\!\!d\spm\,(\spm-\mpi^2)^2\,
+  \beta_\pm\,\lam(s,\spm,m_{\pi^0}^2)\\
+  &+\frac{s^2}{6}\int_{4m_{\pi^0}^2}^{(\sqrt s-m_{\pi^0})^2}\!\!ds_{00}\,
+  \beta_0\,\lam(s,s_{00},m_{\pi^0}^2)\Bigg].
+\end{split}
+  \label{eq:Ghat}
+\end{equation}
+The $1/6$ is the symmetry factor for $3\pi^0$. Near threshold, $\hat\Gamma\propto Q^2$ with
+$Q=\sqrt s-3\mpi$.
+
+%======================================================================
+\section{Cross section: S$\otimes$P and P$\otimes$P}
+
+\subsection{Factorisation}
+
+Use the dark vertices $-ig_x\phi\bar\chi\gamma_5\chi$ (P$\otimes$P) and
+$-g_x\phi\bar\chi\chi$ (S$\otimes$P), with Dirac $\chi$.
+\begin{itemize}
+\item \textbf{Spin sums:} $\sum|\bar v\gamma_5u|^2=2s$ and $\sum|\bar vu|^2=2s\beta^2$, where
+  $\beta=\sqrt{1-4m_\chi^2/s}$.
+\item \textbf{Kinematics:} spin average $1/4$, flux $2s\beta$.
+\end{itemize}
+Any $s$-channel final state $X$ then factorises as
+\begin{equation}
+  \sigma_{\rm PP}(\chi\bar\chi\to X)=\frac{g_x^2\sqrt s\,\hat\Gamma_X(\sqrt s)}{2\beta\,|D_\phi|^2},\qquad
+  \sigma_{\rm SP}=\beta^2\,\sigma_{\rm PP},\qquad D_\phi=s-m_\phi^2+im_\phi\Gamma_\phi .
+  \label{eq:sigfact}
+\end{equation}
+
+\paragraph{Check against the code's $\gamma\gamma$.}
+Put $\hat\Gamma_{\gamma\gamma}=g_{\rm eff}^2s^{3/2}/64\pi$ into \eqref{eq:sigfact}, with
+$g_{\rm eff}(s)=m^2_{\pi^0\phi}\,g_{\pi\gamma\gamma}/(s-\mpi^2)$ and
+$g_{\pi\gamma\gamma}=\alpha/\pi F$. This reproduces the $\pi^0$ part of the P$\otimes$P branch of
+\texttt{xxggxsec.m} exactly, because
+\begin{equation}
+  \frac{m^2_{\pi^0\phi}}{(s-\mpi^2)(s-m_\phi^2)}
+  =\theta_\pi\left[\frac{1}{s-m_\phi^2}-\frac{1}{s-\mpi^2}\right],\qquad
+  \theta_\pi=\frac{m^2_{\pi^0\phi}}{m_\phi^2-\mpi^2}.
+\end{equation}
+The left side is the flavour-basis product; the right side is the code's mass-basis sum over the
+$\pi^0$ and $\phi'$ poles. The flavour basis includes the $\phi$--meson mixing at the same
+$O(\theta)$ as the code.
+
+\subsection{Result}
+
+\begin{equation}
+  \boxed{\;\sigma_{\rm PP}(\chi\bar\chi\to3\pi)=\frac{g_x^2\sqrt s\,\hat\Gamma_{3\pi}(\sqrt s)}
+  {2\beta\,|s-m_\phi^2+im_\phi\Gamma_\phi|^2},\qquad \sigma_{\rm SP}=\beta^2\sigma_{\rm PP}\;}
+\end{equation}
+Here $\hat\Gamma_{3\pi}$ is given by \eqref{eq:Ghat}. For consistency, $\Gamma_\phi$ should also
+include $\hat\Gamma_{3\pi}(m_\phi)$. Adding it changed the thermal averages below by less than
+$0.5\%$, but it matters on the $\phi$ resonance.
+
+Relative to $\gamma\gamma$ through the same $\pi^0$ path, all couplings cancel:
+\begin{equation}
+  R(\sqrt s)\equiv\frac{\hat\Gamma_{3\pi}}{\hat\Gamma^{(\pi)}_{\gamma\gamma}}:\qquad
+  \begin{array}{c|cccccc}
+    \sqrt s~[\mathrm{GeV}] & 0.41 & 0.43 & 0.48 & 0.60 & 0.72 & 0.84\\\hline
+    R & 2 & 1.2\times10^2 & 8.7\times10^2 & 5.8\times10^3 & 1.4\times10^4 & 2.6\times10^4
+  \end{array}
+\end{equation}
+Roughly, $R\sim s/(16\alpha^2F^2)$ times the three-body phase-space suppression. Freeze-in follows
+by detailed balance; it is relevant only once $2m_\chi\gtrsim3\mpi$.
+
+%======================================================================
+\section{Axial-vector mediator}
+
+\subsection{Current and matrix element}
+
+The Lagrangian is
+$\mathcal L\supset\lambda_aA'_\mu\bar\chi\gamma^\mu\gamma_5\chi
++A'_\mu\sum_q a_q\bar q\gamma^\mu\gamma_5q$.
+In $\chi$PT, take $a_\mu=A'_\mu\,\mathrm{diag}(\mathbf a)$ and
+$D_\mu U=\partial_\mu U-i\{a_\mu,U\}$. Using
+$U^\dagger\partial U+\partial U\,U^\dagger=2i\partial\Phi/F-\tfrac{i}{3F^3}[\Phi,[\Phi,\partial\Phi]]+\dots$,
+the term linear in $a$ is
+\begin{equation}
+  \mathcal L_a=\frac{iF^2}{2}\tr\!\left[a^\mu(U^\dagger\partial_\mu U+\partial_\mu U\,U^\dagger)\right]
+  =-\Da\,A'^\mu\left[F\partial_\mu\pi^3+\frac{2}{3F}\left(\pi^3\,\boldsymbol\pi\!\cdot\!\partial_\mu\boldsymbol\pi
+  -\boldsymbol\pi^2\partial_\mu\pi^3\right)\right].
+\end{equation}
+The isoscalar part drops out of the commutator. The first term reproduces
+$m_{\pi^0A'}=F\Da$ of \texttt{axial\_couplings.m} at LO, i.e.\ with \texttt{corr4}$\,=1$.
+
+The matrix element per unit $\Da$ is $V^\mu=\langle3\pi|J^\mu|0\rangle$. It has a pole piece
+along $q=P$ and a contact piece:
+\begin{align}
+  V^\mu_{+-0}&=\frac{F\,q^\mu M_4}{s-\mpi^2}-\frac{2}{3F}(p_++p_--2p_0)^\mu, &
+  V^\mu_{000}&=\frac{\mpi^2}{F}\frac{q^\mu}{s-\mpi^2}.
+\end{align}
+The cubic current cancels identically for $3\pi^0$.
+
+\paragraph{Longitudinal part (PCAC).}
+\begin{equation}
+  q\cdot V_{+-0}=\frac{\mpi^2}{F}\frac{\spm-\mpi^2}{s-\mpi^2},\qquad
+  q\cdot V_{000}=\frac{\mpi^2}{F}\frac{s}{s-\mpi^2}.
+\end{equation}
+This is $(\mpi^2/F^2)\times$ the pseudoscalar amplitudes, as $\partial A=2\hat m P$ requires. The
+$3\pi$ divergence vanishes in the chiral limit. The $\gamma\gamma$ divergence does not, because it
+carries the anomaly: $q\cdot V_{\gamma\gamma}\propto F g_{\pi\gamma\gamma}\,s/(s-\mpi^2)$. Hence
+\begin{equation}
+  \frac{\sigma^{J=0}_{3\pi}}{\sigma_{\gamma\gamma}}=R(\sqrt s)\left(\frac{\mpi^2}{s}\right)^2 = O(1\text{--}10).
+\end{equation}
+
+\paragraph{Transverse part.}
+Only the contact term contributes:
+$V_T=-\tfrac{2}{3F}\,(S-q\,q\!\cdot\!S/s)$ with $S=q-3p_0$. In the CM frame this gives
+$|\vec V_T|^2=4|\vec p_0|^2/F^2$ for $\pi^+\pi^-\pi^0$, and zero for $3\pi^0$.
+
+\subsection{Cross section}
+
+The pieces are:
+\begin{itemize}
+\item \textbf{Propagator} (unitary gauge): $(-g_{\mu\nu}+q_\mu q_\nu/m_A^2)/D_A$, with
+  $D_A=s-m_A^2+im_A\Gamma_A$. On the longitudinal component it reduces to $q_\mu q_\nu/(s\,m_A^2)$
+  with no pole. This is the same $1/m_A^2$ that gives
+  $\lambda_{j\chi}=\lambda_am_{jA'}/m_A^2$ in the code.
+\item \textbf{$\chi$ tensor:}
+  $L^{\mu\nu}=4[p_1^\mu p_2^\nu+p_2^\mu p_1^\nu-g^{\mu\nu}(s/2-2m_\chi^2)]$.
+\item \textbf{Contractions:} $L^{\mu\nu}q_\nu=8m_\chi^2q^\mu$, so the transverse and longitudinal
+  parts do not interfere. Integrated over directions, the transverse piece gives
+  $\tfrac43(s-4m_\chi^2)|\vec V_T|^2$. The longitudinal piece gives
+  $8m_\chi^2|q\cdot V|^2/(s\,m_A^4)$.
+\end{itemize}
+The result is
+\begin{equation}
+  \boxed{\;\sigma_{\rm AV}(\chi\bar\chi\to3\pi)=\lambda_a^2\Da^2\left[
+  \frac{\beta\,\mathcal T(s)}{6\,|D_A|^2}+\frac{m_\chi^2\,\mathcal L(s)}{\beta\,s^2m_A^4}\right]\;}
+\end{equation}
+with
+\begin{align}
+  \mathcal T(s)&=\int d\Phi_3|\vec V_T|^2=\frac{1}{128\pi^3F^2s^2}
+   \int_{4m_{\pi^\pm}^2}^{(\sqrt s-m_{\pi^0})^2}\!\!d\spm\,\beta_\pm\,\lambda^{3/2}(s,\spm,m_{\pi^0}^2),\\
+  \mathcal L(s)&=\int d\Phi_3|q\cdot V|^2=\frac{\mpi^4}{128\pi^3F^2s\,(s-\mpi^2)^2}
+   \left[\int\!d\spm(\spm-\mpi^2)^2\beta_\pm\lam+\frac{s^2}{6}\int\!ds_{00}\,\beta_0\lam\right].
+\end{align}
+\begin{itemize}
+\item \textbf{$J=1$ piece:} $p$-wave ($\propto\beta$) and resonant at $s=m_A^2$.
+\item \textbf{$J=0$ piece:} $s$-wave, with no $A'$ pole.
+\item \textbf{Check:} replacing $\mathcal L$ by its $\gamma\gamma$ analogue,
+  $F^2s^2g_{\pi\gamma\gamma}^2s^2/[32\pi(s-\mpi^2)^2]$, reproduces the $\pi^0$ term of the
+  \texttt{axialVector} branch of \texttt{xxggxsec.m} exactly.
+\item \textbf{$A'$ width:} the hadronic width that $D_A$ needs is
+  \begin{equation}
+    \Gamma(A'\to3\pi)=\frac{\Da^2\,\mathcal T(m_A^2)}{6\,m_A}.
+  \end{equation}
+  \texttt{phi\_partial\_widths.m} puts it in the \texttt{pipi} field (\S\ref{sec:impl}).
+\end{itemize}
+
+%======================================================================
+\section{Size of the effect}
+\label{sec:numbers}
+
+Method: Gondolo--Gelmini $\langle\sigma v\rangle$ at $x=m_\chi/T=20$, with
+$\mathbf g=\eta\,(2,-1,-1)$ as in the figure drivers. For each $m_\chi$ we solve for the $\eta$ that
+gives $\langle\sigma v\rangle=2.2\times10^{-26}$~cm$^3$/s, using \texttt{xxggxsec} with
+\texttt{'all'} channels, both with and without $3\pi$.
+
+\paragraph{Pseudoscalar mediators.}
+The entries are $\eta_{\rm with\,3\pi}/\eta_{\rm without}$.
+\begin{center}
+\begin{tabular}{c|cc|cc}
+\toprule
+ & \multicolumn{2}{c|}{$m_\phi=1$~GeV} & \multicolumn{2}{c}{$m_\phi=0.1$~GeV, $g_x=0.01$}\\
+$m_\chi$ [GeV] & P$\otimes$P & S$\otimes$P & P$\otimes$P & S$\otimes$P\\
+\midrule
+0.15 & 1.00 & 1.00 & 1.00 & 1.00\\
+0.19 & 0.47 & 0.84 & 1.00 & 1.00\\
+0.21 & 0.69 & 0.86 & 0.90 & 1.00\\
+0.23 & 0.95 & 0.98 & 0.91 & 0.99\\
+0.26 & 1.00 & 1.00 & 1.00 & 1.00\\
+0.30 & 0.028 & 0.039 & 0.42 & 0.97\\
+0.35 & 0.007 & 0.003 & 0.38 & 0.96\\
+0.40 & 0.007 & 0.007 & 0.36 & 0.96\\
+\bottomrule
+\end{tabular}
+\end{center}
+Notes on the table:
+\begin{itemize}
+\item \textbf{$m_\phi=1$~GeV:} the ratios are the same at $g_x=1$ and $g_x=0.01$.
+\item \textbf{$m_\chi=0.19$~GeV:} the thermal tail above $3\mpi$ already matters, because $R\sim10^3$.
+\item \textbf{$m_\chi=0.21$--$0.27$~GeV:} $\gamma\gamma$ sits on the $\eta$ resonance. Here the
+  omitted isospin-breaking $\eta\to3\pi$ (about $1.4\times\Gamma_{\gamma\gamma}$ on the pole) would
+  add comparably.
+\item \textbf{$m_\phi=0.1$~GeV:} the $t$-channel $\pi^0\pi^0$ dominates, and $\theta_{\max}>0.3$
+  for most rows.
+\item \textbf{Figure ranges:} the $\eta$-scan figures stop at $m_\chi=0.2$~GeV; the $g_x$-scan
+  figures run to 1~GeV.
+\end{itemize}
+
+\paragraph{Axial vector.}
+The entries are $\langle\sigma v\rangle_{3\pi}/\langle\sigma v\rangle_{\gamma\gamma}$, at
+$\lambda_a=0.01$ and $\eta=0.01$, from \texttt{svavg} with \texttt{LOOP\_3PI} on and off
+(\S\ref{sec:impl}). The $J=0$ column is independent of $m_A$.
+\begin{center}
+\begin{tabular}{c|c|cccc}
+\toprule
+ & $J=0$ only & \multicolumn{4}{c}{$J=0$ + $J=1$}\\
+$m_\chi$ [GeV] & & $m_A=0.1$ & $0.3$ & $0.6$ & $1$\\
+\midrule
+0.30 & 0.97 & 0.98 & 2.7 & $6.9\times10^3$ & $7.7\times10^1$\\
+0.35 & 2.5  & 2.6  & 7.3 & $4.5\times10^2$ & $6.8\times10^4$\\
+0.40 & 1.4  & 1.4  & 4.0 & $1.3\times10^2$ & $1.4\times10^7$\\
+0.50 & 10.7 & 11   & 32  & $6.2\times10^2$ & $1.1\times10^6$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}
+\item \textbf{$m_A=1$~GeV, $m_\chi=0.35$, $0.40$:} these are resonant, $\chi\bar\chi\to A'\to3\pi$
+  with an on-shell $A'$ in the thermal tail. Here $\Gamma_A/m_A\approx3\times10^{-6}$, with
+  $B(A'\to3\pi)=0.7$--$0.8$.
+\item \textbf{$m_A=0.6$~GeV:} the pole sits at or just below threshold, so the enhancement is the
+  near-pole $1/(s-m_A^2)^2$, not an on-shell $A'$.
+\item For $m_A\ll\sqrt s$ the longitudinal $1/m_A^4$ wins and the $J=1$ piece is negligible.
+\item \textbf{Earlier estimate:} it used the same NLO normalisation (\S\ref{sec:impl}), so the
+  table moved only in two places. The $J=0$ column is about 13\% higher, because
+  $q\cdot V$ now carries $m_{\pi^0}^4$ and the estimate had $[B_0(m_u+m_d)]^2=m_{\pi^\pm}^4$; the
+  difference is an isospin-breaking ambiguity. The two resonant $m_A=1$ entries are about
+  $2\times$ lower, because $\Gamma_A$ now contains $\Gamma(A'\to3\pi)$.
+\end{itemize}
+
+%======================================================================
+\section{Axial vector: implementation}
+\label{sec:impl}
+
+\paragraph{Files.}
+\begin{itemize}
+\item \texttt{axial3pi\_weight.m}: the two Dalitz weights below.
+\item \texttt{axial3pi\_sigma.m}: the cross section.
+\item \texttt{axial\_mixing.m}: the mixing masses $m_{jA'}$, shared with \texttt{axial\_couplings.m}.
+\item Wiring: \texttt{xxggxsec.m} (\texttt{axialVector} branch, in \texttt{'all'}, \texttt{'sm'}
+  and \texttt{'had'}), \texttt{phi\_partial\_widths.m}, and \texttt{svavg.m} (A$'$ pole,
+  3$\pi$ thresholds).
+\item Julia: \texttt{src/models/threebody.jl}, \texttt{couplings.jl}, \texttt{widths.jl},
+  \texttt{cross\_sections.jl}, \texttt{thermal\_average.jl}.
+\item Switch: \texttt{LOOP\_3PI=1}, shared with the pseudoscalar channel. With it off, every piece
+  is exactly zero and the A$'$ pole is not added. $\pi^+\pi^-A'$ (\S\ref{sec:pipiA}) has its own
+  switch, \texttt{LOOP\_PIPIPHI=1}.
+\end{itemize}
+
+\subsection{Dalitz weights}
+
+Write $d\Phi_3=dE_1\,dE_2/(32\pi^3)$ and define
+\begin{equation}
+  W_T(s)=\Da_{\rm eff}^2\!\int\!dE_0\,dE_+\,|\vec V_T|^2,\qquad
+  W_L(s)=\Da_{\rm eff}^2\sum_{\rm ch}S\!\int\!dE_1\,dE_2\,|q\cdot V|^2,
+\end{equation}
+so that $\mathcal T=W_T/(32\pi^3\Da_{\rm eff}^2)$ and likewise for $\mathcal L$. Then the boxed
+result and the width read
+\begin{equation}
+  \boxed{\;\sigma_{\rm AV}=\frac{\lambda_a^2}{32\pi^3}\left[\frac{\beta\,W_T}{6|D_A|^2}
+  +\frac{m_\chi^2\,W_L}{\beta\,s^2m_A^4}\right],\qquad
+  \Gamma(A'\to3\pi)=\frac{W_T(m_A^2)}{192\pi^3m_A}\;}
+\end{equation}
+These are the forms in \texttt{axial3pi\_sigma.m} and \texttt{phi\_partial\_widths.m}.
+
+\paragraph{The moments used.}
+\texttt{dalitz\_moments.m} returns $I_n=\int dE_0\,Y(E_0)\,X^n$, with $X=\spm-\mpi^2$ and $Y$
+the $E_\pm$ range at fixed $E_0$. These are the same moments the pseudoscalar code uses.
+\begin{itemize}
+\item \textbf{Longitudinal:} it needs only $I_0$ and $I_2$, for $\pi^+\pi^-\pi^0$ and $3\pi^0$.
+\item \textbf{Transverse:} $E_0=(s-X)/(2\sqrt s)$, so
+  $|\vec p_0|^2=(s-X)^2/(4s)-\mpi^2$ is quadratic in $X$, and
+  \begin{equation}
+    \int\!dE_0\,Y\,|\vec p_0|^2=\frac{s^2I_0-2sI_1+I_2}{4s}-\mpi^2I_0 .
+  \end{equation}
+\end{itemize}
+The 32-point Chebyshev-type rule converges spectrally, because $Y$ has square-root zeros at both
+ends.
+
+\subsection{Normalisation of the current}
+
+The derivation above gives the current per unit $\Da$ at LO. The code uses
+\begin{equation}
+  \Da_{\rm eff}\equiv m_{\pi^0A'}/F ,
+\end{equation}
+with $m_{\pi^0A'}$ the NLO value of \texttt{axial\_mixing.m}. That is
+$\Da\cdot$\texttt{corr4} plus an $L_5$ term, and \texttt{corr4}$\,=2.01$ on the ``$+$'' branch. It
+is the same $A'$--$\pi^0$ coupling the $\gamma\gamma$ channel uses through
+$\lambda_{\pi\chi}=\lambda_am_{\pi^0A'}/m_A^2$. Three reasons:
+\begin{enumerate}
+\item \textbf{$L_4$ is uniform.} The operator
+  $L_4\tr(D_\mu UD^\mu U^\dagger)\tr(\chi U^\dagger+U\chi^\dagger)$ multiplies the whole LO
+  current, pole term and cubic contact term alike, once the second trace is set to its vacuum
+  value. The cancellation that turns $s/(s-\mpi^2)$ into $\mpi^2/(s-\mpi^2)$ in $q\cdot V$ (PCAC)
+  therefore survives the rescaling.
+
+  The pseudoscalar code keeps LO for the opposite reason. There the NLO factor multiplies only the
+  mixing, not the direct $\phi3\pi$ vertex, so it would break the cancellation
+  (\texttt{threepi\_weight.m}).
+\item \textbf{The ratio is protected.} $3\pi$ and $\gamma\gamma$ share one coupling, so their ratio
+  does not depend on the unresolved $L_4$ sign. On the ``$-$'' branch \texttt{corr4}$\,\approx-0.01$,
+  and both channels nearly vanish together.
+\item \textbf{The $L_5$ piece is small.} It is the non-uniform part, about 1\% here. It is carried
+  along rather than split off. It also gives an isoscalar $\mathbf a$ a $3\pi$ coupling
+  $\propto m_u-m_d$, smaller than the isovector one by $6\times10^{-5}$ in rate.
+\end{enumerate}
+The earlier estimate used this same normalisation. With LO $\Da$ the ratios in \S\ref{sec:numbers}
+would be $4.1\times$ smaller.
+
+\paragraph{PCAC mass.}
+$q\cdot V$ carries $m_{\pi^0}^2$, the code's pion pole mass. Writing it as $B_0(m_u+m_d)=m_{\pi^\pm}^2$
+instead is equally LO, and would raise the $J=0$ piece by 14\%.
+
+\subsection{Propagator and pole}
+
+\begin{itemize}
+\item \textbf{$J=0$ piece:} it keeps $q_\mu q_\nu/(s\,m_A^2)$ with the factor
+  $(s-m_A^2)/D_A$ set to 1. This is the treatment the $\gamma\gamma$ branch already makes:
+  its meson poles carry no $A'$ propagator.
+\item \textbf{$J=1$ piece:} it has the full Breit--Wigner, with
+  $\Gamma_A=\Gamma(A'\to\chi\bar\chi)+\Gamma(A'\to3\pi)$, the \texttt{total} of
+  \texttt{phi\_partial\_widths.m}. Before this, $\Gamma_A$ was never used as a propagator
+  regulator.
+\item \textbf{Integration:} \texttt{svavg} adds $(m_A^2,\,m_A\Gamma_A)$ to the pole list for
+  $m_A>3m_{\pi^0}$, but only in the channels that contain $3\pi$ (not \texttt{'gg'}). It also
+  adds the two $3\pi$ thresholds as waypoints. The pole is usually narrow
+  ($\Gamma_A/m_A\sim10^{-6}$), so it goes to the NWA notch, which double-counts the
+  Breit--Wigner tails at the $10^{-3}$ level. That is the existing behaviour at every narrow pole.
+\item \textbf{Julia:} the fixed-grid path notches the $A'$ pole for every channel, a superset of
+  the adaptive path.
+\end{itemize}
+
+\paragraph{On-shell check.}
+At $s=m_A^2$, with $\Gamma(A'\to\chi\bar\chi)=\lambda_a^2m_A\beta^3/12\pi$ and $\Gamma_{3\pi}$ as
+above, the $J=1$ term is
+\begin{equation}
+  \sigma_{J=1}(m_A^2)=\frac{\lambda_a^2\beta\,\Gamma_{3\pi}}{m_A\Gamma_A^2}
+  =\frac{16\pi}{s\beta^2}\cdot\frac{3}{4}\cdot B_{\chi\chi}B_{3\pi},
+\end{equation}
+which is the spin-1 Breit--Wigner peak, with $(2J+1)/[(2s_1+1)(2s_2+1)]=3/4$. This ties the
+normalisation of the transverse cross section to the width, and to the $1/12\pi$
+polarisation-averaged $\chi\bar\chi$ width.
+
+\subsection{Tests}
+
+\texttt{combined/test\_threepi.m}, checks 7--11:
+\begin{enumerate}
+\setcounter{enumi}{6}
+\item $W_T$ and $W_L$ against adaptive quadrature of the $\spm$ integrals for $\mathcal T$ and
+  $\mathcal L$. This is a different integration variable from the $E_0$ moments. Agreement is
+  $<10^{-8}$ at $\sqrt s=0.45$, 0.8 and 1.6~GeV.
+\item PCAC: $W_L=\Da_{\rm eff}^2(\mpi^2/B_0)^2\,W^{\rm PS}$, with $W^{\rm PS}$ the pseudoscalar
+  weight for $\mathbf g=(\tfrac12,-\tfrac12,0)$ (no $\eta$). Agreement to $10^{-12}$.
+\item The rate scales as $m_{\pi^0A'}^2$. Between the $3\pi^0$ and $\pi^+\pi^-\pi^0$ thresholds
+  only $J=0$ is present.
+\item The on-shell Breit--Wigner identity above, to $10^{-10}$.
+\item $\Gamma(A'\to3\pi)$ is finite at $m_A=0$ and vanishes below $3m_{\pi^0}$.
+  \texttt{xxggxsec('had')} with the switch on, minus with it off, equals \texttt{axial3pi\_sigma}.
+\end{enumerate}
+Julia: \texttt{test/validate\_threebody.jl}, against \texttt{test/matlab/dump\_threebody.m}.
+\begin{itemize}
+\item \textbf{Weights, widths and cross sections:} they agree to $10^{-15}$.
+\item \textbf{$\langle\sigma v\rangle$:} it agrees to $5\times10^{-5}$ (the adaptive rules differ).
+\item \textbf{Switch off:} every piece is zero, and no pole is added.
+\end{itemize}
+
+\subsection{Production and other consumers}
+
+\begin{itemize}
+\item \textbf{Freeze-in:} the channel sits in \texttt{'sm'}, so production through detailed
+  balance includes $3\pi\to\chi\bar\chi$. This assumes the pions are in equilibrium.
+\item \textbf{Other users of the width:} $\Gamma(A'\to3\pi)$ sits in the \texttt{pipi} field of
+  \texttt{phi\_partial\_widths}, so \texttt{freeze\_coupled}'s $A'\leftrightarrow$~SM rate and
+  \texttt{neff\_simple}'s SM width pick it up as well.
+\item \textbf{Kaon bound:} $K^+\to\pi^+A'$ needs $m_A<m_K-m_\pi<3m_\pi$, so the kaon bound never
+  sees it.
+\end{itemize}
+
+%======================================================================
+\section{Axial vector: $\chi\bar\chi\to\pi^+\pi^-A'$}
+\label{sec:pipiA}
+
+\paragraph{Why it is needed.} For S$\otimes$P and P$\otimes$P the $\pi\pi\phi$ channel opens at
+$\sqrt s=2m_\pi+m_\phi$, inside the freeze-out window for a light mediator. The axial analogue is
+$\pi^+\pi^-A'$. It is in the code behind \texttt{LOOP\_PIPIPHI=1}, the switch shared with
+$\pi\pi\phi$: \texttt{pipiA\_weight.m}, summed into \texttt{axial3pi\_sigma.m}; Julia
+\texttt{pipiA\_weight} in \texttt{threebody.jl}.
+
+\paragraph{Vertices.} The term of $\tfrac{F^2}{4}\tr(D_\mu U D^\mu U^\dagger)$ quadratic in $a$ is
+$\tfrac{F^2}{4}\tr(\{a,U\}\{a,U^\dagger\})$. At second order in $\Phi$ it is
+$\tfrac12\tr(a\Phi a\Phi-a^2\Phi^2)$, which gives
+\begin{equation}
+  \mathcal L_{aa}=-\Da^2\,A'_\mu A'^\mu\,\pi^+\pi^- .
+\end{equation}
+The diagonal $\pi^0$, $\eta$ and $\eta'$ commute with the diagonal source, so the following are all
+absent: $\pi^0\pi^0A'$, every $\eta$ or $\eta'$ path, and an $A'\eta\pi^+\pi^-$ vertex. The other
+two vertices come from $\mathcal L_a$ above:
+\begin{itemize}
+\item the mixing $-F\Da\,A'\!\cdot\partial\pi^0$;
+\item the cubic $\tfrac{2\Da}{3F}A'_\mu[2\pi^+\pi^-\partial^\mu\pi^0-\pi^0\partial^\mu(\pi^+\pi^-)]$.
+\end{itemize}
+
+\paragraph{Current.} For $A'^*(q)\to\pi^+\pi^-A'(k,\varepsilon)$ there are two diagrams: the
+contact, and the $\pi^0$ pole at $q$ followed by the cubic vertex, which gives $3\,q\!\cdot\!\varepsilon^*$
+since $k\cdot\varepsilon=0$. Diagrams in which the outgoing $A'$ leaves a $\pi^0$ line vanish,
+because the mixing vertex is then $k\cdot\varepsilon^*=0$. Charged-pion poles need an
+$A'\pi^+\pi^-$ vertex, which parity forbids. So
+\begin{equation}
+  V_\sigma=-2i\,\Da^2\Big[\varepsilon^*_\sigma-\frac{q_\sigma\,q\cdot\varepsilon^*}{s-\mpi^2}\Big],
+  \qquad
+  q\cdot V=\frac{2i\,\Da^2\mpi^2}{s-\mpi^2}\,q\cdot\varepsilon^* .
+\end{equation}
+The divergence is $O(\mpi^2)$, as current conservation in the chiral limit requires. This fixes the
+relative sign of the two diagrams.
+
+\paragraph{Weights.} Sum over the $A'$ polarisations with $-g+kk/m_A^2$, in the CM frame of $q$:
+\begin{equation}
+  |\vec V|^2=4\Da^4\Big(3+\frac{|\vec k|^2}{m_A^2}\Big),\qquad
+  |q\cdot V|^2=4\Da^4\,\frac{\mpi^4\,s\,|\vec k|^2}{m_A^2(s-\mpi^2)^2}.
+\end{equation}
+Both depend only on $E_A$, so the Dalitz integrals are $\int dE_A\,Y$, with $m_1=m_A$ and
+$m_2=m_{\pi^\pm}$. With $c=s+m_A^2-\mpi^2$, $E_A=(c-X)/(2\sqrt s)$, and
+\begin{equation}
+  \int\!dE_A\,Y\,|\vec k|^2=\frac{c^2I_0-2cI_1+I_2}{4s}-m_A^2I_0 .
+\end{equation}
+These $W_T$ and $W_L$ enter the boxed $\sigma_{\rm AV}$ of \S\ref{sec:impl} unchanged. The state is
+$\pi^+\pi^-$ only, so $S=1$, and the threshold is $\sqrt s=m_A+2m_{\pi^\pm}$. That is above $m_A$,
+so $\Gamma_A$ only ever sits in an off-shell propagator.
+
+\paragraph{The $1/m_A^2$.} It comes from the longitudinal outgoing $A'$, $\varepsilon_L\simeq k/m_A$.
+It is not suppressed by $\mpi^2$, because $k\cdot V$ is not $O(\mpi^2)$: the $\pi^0$-line diagrams
+that would restore the Ward identity in $k$ are the ones that vanish on shell. It is the mixing
+angle $\sin\theta\sim m_{\pi^0A'}/m_A$ seen from the final state, the same $1/m_A^2$ that runs
+through $\lambda_{j\chi}$. In the $J=0$ piece it stacks on the $1/m_A^4$ of the propagator, giving
+$\sigma\propto1/m_A^6$. Below $m_A\sim m_{\pi^0A'}$ the small-mixing expansion has failed for this
+channel just as it has for the others.
+
+\paragraph{Normalisation.} $L_4$ rescales the whole $O(p^2)$ Lagrangian by \texttt{corr4}. A tree
+amplitude with $V$ vertices and $I$ internal lines therefore scales as $\texttt{corr4}^{V-I}$,
+which is \texttt{corr4} once. So the code puts $\Da_{\rm eff}=m_{\pi^0A'}/F$ in one insertion and
+LO $\Da=a_u-a_d$ in the other:
+\begin{equation}
+  W\propto\Da_{\rm eff}^2\,\Da^2 .
+\end{equation}
+This gives $\texttt{corr4}^2\approx4\times$ LO in rate, as for $3\pi$. Using $\Da_{\rm eff}^2$
+in both insertions would make it $16\times$. Two terms are dropped: the vertex from the
+pion-field part of the second $L_4$ trace, which is $\propto L_4B_0(m_u+m_d)\sum a_q^2/F^2$, below 1\%
+relative; and the external-leg renormalisation. Both are also dropped for $3\pi$.
+
+\paragraph{Size.} $\langle\sigma v\rangle$ at $x=20$, $\mathbf a=\eta(2,-1,-1)$, with \texttt{LOOP\_3PI=1}:
+\begin{itemize}
+\item \textbf{Scaling.} $\sigma\propto\lambda_a^2\eta^4$, against $\lambda_a^2\eta^2$ for $\gamma\gamma$
+  and $3\pi$, $\lambda_a^4\eta^4$ for the meson pairs, and $\lambda_a^4$ for $A'A'$.
+\item \textbf{Small $\eta$.} At $\lambda_a=\eta=0.01$ the effect is invisible.
+\item \textbf{$m_A=0.1$~GeV, $\lambda_a=0.01$.} The \texttt{'sm'} rate rises by 4--8\% at $\eta=0.1$
+  for $m_\chi=0.3$--0.5. The \texttt{'all'} rate rises by up to $1.3\times$ at $\eta=0.3$ and
+  $1.5\times$ for $\eta\ge1$, where it saturates against the meson pairs. Those points already have
+  $\langle\sigma v\rangle$ $10^2$--$10^7$ times the relic value.
+\item \textbf{$m_A=1$~GeV.} The channel opens only at $m_\chi>0.64$, outside freeze-out at
+  $T_{\rm RH}=10$~MeV.
+\item \textbf{Upshot.} Unlike $\pi\pi\phi$, it cannot move the relic curves of the current figure
+  sets.
+\end{itemize}
+
+\paragraph{Production.} The channel is in \texttt{'sm'}, so detailed balance assumes $A'$ is in the
+bath. This is the same caveat as $\pi\pi\phi$.
+
+\paragraph{Tests.} \texttt{test\_threepi.m} checks 12--13:
+\begin{itemize}
+\item $W_T$ and $W_L$ against a brute-force 2D \texttt{integral2} of the polarisation-summed current,
+  to $2\times10^{-12}$;
+\item zero below threshold and for $a_u=a_d$;
+\item the $(a_u-a_d)^2m_{\pi^0A'}^2$ scaling;
+\item the switch, and that \texttt{xxggxsec} with it on minus off equals \texttt{axial3pi\_sigma}.
+\end{itemize}
+Julia: \texttt{validate\_threebody.jl} (quantities \texttt{WTa}, \texttt{WLa}), exact against
+MATLAB.
+
+%======================================================================
+\section{Omitted}
+
+\begin{itemize}
+\item \textbf{Higher orders and resonances:} NLO $\chi$PT and resonances. In the $\pi\pi$ subsystem
+  $\spm\le(\sqrt s-\mpi)^2$, well below the $\rho$ near threshold. The $a_1$ would enhance the
+  axial $J=1$ piece at $\sqrt s\sim1$~GeV.
+\item \textbf{Isoscalar paths:}
+  \begin{itemize}
+  \item $\eta\to3\pi$, which is isospin violating, is omitted from the estimate and from the axial
+    code. \texttt{threepi\_weight.m} keeps the LO $\eta$ pole for S$\otimes$P and P$\otimes$P.
+  \item $\eta'$ mixing vanishes for $\sum g_q=0$.
+  \item $\eta\pi\pi$ opens above $\sqrt s=0.83$~GeV.
+  \end{itemize}
+  For the axial vector, PCAC would supply the $\eta$ path: the octet part of the $J=0$ piece is
+  the pseudoscalar amplitude with $g_q\to2a_qm_q$. The singlet part is anomalous, though, which is
+  why the path is not included.
+\item \textbf{NLO mixing:}
+  \begin{itemize}
+  \item Pseudoscalar code: LO throughout.
+  \item Axial code: the NLO $m_{\pi^0A'}$ multiplies the whole current (\S\ref{sec:impl}).
+  \end{itemize}
+\end{itemize}
+
+\end{document}

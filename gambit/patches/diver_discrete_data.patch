@@ -1,0 +1,50 @@
+Patch: fix diver scanner crash on empty discrete-parameter vector
+==================================================================
+
+Applies to the gambit_light checkout ($GAMBIT_LIGHT_DIR), file:
+    ScannerBit/src/scanners/diver_1.3.0/diver.cpp
+
+WHY
+---
+With `use_scanner: diver` and no discrete parameters (nDiscrete == 0, the
+default), the plugin passes `&discrete[0]` of an empty `std::vector<int>` to
+cdiver(). That is undefined behaviour. In a gambit_light built with
+Homebrew gcc-15, whose libstdc++ has bounds-checking active (BUILD_TYPE: None,
+empty CXX_FLAGS, no -DNDEBUG), `operator[]` aborts:
+
+    .../c++/15/bits/stl_vector.h:1263: ... Assertion '__n < this->size()' failed.
+
+It is independent of `initial_guesses` — it fires on any diver run with no
+discrete params. (The `random` scanner never hits this code path, which is why
+earlier smoke runs were fine.)
+
+FIX (one line): use `.data()` instead of `&v[0]`. `.data()` on an empty vector
+returns a valid pointer and never trips the bounds assertion; cdiver gets
+nDiscrete=0 and does not dereference it.
+
+--- a/ScannerBit/src/scanners/diver_1.3.0/diver.cpp
++++ b/ScannerBit/src/scanners/diver_1.3.0/diver.cpp
+@@ cdiver call (~line 204-208)
+     cdiver(&objective, nPar, &lowerbounds[0], &upperbounds[0], &path[0], nDerived, &bestFitParams[0],
+-           bestFitDerived, nDiscrete, &discrete[0], partitionDiscrete, maxgen, NP, nF, &Fvec[0], Cr,
++           bestFitDerived, nDiscrete, discrete.data(), partitionDiscrete, maxgen, NP, nF, &Fvec[0], Cr,
+            lambda, current, expon, bndry, jDE, lambdajDE, convthresh, convsteps, removeDuplicates,
+            savecount, resume, disableIO, outputRaw, outputSam, init_pop_strategy, nGuesses, &initial_guesses[0],
+            discard_unfit_points, max_ini_attempts, max_acceptable_value, seed, context, verbose);
+
+REAPPLY / REBUILD
+-----------------
+This edit lives outside this repo (in the gambit checkout) and is lost if gambit
+is re-pulled or reinstalled. To reapply by hand, make the one-character-ish edit
+above, then rebuild ONLY the plugin (gambit dlopens it at runtime; gambit itself
+is not relinked):
+
+    cd $GAMBIT_LIGHT_DIR/build && make scanner_diver_1.3.0
+    # relinks ScannerBit/lib/libscanner_diver_1.3.0.so
+
+VERIFIED
+--------
+After the fix, `use_scanner: diver` runs to EXIT=0 / "GAMBIT has finished
+successfully!", seeds the 3 `initial_guesses` points, and writes
+Oh2 = 0.120038 / 0.119815 / 0.120087 (the seeded relic-ridge points) as the
+first three samples.

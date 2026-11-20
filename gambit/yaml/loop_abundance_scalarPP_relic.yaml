@@ -1,0 +1,226 @@
+# ----------------------------------------------------------------------------
+# GAMBIT-light relic-only scan of LoopAbundance: scalarPP.
+#
+# Scanned axes: mx, mphi, gx, gu, gd, gs (6D).  The quark couplings g = [gu, gd,
+# gs] are independent signed-log axes (ScannerBit double_log_flat_join: log on
+# both sides of zero, flat across a small zero-gap).  The likelihood is the relic
+# abundance only (Delta-Neff sigmas = 0); every other constraint is applied
+# afterwards by analysis/postprocess.py.
+#
+# Before running, build the user library and export the worker settings
+# (paths relative to the repository root; see README.md):
+#   gambit/build.sh
+#   export LOOP_JULIA_BIN=julia
+#   export LOOP_JULIA_PROJECT=$PWD/julia/LoopAbundance
+#   export LOOP_WORKER_JL=$PWD/gambit/worker/worker.jl
+#   export LOOP_JULIA_SYSIMAGE=$PWD/gambit/loopabundance_sys.so   # optional
+# and set `user_lib` below to the absolute path of gambit/cpp/loop_loglike.so.
+#
+# To scan another interaction, edit func_name, output_file and
+# default_output_path together, and re-derive `initial_guesses` (the Oh2 = 0.12
+# ridge moves per interaction).
+# ----------------------------------------------------------------------------
+
+UserModel:
+
+  # GAMBIT-light requires the entry keys to be p0/p1/...; the human-readable
+  # parameter name lives in `name:` (this is what is passed to the user lib).
+
+  # --- scanned parameters (log-flat priors over the sub-GeV range) ---
+  p1:
+    name: mx
+    prior_type: log
+    range: [1.0e-6, 1.0]        # DM mass [GeV]
+  p2:
+    name: mphi
+    prior_type: log
+    range: [1.0e-9, 10.0]       # mediator mass [GeV]
+  p3:
+    name: gx
+    prior_type: log
+    range: [1.0e-16, 1.0]       # dark coupling
+
+  # --- quark couplings g = [gu, gd, gs], scanned independently (signed log) ---
+  # double_log_flat_join: log branches on each side of zero joined by a flat bridge
+  # across [-1e-16, 1e-16].  Reaches |g| ~ 1e-16 with uniform per-decade
+  # resolution (needed for the weak-coupling axial regime) while keeping sign.
+  # ranges = [lower, flat_start, flat_end, upper].
+  p4: {name: gu, prior_type: double_log_flat_join, ranges: [-1.0, -1.0e-16, 1.0e-16, 1.0]}
+  p5: {name: gd, prior_type: double_log_flat_join, ranges: [-1.0, -1.0e-16, 1.0e-16, 1.0]}
+  p6: {name: gs, prior_type: double_log_flat_join, ranges: [-1.0, -1.0e-16, 1.0e-16, 1.0]}
+
+  # --- tunables (read by the user lib via fixed_value; defaults shown) ---
+  p7:  {name: T_RH,          fixed_value: 0.01}   # reheat temperature [GeV]
+  p8:  {name: s_mix,         fixed_value: 0.3}    # axial small-mixing threshold
+  p9:  {name: relic_mode,    fixed_value: 0}      # 0 Gaussian (chi=all DM), 1 upper-limit
+  p10: {name: relic_mu,      fixed_value: 0.12}   # Planck Omega h^2
+  p11: {name: relic_sigma,   fixed_value: 0.012}  # relic sigma (incl. theory error)
+  # Delta-Neff: two-sided Gaussian on the measured value at each epoch.
+  # BBN -0.14 +/- 0.21 (arXiv:2401.15054); CMB -0.054 +/- 0.17
+  # (Planck N_eff = 2.99 +/- 0.17 vs SM 3.044).  Two-sided is required: the
+  # model's CMB Delta Neff is signed and can go negative (photon heating).
+  p12: {name: neff_bbn_mode,  fixed_value: 0}      # 0 two-sided Gaussian / 1 cap
+  p13: {name: neff_bbn_mu,    fixed_value: -0.14}  # BBN measured Delta Neff
+  p14: {name: neff_bbn_sigma, fixed_value: 0.0}    # DISABLED (relic-only scan; Delta-Neff off)
+  p15: {name: neff_cmb_mode,  fixed_value: 0}      # 0 two-sided Gaussian / 1 cap
+  p16: {name: neff_cmb_mu,    fixed_value: -0.054}  # CMB measured Delta Neff
+  p17: {name: neff_cmb_sigma, fixed_value: 0.0}    # DISABLED (relic-only scan; Delta-Neff off)
+
+
+UserLogLikes:
+
+  loop_abundance:
+    lang: cpp
+    # EDIT to the absolute path of the built library:
+    user_lib: /ABS/PATH/TO/loop_abundance/gambit/cpp/loop_loglike.so
+    # (1) INTERACTION -- pick here: loop_heavyScalar / loop_heavyScalarPS / ... /
+    # loop_axialVector (one registered function per model).
+    func_name: loop_scalarPP
+    output:
+      - Oh2
+      - dNeff_bbn
+      - dNeff_cmb
+      - sigma_chiN
+      - eft_valid
+      - sin_mix
+      - gx_ceiling
+      - solver
+
+Printer:
+  # NB: keep output_file / default_output_path in sync with func_name (see the
+  # header).  6 scanned params here (mx, mphi, gx,
+  # gu, gd, gs) => "scalarPP_relic".
+  printer: hdf5
+  options:
+    # (2) INTERACTION output tag:
+    output_file: "scalarPP_relic.hdf5"
+    group: "/data"
+    delete_file_on_restart: true
+    # Points buffered per rank before the shared output file is opened,
+    # written and closed again.  The default (1000) means ~one open/close
+    # per rank every few seconds; at 50 ranks that hammers the cluster FS
+    # hard enough for an H5Fopen to fail transiently and kill the job.
+    buffer_length: 20000
+
+
+  # printer: ascii        # human-readable .dat (swap in for quick inspection)
+  # options:
+  #   output_file: "scalarPP_relic.dat"
+  #   buffer_length: 10
+  #   delete_file_on_restart: true
+
+
+Scanner:
+  use_scanner: diver
+
+  scanners:
+
+    # Quick smoke-test sampler.
+    random:
+      plugin: random
+      point_number: 20
+
+    # Differential-evolution optimiser for real runs.  6 parameters are scanned
+    # here (mx, mphi, gx, gu, gd, gs), and the likelihood is rugged/multimodal --
+    # Breit-Wigner resonance ridges, the FIMP/WIMP crossing, the EFT-validity
+    # cliffs, plus the now-open coupling directions -- so keep the population
+    # generous and let jDE self-adapt the mutation/crossover rates.
+    diver:
+      plugin: diver
+      NP: 3500                  # population per generation (6D; ~150x ndim -> 900 min,
+                               #   kept higher for the extra coupling directions)
+      convthresh: 1.0e-3       # smoothed fractional improvement to call convergence
+      convsteps: 10            # generations smoothed over for the convergence test
+      maxgen: 5000             # hard cap on generations per civilisation
+      maxciv: 1                # single civilisation (no restart-from-scratch loop)
+      jDE: true                # self-adaptive rand/1/bin (Brest et al. 2006) — set
+                               #   F, Cr automatically; preferred over hand-tuning
+      lambdajDE: false         # rand-to-best/1/bin self-adaptation (off; jDE only)
+      Cr: 0.9                  # crossover rate (ignored when jDE=true, kept as seed)
+      lambda: 0.0              # best/rand mixing (0 = pure rand/1; ignored by jDE)
+      current: false           # mutate around rand vector, not the current one
+      expon: false             # binomial (not exponential) crossover
+      bndry: 3                 # boundary handling: 3 = reflect back into the box
+      removeDuplicates: true   # drop duplicate vectors within a generation
+      init_population_strategy: 2   # n-shot init, error out if no valid seed found
+      max_initialisation_attempts: 10000  # tries per initial slot to land a valid
+                               #   point (the EFT cuts reject a lot of the box)
+      savecount: 1             # checkpoint every generation (cheap resume)
+      full_native_output: true # also write Diver's native .raw sample file
+      verbosity: 1             # 0=errors 1=basic 2=civ-level 3+=population
+      seed: -1                 # <=0 => seed from system clock
+
+      # Seed the initial population with known-good points (relic Omega h^2 ~ 0.12
+      # for loop_heavyScalar).  All six scanned params are listed; the couplings
+      # are seeded at the symmetric g=[1/3,1/3,1/3] point so the verified ridge is
+      # represented from generation 0.  Re-derive if you change func_name or the
+      # mass ranges (each interaction's relic ridge sits elsewhere).
+      # Seeds generated (2026-08-15) by direct relic solves, NOT harvested
+      # from a prior scan: on the FIMP branch Oh2 ∝ gx^2, so one evaluation per
+      # (mx, mphi, g) fixes the gx that lands on 0.12.  Drawn from this scan's own
+      # priors, then each seed re-evaluated from scratch (no rescaling) and kept
+      # only if finite, EFT-valid and within 1e-3 of target -- so the Oh2 comments
+      # are measured.  Regenerate after any physics change; do NOT reuse seeds
+      # harvested from a run that predates it (find_seeds.py reads the STORED
+      # output::Oh2 column, which a physics change silently invalidates).
+      initial_guesses:
+        parameters: [UserModel::p1, UserModel::p2, UserModel::p3, UserModel::p4, UserModel::p5, UserModel::p6]   # mx,mphi,gx,gu,gd,gs
+        values:
+        - [2.93559e-06, 0.573698, 8.39446e-05, -2.37875e-06, 2.58943e-07, -0.00304496]   # Oh2 = 0.1200
+        - [3.68201e-05, 0.123482, 4.53681e-10, -1.17366e-11, 5.70796e-07, -1.42609e-05]   # Oh2 = 0.1200
+        - [2.27128e-05, 0.00245645, 2.1929e-12, 0.00471498, -6.23287e-09, -3.4366e-11]   # Oh2 = 0.1200
+        - [0.0177437, 1.34257, 2.09603e-06, -3.13593e-08, 4.16593e-11, -0.0111505]   # Oh2 = 0.1200
+        - [4.17292e-06, 2.0216e-08, 2.60287e-07, 2.37834e-11, -0.000235257, -3.40624e-11]   # Oh2 = 0.1200
+        - [0.00026482, 1.19118, 3.43343e-09, -0.171052, -7.98369e-08, 1.25462e-09]   # Oh2 = 0.1200
+        - [0.000134965, 3.45046, 9.74427e-08, 0.0716399, -1.08505e-05, -1.2654e-05]   # Oh2 = 0.1200
+        - [0.00625802, 2.85863e-05, 6.89803e-07, 1.62384e-07, -3.22409e-10, -0.000612203]   # Oh2 = 0.1200
+        - [0.00252363, 9.18428e-09, 6.73965e-10, -0.00442504, -0.000762176, -0.00114197]   # Oh2 = 0.1200
+        - [0.000485247, 3.13962e-05, 1.02548e-09, 0.00550366, 1.09044e-11, -8.19887e-09]   # Oh2 = 0.1200
+        - [0.0317696, 3.34828, 6.42384e-06, 1.9222e-09, -7.15488e-05, 6.94317e-06]   # Oh2 = 0.1200
+        - [0.0606896, 5.76102, 1.04913e-06, -0.00132593, -1.96559e-06, -4.77778e-08]   # Oh2 = 0.1200
+        - [0.0290885, 0.0602907, 2.02844e-12, -0.00276241, 4.10114e-05, -0.000336848]   # Oh2 = 0.1200
+        - [1.79179e-06, 7.17457, 0.0335795, 0.333333, 0.333333, 0.333333]   # Oh2 = 0.1200
+        - [0.00118977, 0.459839, 0.00090855, 4.40797e-09, -3.79722e-08, 2.56191e-11]   # Oh2 = 0.1200
+        - [3.59902e-06, 0.497104, 1.54124e-05, 1.73303e-07, 5.40103e-05, 9.78431e-10]   # Oh2 = 0.1200
+        - [0.003375, 5.47171, 3.28676e-06, -1.21403e-07, -0.00107859, 3.65681e-09]   # Oh2 = 0.1200
+        - [2.25386e-05, 0.0176294, 6.75559e-12, -1.47339e-09, -0.000743014, -6.68636e-08]   # Oh2 = 0.1200
+        - [1.3453e-05, 0.132647, 1.13372e-09, -1.01299e-08, 3.72454e-08, -5.42689e-05]   # Oh2 = 0.1200
+        - [4.74257e-05, 0.49959, 8.87812e-05, -2.60041e-06, -1.66677e-08, 3.77525e-07]   # Oh2 = 0.1199
+        - [0.00154491, 0.000143301, 2.90069e-09, 0.00110551, 1.4977e-05, 8.58208e-10]   # Oh2 = 0.1200
+        - [0.000119676, 1.25757, 7.37454e-08, 0.0132234, 1.8867e-06, -4.58052e-06]   # Oh2 = 0.1200
+        - [0.00256021, 3.89912e-06, 4.51847e-10, -0.00427149, -0.0097847, 0.000987151]   # Oh2 = 0.1200
+        - [1.10464e-06, 0.00118247, 6.02859e-12, 0.0014938, -1.39462e-09, -0.0200197]   # Oh2 = 0.1201
+        - [0.000912116, 0.000139347, 2.98141e-08, -7.00356e-05, 2.04397e-09, -0.017099]   # Oh2 = 0.1200
+        - [0.0108001, 4.3496e-06, 1.96242e-06, 1.5811e-07, -4.02512e-07, -1.35051e-11]   # Oh2 = 0.1200
+        - [2.30965e-05, 0.502961, 3.99628e-08, -0.00544743, 0.0029147, -0.000243296]   # Oh2 = 0.1200
+        - [0.000407696, 3.56112, 0.00054829, 0.333333, 0.333333, 0.333333]   # Oh2 = 0.1200
+        - [5.56546e-05, 1.30688, 3.36143e-07, 1.08674e-08, -0.00469782, -0.0158055]   # Oh2 = 0.1200
+        - [0.000600812, 6.90051e-08, 1.45808e-09, 3.71116e-08, 0.00351017, 0.000633434]   # Oh2 = 0.1200
+        - [0.00774879, 0.00173294, 4.83765e-10, -5.5359e-07, -0.00295901, -0.00164651]   # Oh2 = 0.1200
+        - [0.00192092, 2.5575e-08, 7.09953e-09, 4.14534e-05, -0.000361168, -4.86352e-09]   # Oh2 = 0.1200
+        - [0.00230651, 6.73872e-06, 6.98563e-08, 3.69522e-05, -1.71033e-11, 2.76263e-05]   # Oh2 = 0.1200
+        - [1.4192e-06, 0.0611318, 1.54086e-10, 6.55076e-09, -0.00347816, -0.000131165]   # Oh2 = 0.1200
+        - [0.165762, 0.194598, 0.0377337, 0.000158568, 5.24507e-05, 0.0179918]   # Oh2 = 0.1199
+        - [2.4441e-06, 0.151394, 6.45097e-09, -8.85169e-08, 3.80828e-08, -1.21626e-11]   # Oh2 = 0.1200
+        - [0.00436725, 0.473857, 3.91713e-09, 0.00554375, -1.77136e-05, -0.0293485]   # Oh2 = 0.1200
+        - [0.000460317, 1.08863, 4.67237e-09, 2.10036e-10, 0.0800644, -2.32087e-07]   # Oh2 = 0.1200
+        - [2.6596e-06, 0.00183139, 5.3511e-12, 0.00078776, 0.00245203, -1.57359e-09]   # Oh2 = 0.1200
+        - [5.42791e-06, 0.0779241, 1.59798e-10, -2.20794e-05, 1.64936e-08, -0.00532222]   # Oh2 = 0.1200
+
+
+Logger:
+  redirection:
+    [Default] : "default.log"
+    [Scanner] : "Scanner.log"
+
+
+KeyValues:
+  # (3) INTERACTION output tag (sync with func_name):
+  default_output_path: "runs/scalarPP_relic"
+  print_timing_data: true
+  rng:
+    generator: ranlux48
+    seed: -1
+  likelihood:
+    model_invalid_for_lnlike_below: -1.0e5
+    print_invalid_points: false

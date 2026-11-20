@@ -1,0 +1,1094 @@
+[
+  {
+    "figtag": "compare_limits_g_axialVector_mphi0.1_gx0.01",
+    "labels": [
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.01488,
+        "y": 7.868e-39,
+        "rot": 0.0374,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+A^{\\prime}$",
+        "x": 0.0004068,
+        "y": 1.427e-44,
+        "rot": 13.03,
+        "hide": false
+      },
+      {
+        "label": "$\\pi^0,\\eta,\\eta'\\to$ inv.",
+        "x": 0.0001639,
+        "y": 1.022e-40,
+        "rot": -0.002669,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.001006,
+        "y": 5.947e-29,
+        "rot": -13.85,
+        "hide": false
+      },
+      {
+        "label": "CMB",
+        "x": 0.006991,
+        "y": 8.347e-30,
+        "rot": -21.78,
+        "hide": false
+      },
+      {
+        "label": "Unitarity ($\\Gamma_{A'} \\ge m_A$ )",
+        "x": 5.955e-05,
+        "y": 2.728e-27,
+        "rot": -0.002839,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 4.031e-05,
+        "y": 2e-35,
+        "rot": 14,
+        "hide": false
+      },
+      {
+        "label": "$\\Omega h^2 = 0.12$",
+        "x": 0.0004304,
+        "y": 3.592e-48,
+        "rot": -6.531,
+        "hide": false
+      },
+      {
+        "label": "Overabundant",
+        "x": 0.003123,
+        "y": 1.973e-46,
+        "rot": -6.656,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_axialVector_mphi1_gx0.01",
+    "labels": [
+      {
+        "label": "$\\pi^0,\\eta,\\eta'\\to$ inv.",
+        "x": 0.002304,
+        "y": 3.619e-41,
+        "rot": -0.0209,
+        "hide": false
+      },
+      {
+        "label": "Large mixing ($\\sin\\theta_{A'}>0.3$)",
+        "x": 0.004029,
+        "y": 8.413e-38,
+        "rot": 12.99,
+        "hide": false
+      },
+      {
+        "label": "Unitarity ($\\Gamma_{A'} \\ge m_A$ )",
+        "x": 6.235e-05,
+        "y": 3.354e-27,
+        "rot": -0.002839,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 4.521e-05,
+        "y": 1.496e-39,
+        "rot": 15,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.001088,
+        "y": 3.176e-29,
+        "rot": -14,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_axialVector_mphi1e-09_gx0.01",
+    "labels": [
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 0.0002148,
+        "y": 6.996e-35,
+        "rot": 0,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.0001649,
+        "y": 3.941e-28,
+        "rot": -3.692,
+        "hide": false
+      },
+      {
+        "label": "CMB",
+        "x": 0.02782,
+        "y": 6.204e-32,
+        "rot": -14.11,
+        "hide": false
+      },
+      {
+        "label": "5th force",
+        "x": 0.03499,
+        "y": 2.263e-20,
+        "rot": 7.522,
+        "hide": false
+      },
+      {
+        "label": "Bullet Cluster",
+        "x": 0.00169,
+        "y": 1.139e-47,
+        "rot": 0,
+        "hide": false
+      },
+      {
+        "label": "$\\pi^0,\\eta,\\eta'\\to$ inv.",
+        "x": 4.657e-05,
+        "y": 3.446e-44,
+        "rot": -0.004735,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+A^{\\prime}$",
+        "x": 2.751e-05,
+        "y": 1.949e-31,
+        "rot": 7.523,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.0001285,
+        "y": 7.415e-39,
+        "rot": -0.002075,
+        "hide": false
+      },
+      {
+        "label": "Unitarity ($\\Gamma_{A'} \\ge m_A$ )",
+        "x": 0.01422,
+        "y": 2.757e-25,
+        "rot": 0.1382,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_axialVector_mphi1e-09_gx1",
+    "labels": [
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 0.0002,
+        "y": 2.5e-41,
+        "rot": 0,
+        "hide": false
+      },
+      {
+        "label": "Bullet Cluster",
+        "x": 0.001,
+        "y": 1e-46,
+        "rot": 0,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalarPP_mphi0.1_gx0.01",
+    "labels": [
+      {
+        "label": "SN1987A",
+        "x": 0.01302,
+        "y": 4.079e-62,
+        "rot": 17.8,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 0.001111,
+        "y": 5.075e-59,
+        "rot": 17.2,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.0001187,
+        "y": 3.372e-52,
+        "rot": 7.858,
+        "hide": false
+      },
+      {
+        "label": "CMB",
+        "x": 0.01617,
+        "y": 3.226e-47,
+        "rot": -0.6453,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.01736,
+        "y": 2.667e-54,
+        "rot": 18.19,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 0.003889,
+        "y": 1.64e-44,
+        "rot": 17.26,
+        "hide": false
+      },
+      {
+        "label": "Overabundant",
+        "x": 6.775e-05,
+        "y": 2.15e-70,
+        "rot": 13.17,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalarPP_mphi0.1_gx1",
+    "labels": [
+      {
+        "label": "SN1987A",
+        "x": 0.016,
+        "y": 4e-61,
+        "rot": 16.1,
+        "hide": false
+      },
+      {
+        "label": "Overabundant",
+        "x": 0.0012,
+        "y": 2e-65,
+        "rot": 10.2,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalarPP_mphi1_gx0.01",
+    "labels": [
+      {
+        "label": "$\\pi^0,\\eta,\\eta'\\to$ inv.",
+        "x": 0.01351,
+        "y": 2.449e-59,
+        "rot": 17.28,
+        "hide": false
+      },
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 0.00465,
+        "y": 5.999e-52,
+        "rot": 23.34,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.0001067,
+        "y": 2.021e-52,
+        "rot": 9,
+        "hide": false
+      },
+      {
+        "label": "CMB",
+        "x": 0.0245,
+        "y": 1.911e-49,
+        "rot": -1.289,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 6.195e-05,
+        "y": 6.578e-56,
+        "rot": 17.28,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalarPS_mphi0.1_gx0.01",
+    "labels": [
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 2.57e-05,
+        "y": 3.651e-45,
+        "rot": 10.04,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.0004644,
+        "y": 1.825e-37,
+        "rot": -0.738,
+        "hide": false
+      },
+      {
+        "label": "CMB",
+        "x": 0.01518,
+        "y": 5.295e-39,
+        "rot": -7.839,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 0.001121,
+        "y": 2.391e-49,
+        "rot": 9.571,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.01684,
+        "y": 3.486e-46,
+        "rot": 10,
+        "hide": false
+      },
+      {
+        "label": "SN1987A",
+        "x": 4.81e-05,
+        "y": 1.269e-60,
+        "rot": 10.04,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 4.307e-05,
+        "y": 4.865e-41,
+        "rot": 10.03,
+        "hide": false
+      },
+      {
+        "label": "$\\Omega h^2 = 0.12$",
+        "x": 0.002333,
+        "y": 1.547e-55,
+        "rot": 4.888,
+        "hide": false
+      },
+      {
+        "label": "Overabundant",
+        "x": 0.00612,
+        "y": 2.145e-51,
+        "rot": 1.073,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalarPS_mphi0.1_gx0.01_mfv",
+    "labels": [
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 0.002088,
+        "y": 2.395e-49,
+        "rot": 9.73,
+        "hide": false
+      },
+      {
+        "label": "CMB",
+        "x": 0.0161,
+        "y": 7.7e-37,
+        "rot": -8.946,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.01693,
+        "y": 1.509e-46,
+        "rot": 10.02,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 7.542e-05,
+        "y": 7.004e-42,
+        "rot": 9.979,
+        "hide": false
+      },
+      {
+        "label": "Overabundant",
+        "x": 0.009429,
+        "y": 2.339e-51,
+        "rot": 5.018,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalarPS_mphi1_gx0.01",
+    "labels": [
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.0008187,
+        "y": 3.639e-45,
+        "rot": 11,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 0.02892,
+        "y": 2.191e-39,
+        "rot": 9,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalarPS_mphi1_gx0.01_mfv",
+    "labels": [
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.001652,
+        "y": 3.45e-47,
+        "rot": 9,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 0.001039,
+        "y": 1.136e-43,
+        "rot": 11,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalarSP_mphi0.1_gx0.01",
+    "labels": [
+      {
+        "label": "SN1987A",
+        "x": 0.01,
+        "y": 1.3e-55,
+        "rot": 16.9,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 0.001902,
+        "y": 8.339e-52,
+        "rot": 17.1,
+        "hide": false
+      },
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 4.124e-05,
+        "y": 5.074e-51,
+        "rot": 17.13,
+        "hide": false
+      },
+      {
+        "label": "$\\pi^0,\\eta,\\eta'\\to$ inv.",
+        "x": 0.0003039,
+        "y": 1.715e-57,
+        "rot": 17.12,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.0001005,
+        "y": 9.084e-40,
+        "rot": 10.16,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.01666,
+        "y": 2.562e-47,
+        "rot": 14.33,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 0.005627,
+        "y": 4.997e-40,
+        "rot": 17.11,
+        "hide": false
+      },
+      {
+        "label": "$\\Omega h^2 = 0.12$",
+        "x": 0.002575,
+        "y": 6.02e-63,
+        "rot": 12.96,
+        "hide": false
+      },
+      {
+        "label": "Overabundant",
+        "x": 7.693e-05,
+        "y": 4.447e-63,
+        "rot": 13.05,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalarSP_mphi1_gx0.01",
+    "labels": [
+      {
+        "label": "$\\pi^0,\\eta,\\eta'\\to$ inv.",
+        "x": 0.001766,
+        "y": 2.754e-54,
+        "rot": 17.13,
+        "hide": false
+      },
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 0.0006845,
+        "y": 2.308e-49,
+        "rot": 17.81,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.0001054,
+        "y": 1.504e-39,
+        "rot": 5.164,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 0.01324,
+        "y": 8.904e-40,
+        "rot": 16.82,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalar_mphi0.1_gx0.01",
+    "labels": [
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 0.004478,
+        "y": 2.315e-28,
+        "rot": 75.22,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 0.0005199,
+        "y": 2.314e-43,
+        "rot": 10.13,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.01761,
+        "y": 1.327e-38,
+        "rot": 10.11,
+        "hide": false
+      },
+      {
+        "label": "SN1987A",
+        "x": 4.822e-05,
+        "y": 5.308e-54,
+        "rot": 10.13,
+        "hide": false
+      },
+      {
+        "label": "$\\Omega h^2 = 0.12$",
+        "x": 0.0008595,
+        "y": 9.513e-50,
+        "rot": 5.07,
+        "hide": false
+      },
+      {
+        "label": "Overabundant",
+        "x": 0.01268,
+        "y": 6.937e-45,
+        "rot": 1.069,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalar_mphi0.1_gx0.01_mfv",
+    "labels": [
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 0.009788,
+        "y": 2.282e-41,
+        "rot": 9.964,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.01745,
+        "y": 1.469e-38,
+        "rot": 10.11,
+        "hide": false
+      },
+      {
+        "label": "SN1987A",
+        "x": 3.889e-05,
+        "y": 3.136e-54,
+        "rot": 10.12,
+        "hide": false
+      },
+      {
+        "label": "Overabundant",
+        "x": 0.007674,
+        "y": 4.396e-45,
+        "rot": 5.156,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalar_mphi1_gx0.01",
+    "labels": {
+      "label": "Non-perturbative",
+      "x": 0.001988,
+      "y": 8.83e-35,
+      "rot": 10,
+      "hide": false
+    }
+  },
+  {
+    "figtag": "compare_limits_g_heavyScalar_mphi1_gx0.01_mfv",
+    "labels": [
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.002386,
+        "y": 2.983e-40,
+        "rot": 10.12,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 0.0002021,
+        "y": 6.91e-39,
+        "rot": 10,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_lightScalarPP_mphi1e-09_gx0.01",
+    "labels": [
+      {
+        "label": "INTEGRAL",
+        "x": 0.0002989,
+        "y": 5.677e-38,
+        "rot": 11.22,
+        "hide": false
+      },
+      {
+        "label": "CMB",
+        "x": 0.0007235,
+        "y": 6.854e-35,
+        "rot": 11.59,
+        "hide": false
+      },
+      {
+        "label": "5th force",
+        "x": 0.01243,
+        "y": 1.157e-36,
+        "rot": 0.009646,
+        "hide": false
+      },
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 0.006499,
+        "y": 5.346e-33,
+        "rot": 48.82,
+        "hide": false
+      },
+      {
+        "label": "$\\pi^0,\\eta,\\eta'\\to$ inv.",
+        "x": 0.0001667,
+        "y": 9.283e-42,
+        "rot": -0.004097,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.003311,
+        "y": 5.051e-39,
+        "rot": -0.02419,
+        "hide": false
+      },
+      {
+        "label": "Bullet Cluster",
+        "x": 3.377e-05,
+        "y": 1.18e-45,
+        "rot": 90,
+        "hide": false
+      },
+      {
+        "label": "$\\Omega h^2 = 0.12$",
+        "x": 0.1269,
+        "y": 1.204e-39,
+        "rot": 68.43,
+        "hide": false
+      },
+      {
+        "label": "Overabundant",
+        "x": 0.04408,
+        "y": 1.015e-39,
+        "rot": -79.1,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_lightScalarPS_mphi1e-09_gx0.01",
+    "labels": [
+      {
+        "label": "INTEGRAL",
+        "x": 0.0003011,
+        "y": 2.137e-20,
+        "rot": -2.095,
+        "hide": false
+      },
+      {
+        "label": "Neutron star",
+        "x": 0.0003,
+        "y": 5.6e-45,
+        "rot": -7.8,
+        "hide": false
+      },
+      {
+        "label": "Bullet Cluster",
+        "x": 3.104e-05,
+        "y": 7.811e-42,
+        "rot": 90,
+        "hide": false
+      },
+      {
+        "label": "CMB",
+        "x": 0.007499,
+        "y": 4.59e-22,
+        "rot": -5.725,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 0.00115,
+        "y": 2.607e-31,
+        "rot": -7.911,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.003275,
+        "y": 2.274e-28,
+        "rot": -6.872,
+        "hide": false
+      },
+      {
+        "label": "SN1987A",
+        "x": 0.004114,
+        "y": 1.827e-37,
+        "rot": -8.007,
+        "hide": false
+      },
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 0.002563,
+        "y": 1.363e-23,
+        "rot": -3.887,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_lightScalarPS_mphi1e-09_gx0.01_mfv",
+    "labels": [
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.00235,
+        "y": 2.568e-28,
+        "rot": -7.118,
+        "hide": false
+      },
+      {
+        "label": "Neutron star",
+        "x": 0.001029,
+        "y": 3.087e-48,
+        "rot": -8.388,
+        "hide": false
+      },
+      {
+        "label": "CMB",
+        "x": 0.008087,
+        "y": 2.398e-24,
+        "rot": -0.3932,
+        "hide": false
+      },
+      {
+        "label": "SN1987A",
+        "x": 0.01161,
+        "y": 1.088e-38,
+        "rot": -8.594,
+        "hide": false
+      },
+      {
+        "label": "Bullet Cluster",
+        "x": 3.334e-05,
+        "y": 5.32e-45,
+        "rot": 90,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.0002834,
+        "y": 2.175e-23,
+        "rot": -0.3871,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 0.0001114,
+        "y": 1.032e-29,
+        "rot": -7.831,
+        "hide": false
+      },
+      {
+        "label": "Stellar cooling",
+        "x": 0.0001696,
+        "y": 8.298e-42,
+        "rot": -8.155,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 0.007875,
+        "y": 5.987e-21,
+        "rot": -8.577,
+        "hide": false
+      },
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 0.002218,
+        "y": 1.915e-23,
+        "rot": -4.575,
+        "hide": false
+      },
+      {
+        "label": "$\\Omega h^2 = 0.12$",
+        "x": 0.02779,
+        "y": 1.039e-29,
+        "rot": -55.95,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_lightScalarPS_mphi1e-09_gx1",
+    "labels": {
+      "label": "Neutron star",
+      "x": 0.0003,
+      "y": 5.6e-41,
+      "rot": -7.8,
+      "hide": false
+    }
+  },
+  {
+    "figtag": "compare_limits_g_lightScalarSP_mphi1e-09_gx0.01",
+    "labels": [
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 5.32e-05,
+        "y": 1.706e-34,
+        "rot": 1.526,
+        "hide": false
+      },
+      {
+        "label": "Bullet Cluster",
+        "x": 0.113,
+        "y": 1.272e-33,
+        "rot": -90,
+        "hide": false
+      },
+      {
+        "label": "$\\pi^0,\\eta,\\eta'\\to$ inv.",
+        "x": 0.001625,
+        "y": 5.837e-36,
+        "rot": 0.9443,
+        "hide": false
+      },
+      {
+        "label": "5th force",
+        "x": 4.04e-05,
+        "y": 2.105e-29,
+        "rot": 0.7658,
+        "hide": false
+      },
+      {
+        "label": "SN1987A",
+        "x": 0.002448,
+        "y": 2.305e-42,
+        "rot": 0.908,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.0002274,
+        "y": 1.078e-24,
+        "rot": 16.15,
+        "hide": false
+      },
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 0.005642,
+        "y": 2.917e-27,
+        "rot": 48.17,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 0.01049,
+        "y": 1.127e-21,
+        "rot": 1.126,
+        "hide": false
+      },
+      {
+        "label": "$\\Omega h^2 = 0.12$",
+        "x": 0.05603,
+        "y": 1.642e-26,
+        "rot": 88.41,
+        "hide": false
+      },
+      {
+        "label": "Overabundant",
+        "x": 6.06,
+        "y": 7.677e-31,
+        "rot": -0.8705,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_lightScalar_mphi1e-09_gx0.01",
+    "labels": [
+      {
+        "label": "SN1987A",
+        "x": 0.001217,
+        "y": 2.895e-25,
+        "rot": 4.589e-06,
+        "hide": false
+      },
+      {
+        "label": "Bullet Cluster",
+        "x": 0.1222,
+        "y": 7.898e-22,
+        "rot": 90,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.000675,
+        "y": 4.484e-06,
+        "rot": 10.1,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 0.006432,
+        "y": 1.215e-19,
+        "rot": 9.294e-08,
+        "hide": false
+      },
+      {
+        "label": "Stellar cooling",
+        "x": 7.801e-05,
+        "y": 6.058e-32,
+        "rot": 0.0008561,
+        "hide": false
+      },
+      {
+        "label": "Neutron star",
+        "x": 0.0005254,
+        "y": 5.826e-35,
+        "rot": 0,
+        "hide": false
+      },
+      {
+        "label": "$\\Omega h^2 = 0.12$",
+        "x": 0.05897,
+        "y": 2.823e-12,
+        "rot": -77.56,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_lightScalar_mphi1e-09_gx0.01_mfv",
+    "labels": [
+      {
+        "label": "SN1987A",
+        "x": 0.02946,
+        "y": 4.845e-25,
+        "rot": 5.296e-09,
+        "hide": false
+      },
+      {
+        "label": "$\\Delta N_{\\rm eff}$",
+        "x": 0.004436,
+        "y": 6.428e-11,
+        "rot": 0.9408,
+        "hide": false
+      },
+      {
+        "label": "Bullet Cluster",
+        "x": 0.1134,
+        "y": 5.883e-22,
+        "rot": -90,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\chi\\chi$",
+        "x": 0.0004982,
+        "y": 3.585e-15,
+        "rot": 1.106,
+        "hide": false
+      },
+      {
+        "label": "INTEGRAL",
+        "x": 0.0001132,
+        "y": 3.434e-07,
+        "rot": 5.814,
+        "hide": false
+      },
+      {
+        "label": "$K^+\\!\\to\\pi^+\\phi$",
+        "x": 0.004725,
+        "y": 4.172e-20,
+        "rot": 9.389e-08,
+        "hide": false
+      },
+      {
+        "label": "Stellar cooling",
+        "x": 6.684e-05,
+        "y": 8.415e-32,
+        "rot": 0.0008648,
+        "hide": false
+      },
+      {
+        "label": "Neutron star",
+        "x": 0.00132,
+        "y": 1.232e-34,
+        "rot": 4.24e-06,
+        "hide": false
+      },
+      {
+        "label": "Non-perturbative",
+        "x": 0.001859,
+        "y": 1.1e-07,
+        "rot": 2.606e-08,
+        "hide": false
+      }
+    ]
+  },
+  {
+    "figtag": "compare_limits_g_lightScalar_mphi1e-09_gx1",
+    "labels": {
+      "label": "Neutron star",
+      "x": 0.0005,
+      "y": 1.8e-30,
+      "rot": 0,
+      "hide": false
+    }
+  }
+]

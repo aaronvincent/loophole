@@ -1,0 +1,261 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb,booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\newcommand{\tr}{\operatorname{Tr}}
+\newcommand{\Da}{\Delta a}
+\newcommand{\mpi}{m_\pi}
+
+\title{$A'A'\to\gamma\gamma$ and $A'A'\to M\bar M$ for the axial-vector mediator}
+\author{\texttt{AA\_sm\_xsec.m}, \texttt{sv\_AAsm\_grid.m}, \texttt{freeze\_coupled.m} ($c_{AA}$)}
+\date{2026-11-17}
+
+\begin{document}
+\maketitle
+
+\section{Why}
+
+For $m_{A'}<\min(2m_\chi,\,3\mpi)$ the $A'$ cannot decay. Landau--Yang forbids $A'\to\gamma\gamma$,
+$A'\to\pi^0\gamma$ and $A'\to3\gamma$ are $C$-odd (the axial current is $C$-even), and $A'$ has no
+lepton couplings. Its only number-changing link was $\chi\bar\chi\leftrightarrow A'A'$, so
+\texttt{freeze\_coupled} left an $A'$ relic that was never counted. Here we add the lowest-order
+$A'A'\to$ SM channels:
+\begin{itemize}
+\item $A'A'\to\gamma\gamma$ through one charged-meson loop;
+\item $A'A'\to\pi^+\pi^-,\,K^+K^-,\,K^0\bar K^0$ at tree level, which is the same vertex.
+\end{itemize}
+We also return $\Omega_{A'}h^2$ so that overclosure can be flagged.
+
+\section{The vertex}
+
+The axial source is $a_\mu=A'_\mu\,\mathrm{diag}(a_u,a_d,a_s)$, with
+$U=\exp(i\sqrt2\Phi/F)$ and $D_\mu U=\partial_\mu U-i\{a_\mu,U\}$. The term of
+$\tfrac{F^2}{4}\tr(D_\mu UD^\mu U^\dagger)$ quadratic in $a$ is
+$\tfrac{F^2}{4}\tr(\{a,U\}\{a,U^\dagger\})$. With $X=\sqrt2\Phi/F$, its $O(X^2)$ part is
+$\tfrac{F^2}{4}\big[2\tr(aXaX)-2\tr(a^2X^2)\big]=\tr(a\Phi a\Phi-a^2\Phi^2)$. Because $a$ is
+diagonal,
+\begin{equation}
+\tr(a\Phi a\Phi-a^2\Phi^2)=\sum_{i,j}(a_ia_j-a_i^2)\Phi_{ij}\Phi_{ji}
+=-\sum_{i<j}(a_i-a_j)^2\,\Phi_{ij}\Phi_{ji}.
+\end{equation}
+This gives
+\begin{equation}
+\boxed{\mathcal L_{aa}=-A'\!\cdot\!A'\Big[\Da_\pi^2\,\pi^+\pi^-+\Da_K^2\,K^+K^-+\Da_{K^0}^2\,K^0\bar K^0\Big]},
+\qquad \Da_\pi=a_u-a_d,\ \Da_K=a_u-a_s,\ \Da_{K^0}=a_d-a_s .
+\end{equation}
+This is the contact of \texttt{notes/threepi\_annihilation.tex} (section on $\pi^+\pi^-A'$) with the kaons
+added. The diagonal mesons ($\pi^0,\eta,\eta'$) commute with the source and drop out. The
+Feynman rule is $-2i\Da^2(\varepsilon_1\!\cdot\!\varepsilon_2)$, where the 2 comes from the two
+identical $A'$.
+
+\paragraph{Which diagrams survive at one loop.} The candidates are:
+\begin{enumerate}
+\item The contact $\times$ a scalar-QED loop (two $M\bar M\gamma$ vertices, or one
+  $M\bar M\gamma\gamma$ seagull). This is the one that contributes.
+\item $A'\to\pi^0$ mixing on an external leg. This is $\propto k\cdot\varepsilon=0$ on shell, so it
+  vanishes.
+\item $A'\gamma M$ vertices. There are none: $C$ and $P$ forbid them, and $\tr(v\ldots a\ldots)$
+  cross terms vanish for commuting diagonal sources.
+\item An $O(p^4)$ $A'A'\gamma\gamma$ counterterm. $L_{10}\tr(U^\dagger F_R UF_L)$ has none at this
+  order in $\Phi$, so the loop is finite.
+\end{enumerate}
+The $A'A'$ pair therefore enters exactly like a scalar source $\sigma=A'\!\cdot\!A'$ coupled to
+$|M|^2$, i.e.\ like $h\to\gamma\gamma$ through a charged scalar, with $m_h^2\to s$.
+
+\section{The loop}
+
+The effective Lagrangian is
+\begin{equation}
+\mathcal L_{\rm eff}=c(s)\,(A'\!\cdot\!A')\,F_{\mu\nu}F^{\mu\nu},\qquad
+c(s)=\frac{\alpha}{16\pi}\sum_{j=\pi^\pm,K^\pm}\frac{\Da_j^2}{m_j^2}\,A_0\!\Big(\frac{s}{4m_j^2}\Big),
+\end{equation}
+with
+\begin{equation}
+A_0(\tau)=\frac{f(\tau)-\tau}{\tau^2},\quad
+f(\tau)=\begin{cases}\arcsin^2\sqrt\tau & \tau\le1\\[2pt]
+-\tfrac14\Big[\ln\frac{1+\sqrt{1-1/\tau}}{1-\sqrt{1-1/\tau}}-i\pi\Big]^2 & \tau>1\end{cases},
+\qquad A_0=\tfrac13+\tfrac{8\tau}{45}+\tfrac{4\tau^2}{35}+\dots
+\end{equation}
+The overall sign is a convention. Both mesons enter with the same sign, because $\Da_j^2>0$ and
+$A_0>0$ below threshold, so the $\pi$ and $K$ loops add.
+
+\paragraph{Check 1: low-energy theorem.} At $s\to0$ the contact is a mass shift
+$\delta m_j^2=\Da_j^2A'\!\cdot\!A'$. A charged scalar adds
+$-\tfrac14\tfrac{e^2}{48\pi^2}\ln m^2\,F^2$ to the photon kinetic term. Varying it gives
+$\mp\tfrac{\alpha}{48\pi}\tfrac{\delta m^2}{m^2}F^2=\mp\tfrac{\alpha}{16\pi}\tfrac{\Da^2}{m^2}\tfrac13\,A'\!\cdot\!A'F^2$,
+which is $c(0)$ with $A_0(0)=\tfrac13$.
+
+\paragraph{Check 2: $h\to\gamma\gamma$.} Taking $\tfrac14 g\,hFF$ in place of $c\,A'A'FF$ gives
+$\Gamma=g^2m^3/(64\pi)$, the standard normalisation.
+
+\section{Cross sections}
+
+\paragraph{Amplitude.} $F_{\mu\nu}F^{\mu\nu}$ between two photons gives
+$4[(k_1\!\cdot\!k_2)(e_1\!\cdot\!e_2)-(k_1\!\cdot\!e_2)(k_2\!\cdot\!e_1)]$, and
+$A'\!\cdot\!A'$ gives $2\,\varepsilon_1\!\cdot\!\varepsilon_2$. So
+$\mathcal M=8c\,(\varepsilon_1\!\cdot\!\varepsilon_2)[\dots]$. Summing over photon
+polarisations, $\sum|[\dots]|^2=2(k_1\!\cdot\!k_2)^2=s^2/2$.
+
+\paragraph{A$'$ polarisations.} With $-g+kk/m_A^2$ and $p_1\!\cdot\!p_2=(s-2m_A^2)/2$:
+\begin{equation}
+P(s)\equiv\sum_{\rm pol}|\varepsilon_1\!\cdot\!\varepsilon_2|^2=2+\frac{(s-2m_A^2)^2}{4m_A^4}.
+\end{equation}
+The second term is the two longitudinal $A'$. It is physical: by Goldstone equivalence
+$\varepsilon_L\simeq p/m_A$ is the $\pi^0$ admixture, with angle $\sim F\Da/m_A$. It makes both
+channels grow as $s^2/m_A^4$ for a light $A'$. This is the same $1/m_A^2$ as in
+$\pi^+\pi^-A'$, and it fails where the small-mixing expansion does.
+
+\paragraph{Results.} The initial-state average is $\tfrac19$, there is a factor $\tfrac12$ for
+identical photons, and $\beta_A=\sqrt{1-4m_A^2/s}$. Then
+\begin{align}
+\sum|\mathcal M_{\gamma\gamma}|^2&=32|c|^2s^2P(s), &
+\sigma_{\gamma\gamma}&=\frac{|c(s)|^2\,s\,P(s)}{9\pi\,\beta_A},\\
+\sum|\mathcal M_{M\bar M}|^2&=4\Da_j^4P(s), &
+\sigma_{M\bar M}&=\frac{\Da_j^4\,P(s)\,\beta_M}{36\pi\,s\,\beta_A}.
+\end{align}
+\paragraph{Non-relativistic limit.} Take $v_{\rm rel}=2\beta_A$, $s\to4m_A^2$ and $P\to3$. With
+the pion only and $A_0=\tfrac13$,
+\begin{equation}
+\sigma_{\gamma\gamma}v_{\rm rel}\to\frac{8|c|^2m_A^2}{3\pi}
+=\frac{\alpha^2\Da_\pi^4m_A^2}{864\pi^3\mpi^4}.
+\end{equation}
+This is $s$-wave, so it survives late. The code reproduces it, and the ratio to the LO pion-only
+value is $[A_0(m_A^2/\mpi^2)/A_0(0)\,(1+\text{kaon})]^2=(1.419\times1.058)^2=2.25$ at
+$m_A=0.1$, $a\propto[2,-1,-1]$.
+
+\paragraph{Order in $\chi$PT.} This is LO $\Da$. A one-loop graph carries the $L_4$ factor
+\texttt{corr4} to the power $V-I=0$, so it is not rescaled. The tree-level $3\pi$ and
+$\pi\pi A'$ currents are rescaled (\texttt{threepi\_annihilation.tex}). The $O(p^4)$ corrections
+to the contact are not included; expect tens of percent.
+
+\section{Boltzmann term and relic}
+
+$A'$ is self-conjugate. Each annihilation removes two particles, which cancels the $\tfrac12$
+for identical initial states, so
+\begin{equation}
+\frac{dY_{A'}}{d\ln x}\supset-\frac{s\langle\sigma v\rangle_{AA}}{H}\,(Y_{A'}^2-Y_{A',\rm eq}^2),
+\qquad c_{AA}=2\lambda\,\langle\sigma v\rangle_{AA}.
+\end{equation}
+Here $\lambda$ is \texttt{freeze\_coupled}'s coefficient. It carries the Dirac $\tfrac12$ for
+$\chi\bar\chi$, hence the 2. $\langle\sigma v\rangle$ is the Gondolo--Gelmini average with
+Maxwell--Boltzmann statistics (matching $Y_{\rm eq}$), $g_{A'}=3$, tabulated on the solver's $T$
+grid. It is piecewise between the thresholds $2m_A,2m_{\pi^\pm},2m_{K^\pm},2m_{K^0}$
+(\texttt{sv\_AAsm\_grid.m}).
+
+\paragraph{Where it enters.} It is added to every path in \texttt{freeze\_coupled}:
+\begin{itemize}
+\item the full $2\times2$ system and its Jacobians;
+\item the dark-exchange shortcut, where it is one of $N$'s slow links;
+\item the fast-$\phi$ quasi-steady state. There the quadratic coefficient becomes
+  $c_{\rm rev}+c_{AA}$, $D'\mathrel{+}=2c_{AA}Y_{\rm eq}$, and the exchange term $T_\phi$ gains
+  $-2c_{AA}(2Y_{\rm eq}\delta+\delta^2)$;
+\item the $Y_{A'}$ initial condition, as a rate $c_{AA}Y_{\rm eq}$.
+\end{itemize}
+\texttt{LOOP\_AA\_SM=0} turns it off.
+
+\paragraph{Second output.} \texttt{[Oh2, info] = freeze\_coupled(...)} returns:
+\begin{itemize}
+\item $Y_{A'}$ at $x_{\rm final}$;
+\item $\Omega_{A'}h^2=m_A s_0Y_{A'}/(\rho_c/h^2)$;
+\item $\Gamma_{A'}$;
+\item \texttt{phi\_stable} ($\Gamma\,t_0<1$);
+\item \texttt{overclosed} (stable and $\Omega_{A'}h^2>0.12$).
+\end{itemize}
+$\Omega_\chi h^2$ is unchanged in meaning. Whether to add $\Omega_{A'}$ to the relic target is
+left open.
+
+\section{$A'\pi\to\pi\pi$}
+
+The term of the axial current linear in $a$, to $O(\Phi^3)$, is
+(\texttt{threepi\_annihilation.tex})
+\begin{equation}
+\mathcal L_a=-\Da\,A'_\mu\Big[F\partial^\mu\pi^3+\frac{2}{3F}\big(\pi^3\,\pi\!\cdot\!\partial^\mu\pi
+-\pi^2\partial^\mu\pi^3\big)\Big]
+\supset-\frac{2\Da}{3F}A'_\mu\Big[\pi^0\partial^\mu(\pi^+\pi^-)-2\pi^+\pi^-\partial^\mu\pi^0\Big].
+\end{equation}
+In $A'\to\pi^+\pi^-\pi^0$ the current is
+$V^\mu=F q^\mu M_4/(s-m_{\pi^0}^2)-\tfrac{2}{3F}(p_++p_--2p_0)^\mu$, with $q=p_++p_-+p_0$. Crossed
+to $2\to2$, the pole piece is $\propto k\cdot\varepsilon=0$ for an on-shell $A'$. Only the
+contact survives:
+\begin{itemize}
+\item $A'(k)\pi^0(p)\to\pi^+\pi^-$: $p_0\to-p$, so $V=\tfrac{2}{3F}(p_++p_-+2p)=\tfrac{2}{3F}(k+3p)$
+  and $\mathcal M=\tfrac{2\Da}{F}\,\varepsilon\cdot p$.
+\item $A'(k)\pi^\pm(p)\to\pi^\pm(p')\pi^0(p_0)$: $V\propto p'-p-2p_0=k-3p_0$, so
+  $\mathcal M=-\tfrac{2\Da}{F}\,\varepsilon\cdot p_0$.
+\end{itemize}
+Summing over the $A'$ polarisations,
+$\sum|\varepsilon\cdot p|^2=(k\cdot p)^2/m_A^2-p^2$. This gives
+\begin{align}
+\sum_{\rm pol}|\mathcal M_{0\to+-}|^2&=\frac{4\Da^2}{F^2}\,\frac{\lambda(s,m_A^2,m_{\pi^0}^2)}{4m_A^2}
+\qquad\text{(isotropic)},\\
+\Big\langle\sum_{\rm pol}|\mathcal M_{\pm\to\pm0}|^2\Big\rangle_\Omega&=\frac{4\Da^2}{F^2}
+\Big[\frac{E_k^2E_0^2+p_i^2p_f^2/3}{m_A^2}-m_{\pi^0}^2\Big],
+\end{align}
+with CM energies $E_k=(s+m_A^2-m_{\pi^\pm}^2)/2\sqrt s$ and $E_0=(s+m_{\pi^0}^2-m_{\pi^\pm}^2)/2\sqrt s$.
+Then $\sigma=\tfrac13\langle\sum|\mathcal M|^2\rangle\,p_f/(16\pi s\,p_i)$. Neither final state
+has identical particles. The thresholds are
+$\sqrt s\ge\max(m_A+m_{\pi^0},2m_{\pi^\pm})$ and $\max(m_A+m_{\pi^\pm},m_{\pi^\pm}+m_{\pi^0})$.
+
+$\Da$ is normalised as for $\Gamma(A'\to3\pi)$ in \texttt{axial3pi\_weight.m}:
+$\Da_{\rm eff}=m_{\pi^0A'}/F$ from \texttt{axial\_mixing.m}. The per-$A'$ rate is
+\begin{equation}
+\Gamma_{A'\pi}(T)=\frac{1}{n_{A'}^{\rm eq}}\sum_{\pi^0,\pi^+,\pi^-}\frac{g_{A'}T}{32\pi^4}\int ds\,
+\sigma(s)\,\frac{\lambda(s,m_A^2,m_\pi^2)}{\sqrt s}\,K_1(\sqrt s/T),\qquad
+n_{A'}^{\rm eq}=\frac{3m_A^2T}{2\pi^2}K_2(m_A/T).
+\end{equation}
+This is Maxwell--Boltzmann statistics with $g_{A'}=3$ (\texttt{apipi\_phi\_rate.m}). The pions
+are in equilibrium, so detailed balance gives
+$dY_{A'}/d\ln x\supset-(\Gamma_{A'\pi}/H)(Y_{A'}-Y_{A',\rm eq})$. It goes into
+\texttt{freeze\_coupled}'s $\Gamma_{\rm sc}$ next to $\pi\gamma\to\pi\phi$, so it also enters the
+$Y_{A'}$ initial condition. It is on with \texttt{production='sm'}. It is off with
+\texttt{LOOP\_PHI\_SC=0} or \texttt{LOOP\_APIPI=0}.
+
+\paragraph{Size.} $\Gamma_{A'\pi}/H\approx4\times10^{11}\eta^2$ at $T=10$ MeV and
+$8\times10^{3}\eta^2$ at 5 MeV, for $m_A=0.1$ and $a=\eta[2,-1,-1]$. So the $A'$ reaches the pion
+bath at $T_{\rm RH}$ for $\eta\gtrsim2\times10^{-6}$. That is $O(\Da^2)$ against
+$O(\alpha^2\Da^4)$ for $A'A'\to\gamma\gamma$, so it is the $A'$'s main bath link wherever
+$A'\to3\pi$ is closed. The kaon analogues pay an extra $e^{-(m_K-m_\pi)/T}$ and are dropped.
+
+\section{Numbers ($m_{A'}=0.1$ GeV, $g_\chi=0.01$, $a=\eta[2,-1,-1]$, $T_{\rm RH}=10$ MeV)}
+
+The relic loci are recomputed with the current solver. $\eta$ is where $\Omega_\chi h^2=0.12$
+(FIMP root, WIMP root). The first two columns of $\Omega_{A'}h^2$ have no $A'\pi\to\pi\pi$; the
+last has every term in.
+
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+& \multicolumn{3}{c}{without $A'\pi\to\pi\pi$} & \multicolumn{2}{c}{with $A'\pi\to\pi\pi$}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}
+$m_\chi$ [GeV] & $\eta$ & $\Omega_{A'}h^2$, no $c_{AA}$ & with $c_{AA}$ & $\eta$ & $\Omega_{A'}h^2$\\
+\midrule
+0.055 & $2.4\times10^{-3}$ & 0.0038 & 0.0043 & $2.4\times10^{-3}$ & 0.0043\\
+0.07 & $1.5\times10^{-6}$, $0.062$ & 0.0014, 0.0056 & 0.0014, 0.0056 & $8.1\times10^{-8}$, 0.062 & 0.0030, 0.0056\\
+0.09 & $1.9\times10^{-5}$, $0.24$ & 0.0095, 0.017 & 0.0095, 0.0085 & $7.3\times10^{-8}$, 0.24 & 0.0098, 0.0085\\
+0.11 & $3.2\times10^{-4}$, $0.066$ & 1.4, 8.1 & 1.4, 0.99 & $2.4\times10^{-7}$, 0.018 & 1.4, 1.25\\
+\bottomrule
+\end{tabular}
+\end{center}
+For $m_\chi<m_{A'}$, the process $A'A'\to\chi\bar\chi$ drains the $A'$ and the remnant is
+$\lesssim10\%$ of the DM. For $m_\chi>m_{A'}$, the decay $\chi\bar\chi\to A'A'$ fills it and the
+point overcloses even with $A'A'\to$ SM. $c_{AA}$ matters only at large $\eta$, as expected from
+$\Da^4$.
+
+$A'\pi\to\pi\pi$ does not change $\Omega_{A'}$ much. It moves the FIMP loci by 1--3 decades in
+$\eta$ wherever the $A'$ is stable ($m_\chi>m_{A'}/2$). Below the old FIMP root it already
+brings the $A'$ into the pion bath at $T_{\rm RH}$, and $A'A'\to\chi\bar\chi$ ($g_\chi=0.01$) then
+makes the $\chi$, independent of $\eta$. The WIMP root at $m_\chi=0.11$ moves from 0.066 to
+0.018. At $m_\chi=0.055$, $A'\leftrightarrow\chi\bar\chi$ already ties the $A'$ to the bath
+through the $\chi$, and nothing changes.
+
+\section{Not included}
+
+\begin{itemize}
+\item $A'K\to K\pi$ and other kaon analogues of $A'\pi\to\pi\pi$, which carry an extra
+  $e^{-(m_K-m_\pi)/T}$.
+\item The $O(p^4)$ corrections to the $A'\pi\pi\pi$ contact.
+\item The anomaly-induced $A'\gamma\gamma^*$ coupling (WZW): Primakoff-like $e\gamma\to eA'$.
+\end{itemize}
+
+\end{document}

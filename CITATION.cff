@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the accompanying paper."
+title: "loop_abundance"
+type: software
+license: MIT
+authors:
+  - family-names: Vincent
+    given-names: Aaron
+# TODO: add co-authors, the repository URL, and a preferred-citation block
+# (arXiv id / DOI) once the paper is public.
