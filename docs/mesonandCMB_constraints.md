@@ -52,6 +52,6 @@ Python vs MATLAB: ~4e-13.
 - `postprocess.py`: `kphi()`, `cmb()`, `integral()` (via `_mcmb`), `mesoninv()`.
 - Datasets `LogLike_<key>`, `excluded_<key>` (in `excluded_any`), provenance `input::ext_sigma_<key>`.
 - Width: `EXT_SIGMA_KPHI`, `EXT_SIGMA_CMB`, `EXT_SIGMA_INTEGRAL`, `EXT_SIGMA_MESONINV` (−1 = hard cut; > 0 = soft width).
-- Registered in `constraint_io.py` (`CONSTRAINT_COLS`, `_LEGACY_SRC`), `plot_all_constraints.py` (`kphi` #a6761d, `cmb` #17becf, `integral` #7570b3).
+- Registered in `constraint_io.py` (`CONSTRAINT_COLS`), `plot_all_constraints.py` (`kphi` #a6761d, `cmb` #17becf, `integral` #7570b3).
 - `compare_limits_g.m`: `mesoninv` is the 5th ratio row (`SHOW.mesoninv`, navy).
 - Existing sidecars: rerun with `POSTPROC_FORCE=1`.

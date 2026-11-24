@@ -81,32 +81,6 @@ lam_etapgg = alphaEM/(pi*F_etap);
 % axial_mixing.m, which carries the unresolved L4 sign (corr4).
 mjA = axial_mixing(g);
 m_pi0Ap = mjA(1);  m_etaAp = mjA(2);  m_etapAp = mjA(3);
-au = g(1); ad = g(2); as = g(3);
-
-% --- small-mixing validity: m_A' must exceed the off-diagonal mixing masses
-% The induced couplings lambda_{j chi} = lambda_a m_{jA'}/m_A'^2 come from
-% diagonalising the A'-meson mass matrix to first order in the mixing angle
-% sin(theta_j) ~ m_{jA'}/m_A'.  That expansion is only valid for m_A' > |m_{jA'}|;
-% once m_A' drops below an off-diagonal mass the "small-mixing" picture is no
-% longer perturbative (the would-be A' and meson states are maximally mixed and
-% the lambda_{j chi} ~ 1/m_A'^2 formula is meaningless).  Refuse rather than
-% extrapolate -- the compare_* scans catch this and mark the point NaN.
-mixmass = abs([m_pi0Ap, m_etaAp, m_etapAp]);
-[mxmix, jmix] = max(mixmass);
-% DISABLED (temporary): the small-mixing breakdown check below was gapping the
-% entire scan at small m_A' (e.g. mphi=1e-9, where m_A' << the ~0.2 GeV eta'-A'
-% mixing mass), NaN'ing every point and emptying the plots.  Re-enable when the
-% small-mixing-regime treatment is sorted out.
-if false && mphi <= mxmix
-    jn = {'pi0','eta','etaprime'};
-    error('axial_couplings:mixingTooLarge', ...
-        ['axialVector small-mixing breakdown: m_A''=%.3g GeV is below the ' ...
-         '%s-A'' off-diagonal mixing mass |m_{jA''}|=%.3g GeV (m_A''/|m_{jA''}|' ...
-         '=%.3g <= 1), mx=%.3g, lambda_a=%.3g, g=[%.3g %.3g %.3g]. The ' ...
-         'sin(theta)~m_{jA''}/m_A'' expansion behind lambda_{jchi}~1/m_A''^2 ' ...
-         'is non-perturbative here; axialVector couplings are invalid.'], ...
-        jn{jmix}, mphi, mxmix, mphi/mxmix, mx, gx, au, ad, as);
-end
 
 % --- assemble (lambda_{j chi} = lambda_a m_{jA'} / m_A'^2) ----------------
 mj      = [mpi0,     m_eta,     m_etap   ];

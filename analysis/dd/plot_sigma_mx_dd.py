@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 """
-PROTOTYPE: the combined-constraint (m_chi, sigma_chiN) panel with the published
+The combined-constraint (m_chi, sigma_chiN) panel with the published
 spin-independent direct-detection limits laid over it.
 
 Default run is the MFV S(x)S merged scan
 (``merged/heavyScalar_relic_mfv_merged``).
 
-How it reuses the production plotter
+How it reuses the main plotter
 ------------------------------------
 It does NOT copy ``plot_all_constraints.py``.  It executes that script with
 ``runpy`` (PLANES restricted to ``mx:sigma_chiN``) behind two wrappers:
 
   * ``Figure.savefig`` is wrapped -- the direct-detection overlay is drawn onto
     the finished axes just before the file is written, and the output path is
-    redirected into ``dd_si_prototype/plots/<tag>_dd/`` so the production
-    figures in ``plotting/plots/<tag>_allconstraints/`` are never touched;
+    redirected into ``analysis/dd/plots/<tag>_dd/`` so the main
+    figures in ``analysis/plots/<tag>_allconstraints/`` are never touched;
   * the undecorated figure is pickled to ``cache/`` on the way past, so
     ``--from-cache`` can restyle the overlay in a second without re-reading the
     6 GB sidecar.
 
 So every region, colour and label in the panel underneath is exactly what the
-production figure shows; the only addition is the overlay.
+main figure shows; the only addition is the overlay.
 
 Usage
 -----
@@ -164,8 +164,8 @@ def decorate(ax):
                 fill=FILL)
 
     if SHOW_LEGEND and handles:
-        # The production panels carry no legend (it is a separate legend.pdf).
-        # A prototype is easier to read with the new curves named in place; the
+        # The main panels carry no legend (it is a separate legend.pdf).
+        # Here the new curves are named in place; the
         # shared legend.pdf is still written beside it, unchanged.
         # DD_MODE=individual is a diagnostic ("which experiment sets the bound
         # here?") and can produce a dozen entries -- shrink and column them so
@@ -304,8 +304,8 @@ def report_overlap(g, out_dir):
             f"WARNING: {off} of the {n_above} DD-excluded surviving samples sit "
             f"ABOVE the panel's sigma window (top = 10^{yhi:.0f} cm^2), so the figure "
             f"cannot show them.  The window comes from the relic-allowed "
-            f"percentiles in plot_all_constraints.make_plane; a production "
-            f"version needs that widened to the DD curve.")
+            f"percentiles in plot_all_constraints.make_plane; widen it "
+            f"(LOOP_SIGMA_YMAX) to include the DD curve.")
         lines.append("")
 
     p = os.path.join(out_dir, "dd_overlap.txt")
@@ -325,7 +325,7 @@ def cache_path_for(tag):
 
 def run_tag_of(path):
     base = os.path.basename(path)
-    for suf in ("_postprocessed.hdf5", "_Neff.hdf5", "_external.hdf5", ".hdf5"):
+    for suf in ("_postprocessed.hdf5", ".hdf5"):
         if base.endswith(suf):
             return base[: -len(suf)]
     return base
@@ -336,7 +336,7 @@ def install_wrapper(out_dir, cache_path, prod_dir):
 
     Also wraps builtins.open for writes into ``prod_dir``: write_legend saves
     legend.json with a plain open(), which savefig never sees, so without this
-    a prototype run would rewrite the production run's legend.json.
+    this script would overwrite the main run's legend.json.
     """
     import builtins
     orig = Figure.savefig

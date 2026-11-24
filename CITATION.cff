@@ -4,7 +4,16 @@ title: "Loophole"
 type: software
 license: MIT
 authors:
+  - family-names: Avis Kozar
+    given-names: Neal P.
+    orcid: "https://orcid.org/0000-0003-4875-6782"
+  - family-names: Cappiello
+    given-names: Christopher
+    orcid: "https://orcid.org/0000-0002-7466-9634"
+  - family-names: Diamond
+    given-names: Melissa D.
+    orcid: "https://orcid.org/0000-0003-1221-9475"
   - family-names: Vincent
-    given-names: Aaron
-# TODO: add co-authors, the repository URL, and a preferred-citation block
-# (arXiv id / DOI) once the paper is public.
+    given-names: Aaron C.
+    orcid: "https://orcid.org/0000-0003-3872-0743"
+repository-code: "https://github.com/aaronvincent/loophole"

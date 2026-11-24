@@ -20,8 +20,7 @@ function [gq_mix, mxmix, jbind] = axial_mixing_floor(mphi, mx, g, smax)
 %   mxmix    max_j |m_{jA'}(g)|  [GeV]  (so the gx-scan can form sin(theta)=mxmix/mphi)
 %   jbind    index of the binding meson in {pi0, eta, eta'}
 %
-% Unlike axial_couplings.m's mixingTooLarge gate (disabled), this NEVER errors
-% and NEVER gates a scan -- it is a drawn-overlay diagnostic only.
+% Never errors and never gates a scan; drawn as an overlay.
 %
 % axial_couplings.m is the single source of truth for the mixing masses, so
 % (as in axial_gx_ceiling.m) we probe it at a tiny lambda_a -- which clears the

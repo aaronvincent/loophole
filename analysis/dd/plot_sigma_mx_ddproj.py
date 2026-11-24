@@ -19,10 +19,10 @@ survivors whose sigma_chin lies above the QUEST-DMC curve.  They
 assume a contact interaction, which is why only the m_phi = 10 GeV runs are
 drawn: at these m_chi the momentum transfer is <= 0.1 GeV << m_phi.
 
-Machinery is the sibling prototype's (plot_sigma_mx_dd.py): plot_all_constraints
+Machinery is shared with plot_sigma_mx_dd.py: plot_all_constraints
 runs under ``runpy`` behind a wrapped ``Figure.savefig``, which draws this
 overlay onto the finished axes and redirects every output into
-``analysis/plots/<tag>_ddproj/``.  The production figures are not touched.  The sigma window
+``analysis/plots/<tag>_ddproj/``.  The main figures are not touched.  The sigma window
 is widened with ``LOOP_SIGMA_YMAX`` so the region above the relic band -- where
 the existing limit actually removes samples -- is inside the frame.
 
@@ -78,7 +78,7 @@ ZOOM_BOX = tuple(float(v) for v in
 PROJ = [p for p in os.environ.get("DDP_PROJ", ",".join(P.PROJECTIONS)).split(",") if p]
 
 OUT_ROOT = os.path.join(PLOTTING, "plots")      # beside <tag>_allconstraints/
-# DDP_OUT_SUFFIX: write to <tag>_ddproj<suffix>/ instead (variants beside production).
+# DDP_OUT_SUFFIX: write to <tag>_ddproj<suffix>/ instead (variants beside the main output).
 OUT_SUFFIX = os.environ.get("DDP_OUT_SUFFIX", "")
 # Both HeRALD curves drawn: say which is which.
 if "HeRALD_c4" in PROJ:
@@ -94,7 +94,7 @@ SD_STYLE = {"QUESTDMC_SDn": dict(color="#555555", ls=(0, (1.5, 2)), lw=2.2)}
 CACHE_DIR = os.path.join(HERE, "cache_proj")
 
 # Existing limit: black, hatched (it excludes).  Projections: outlines only, one
-# dash pattern each, achromatic for the same reason as the prototype -- the
+# dash pattern each, achromatic as in plot_sigma_mx_dd.py -- the
 # coloured fills in these panels are terms in the likelihood, and none of these is.
 EXIST_COLOR = "#000000"
 PROJ_STYLE = {
@@ -318,7 +318,7 @@ _base_save_zoom = base.save_zoom
 
 
 def save_zoom(fig, path, saver=None):
-    """The prototype's zoom, with the inline legend hidden: at zoom scale it
+    """The base zoom, with the inline legend hidden: at zoom scale it
     lands on the region the zoom is for (legend_ddproj.pdf carries it)."""
     leg = fig.axes[0].get_legend()
     if leg is not None:
@@ -331,7 +331,7 @@ def save_zoom(fig, path, saver=None):
 
 
 def configure_base():
-    """Point the prototype's wrapper at this overlay and these output dirs."""
+    """Point the plot_sigma_mx_dd wrapper at this overlay and these output dirs."""
     base.decorate = decorate
     base.SHOW_ZOOM = SHOW_ZOOM
     base.ZOOM_BOX = ZOOM_BOX

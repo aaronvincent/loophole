@@ -15,7 +15,7 @@ the font is the panel's own legend size.  Placed at the same \\includegraphics
 width as the panel, the text therefore comes out the same size as the panel's
 tick labels.  Height is minimised by picking the most columns that fit, tight
 handle/column spacing, no frame, and short labels (``--long`` keeps the
-production labels).
+full labels).
 
 ``--ddproj`` builds it for a plot_sigma_mx_ddproj.py panel instead (existing SI
 limit + projections, or the SD set for A(x)A), from that driver's cache, and
@@ -182,7 +182,7 @@ def nolegend_panel(tag):
 
 
 def out_root(sub):
-    """The ddproj driver writes beside the production plots, the prototype here."""
+    """Output root: analysis/plots for ddproj, analysis/dd/plots otherwise."""
     if sub == "_ddproj":
         import plot_sigma_mx_ddproj as dp
         return dp.OUT_ROOT

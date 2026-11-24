@@ -49,5 +49,5 @@ MATLAB S⊗S/P⊗S on-shell pole: NWA notch (`bw_notch_integral`).
 
 - `kaon()` → `LogLike_kaon` (`_softregion(log10 r, sigma)`), `excluded_kaon` (uint8, in `excluded_any`).
 - `EXT_SIGMA_KAON`: −1 (default) = hard cut, −10⁶ per excluded point; > 0 = soft width in log10 r.
-- Registered in `constraint_io.py` (`CONSTRAINT_COLS`, `_LEGACY_SRC`), `plot_all_constraints.py` (#66a61e, `K⁺→π⁺χχ`).
+- Registered in `constraint_io.py` (`CONSTRAINT_COLS`), `plot_all_constraints.py` (#66a61e, `K⁺→π⁺χχ`).
 - Existing sidecars: rerun with `POSTPROC_FORCE=1`.

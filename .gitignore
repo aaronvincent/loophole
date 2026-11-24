@@ -16,3 +16,4 @@ analysis/dd/cache*/
 __pycache__/
 *.pyc
 .DS_Store
+analysis/dd/plots/

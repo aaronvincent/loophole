@@ -8,12 +8,9 @@ function gq_max = axial_gq_ceiling(mphi, mx, gx, g)
 % so BOTH axial_couplings.m validity gates move with g_q and the gx-solving
 % axial_gx_ceiling cannot be reused (at g_q=1 the small-mixing gate is already
 % tripped for an ultralight m_A', so its sub-floor probe never clears and it
-% returns NaN).  The two gates are:
-%   * mediatorTooLight -- meson->chichi width reaches its mass; the width
-%     ~ lambda_{jchi}^2 ~ (gx*g_q)^2, so it grows with g_q.
-%   * mixingTooLarge   -- the A'-meson mixing mass m_{jA'} ~ g_q reaches m_A',
-%     breaking the sin(theta) ~ m_{jA'}/m_A' expansion; also grows with g_q.
-% Both are monotonic in g_q, so the valid set is g_q < gq_max and we bisect on
+% returns NaN).  The gate is mediatorTooLight: the meson->chichi width reaches
+% its mass; the width ~ lambda_{jchi}^2 ~ (gx*g_q)^2, so it grows with g_q.
+% It is monotonic in g_q, so the valid set is g_q < gq_max and we bisect on
 % log10(g_q) for the boundary.  Returns Inf if g_q=1e12 is still valid (no
 % ceiling, e.g. heavy m_A'); NaN if even g_q=1e-30 is invalid.
 
@@ -35,8 +32,7 @@ tf = true;
 try
     axial_couplings(mphi, mx, gx, gq * g);
 catch ME
-    if any(strcmp(ME.identifier, {'axial_couplings:mediatorTooLight', ...
-                                  'axial_couplings:mixingTooLarge'}))
+    if strcmp(ME.identifier, 'axial_couplings:mediatorTooLight')
         tf = false;
     else
         rethrow(ME);

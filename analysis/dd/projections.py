@@ -74,7 +74,7 @@ def raw_log(name):
 # XENON1T-Migdal curve at m_chi = 0.1--0.13 GeV (where the survivors of the
 # m_phi = 10 GeV scans sit within 0.02 dex of the bound).  So by default the
 # existing floor is the pointwise best of the digitised file and the published
-# curves the sibling prototype uses (si_limits.envelope_log); the file alone
+# curves plot_sigma_mx_dd.py uses (si_limits.envelope_log); the file alone
 # supplies the reach below 0.104 GeV and the ceiling.  DDP_EXIST_ENVELOPE=0: file only.
 EXIST_WITH_ENVELOPE = os.environ.get("DDP_EXIST_ENVELOPE", "1") not in ("0", "", "false", "False")
 # The existing region is extended to log10(m / GeV) = DDP_EXIST_EXTEND_TO with a

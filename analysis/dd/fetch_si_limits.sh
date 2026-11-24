@@ -8,12 +8,11 @@
 # Each file is two whitespace-separated columns, "# " comments:
 #     m_chi [GeV]     sigma_p^SI [cm^2]
 #
-# These are DOWNLOADED REFERENCE CURVES for a plot overlay; they live inside
-# this prototype folder and nothing in the repo's own data/ runs/ oldruns/ trees
-# is touched.  Re-running is idempotent (curl overwrites the cached copy).
+# Downloaded reference curves for the plot overlay, stored in ./limits/
+# (git-ignored).  Re-running is idempotent (curl overwrites the cached copy).
 #
 # Usage:
-#   ./fetch_si_limits.sh            # the curated set used by the prototype
+#   ./fetch_si_limits.sh            # the curated set used by plot_sigma_mx_dd.py
 #   ./fetch_si_limits.sh --all      # every .txt in the upstream SI folder
 #   ./fetch_si_limits.sh NAME ...   # named files, with or without .txt
 # ---------------------------------------------------------------------------

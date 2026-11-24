@@ -1,7 +1,7 @@
 """Shared axis registry + auto-windowing for the Loophole scan plotters.
 
-Single source of truth (used by both ``plot_2D_profiles.py`` and
-``plot_allowed_regions.py``) for:
+Single source of truth (used by ``plot_all_constraints.py`` and
+``postprocess.py``) for:
 
   * which scan quantities are plottable and how each maps to a plot axis
     (``log`` = log10 for positive quantities; ``symlog`` = signed log10 for the
@@ -28,8 +28,6 @@ KNOWN = {
     "mphi":       ("input::mphi",        "log",    r"$\log_{10}(m_\phi\,/\,\mathrm{GeV})$"),
     "gx":         ("input::gx",          "log",    r"$\log_{10} g_\chi$"),
     "gq":         ("input::gq",          "log",    r"$\log_{10} g_q$"),
-    # legacy name of the gq master coupling in older scan files
-    "eta":        ("input::eta",         "log",    r"$\log_{10} g_q$"),
     "gu":         ("input::gu",          "symlog", r"signed $\log_{10} g_u$"),
     "gd":         ("input::gd",          "symlog", r"signed $\log_{10} g_d$"),
     "gs":         ("input::gs",          "symlog", r"signed $\log_{10} g_s$"),
@@ -38,10 +36,10 @@ KNOWN = {
 
 # Preference order for de-duplicating perfectly-correlated axes (a master like
 # gq wins over the gu/gd/gs it ties together) and for ordering default planes.
-ORDER = ["mx", "mphi", "gx", "gq", "eta", "gu", "gd", "gs", "sigma_chiN"]
+ORDER = ["mx", "mphi", "gx", "gq", "gu", "gd", "gs", "sigma_chiN"]
 
 MASSES = ("mx", "mphi")
-COUPLINGS = ("gx", "gq", "eta", "gu", "gd", "gs")
+COUPLINGS = ("gx", "gq", "gu", "gd", "gs")
 QUARK_COUPLINGS = ("gu", "gd", "gs")
 
 # Derived axes: quantities NOT stored as their own dataset, computed on the fly

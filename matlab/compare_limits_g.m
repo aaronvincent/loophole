@@ -238,8 +238,8 @@ end
 % suspect.  Distinct from the unitarity ceiling above (gq_unit ~ mphi^2 vs
 % gq_mix ~ mphi; they cross near mphi ~ 0.01 GeV).  gq_mix is mx-independent
 % (mixing masses are linear in g); mapped to sigma_chiN via DMnucxsec.  Drawn as
-% an overlay ONLY -- it does not cap any scan (axial_couplings mixingTooLarge
-% stays disabled).  No-op for non-axialVector (gq_mix NaN).
+% a drawn overlay; it does not cap the scan.  No-op for non-axialVector
+% (gq_mix NaN).
 % -----------------------------------------------------------------------
 gq_mix = NaN;
 sg_mix  = nan(size(mx_vec));
@@ -2209,7 +2209,7 @@ function [ext_gq_lo, ext_gq_hi, ext_sg_lo, ext_sg_hi, ext_vg_lo, ext_vg_hi] = ..
 nE = size(ext_specs, 1);
 ext_opts = struct('enable_bullet', false, 'enable_kaon', false, ...
                   'enable_kphi', false, 'enable_cmb', false, ...
-                  'enable_integral', false, 'enable_mesoninv', false, 'enable_beamdump', false);
+                  'enable_integral', false, 'enable_mesoninv', false);
 le_sn = linspace(le_ext_lo, le_ext_hi, n_ext);
 excl_grid = false(numel(le_sn), nE);
 for i = 1:numel(le_sn)

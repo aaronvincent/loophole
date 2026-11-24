@@ -7,8 +7,7 @@ one figure, with TRANSPARENT excluded overlays so overlapping exclusions blend.
 This is the single constraint plotter: all constraints are always computed.  The
 sidecar is loaded via constraint_io.load, which reads the unified
 ``<base>_postprocessed.hdf5`` (built by postprocess.py -- relic + every offline
-likelihood in one self-contained file) or, in transition, the legacy
-``_Neff.hdf5`` + ``_external.hdf5`` pair.  It carries
+likelihood in one self-contained file).  It carries
 
     LogLike_relic, LogLike_neff_bbn, LogLike_neff_cmb,
     LogLike_sn1987a, LogLike_neutronstar, LogLike_stellar, LogLike_fifthforce,
@@ -37,11 +36,11 @@ Usage
     python plot_all_constraints.py [BASE_OR_SIDECAR] [GROUP] [PLANES]
 
     BASE_OR_SIDECAR  the run's raw scan OR its sidecar; the script strips a
-                     trailing _postprocessed/_Neff/_external and locates the
+                     trailing _postprocessed and locates the
                      sidecar.  (default: runs/heavyScalar_3p.hdf5)
     GROUP            hdf5 group (default: "data")
     PLANES           comma-separated "<x>:<y>" planes (scan_axes.KNOWN names).
-                     Default: auto, like the sibling plotters.
+                     Default: auto.
 
     python plot_all_constraints.py --legend PLOTS_DIR [PLOTS_DIR ...]
 
@@ -254,9 +253,8 @@ in_arg = sys.argv[1]
 group_name = sys.argv[2] if len(sys.argv) > 2 else "data"
 planes_arg = sys.argv[3] if len(sys.argv) > 3 else None
 
-# Locate + load the constraint sidecar: the new single <base>_postprocessed.hdf5
-# (all constraints in one file) or, in transition, the legacy _Neff + _external
-# pair.  Accepts the raw scan or any sidecar path as the argument.
+# Locate + load the constraint sidecar <base>_postprocessed.hdf5.  Accepts the
+# raw scan or the sidecar path as the argument.
 try:
     C = constraint_io.load(in_arg, group_name)
 except FileNotFoundError as e:
@@ -308,7 +306,7 @@ for n in active:
     print(f"  {n}: {(comp[n][valid] < -0.5).mean():.3%} of valid points "
           f"strongly penalized (<-0.5)")
 
-# Axis machinery (identical to the sibling plotters).
+# Axis machinery.
 AX = {k: (avail[k][1], avail[k][2]) for k in avail}
 derived = scan_axes.derived_available(avail)
 for dk, (_srcs, dmode, dlabel) in derived.items():

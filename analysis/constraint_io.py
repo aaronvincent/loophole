@@ -1,25 +1,19 @@
 #!/usr/bin/env python3
 """
-Shared loader for the Loophole constraint sidecar(s).
+Shared loader for the Loophole constraint sidecar.
 
-The postprocessing was unified (postprocess.py): a relic-only scan is mapped by
-Diver, then ALL offline likelihoods are applied in one pass into a single
-self-contained sidecar ``<base>_postprocessed.hdf5`` carrying
+A relic-only scan is mapped by Diver, then postprocess.py applies all offline
+likelihoods in one pass into a single self-contained sidecar ``<base>_postprocessed.hdf5`` carrying
 
     LogLike_relic, LogLike_neff_bbn, LogLike_neff_cmb,
     LogLike_sn1987a, LogLike_neutronstar, LogLike_stellar, LogLike_fifthforce,
     LogLike (= their sum), LogLike_isvalid, the scan axes + output::sigma_chiN,
     output::Oh2/dNeff_bbn/dNeff_cmb, and length-1 input:: parameter columns.
 
-This module locates that sidecar from any of {raw scan, the sidecar itself,
-a legacy _Neff/_external path} and returns the relic + per-constraint
-likelihoods, axes, valid mask and interaction.  Both plotters
-(plot_all_constraints.py, plot_2D_profiles.py) go through ``load`` so they can
-never drift in how they read the columns.
-
-A legacy fallback (the old separate ``_Neff.hdf5`` + ``_external.hdf5`` pair) is
-still supported for transition: if no ``_postprocessed.hdf5`` is found but both
-legacy sidecars exist, they are read and merged identically.
+This module locates that sidecar from the raw scan or the sidecar path and
+returns the relic + per-constraint
+likelihoods, axes, valid mask and interaction.  All plotters go through
+``load`` so they cannot drift in how they read the columns.
 """
 
 import os
@@ -46,14 +40,6 @@ CONSTRAINT_COLS = {
     "mesoninv":    "LogLike_mesoninv",
 }
 
-# In the legacy two-file layout, which sidecar held each constraint.
-_LEGACY_SRC = {
-    "neff_bbn": "neff", "neff_cmb": "neff",
-    "sn1987a": "ext", "neutronstar": "ext", "stellar": "ext",
-    "fifthforce": "ext", "bullet": "ext", "kaon": "ext",
-    "kphi": "ext", "cmb": "ext", "integral": "ext", "mesoninv": "ext",
-}
-
 # Constraints the plots show as ONE region: key -> members, folded into the
 # first member's overlay slot.  The sidecar keeps every member's column; summing
 # the hard-cut LogLikes leaves total_LL unchanged and penalizes a point iff any
@@ -78,24 +64,20 @@ def _merge(comp):
 
 
 def _strip_base(in_arg):
-    """Run base path: drop a trailing _postprocessed/_Neff/_external + .hdf5."""
-    return re.sub(r"(_postprocessed|_Neff|_external)?\.hdf5$", "", in_arg)
+    """Run base path: drop a trailing _postprocessed + .hdf5."""
+    return re.sub(r"(_postprocessed)?\.hdf5$", "", in_arg)
 
 
 def locate(in_arg):
-    """Find the constraint sidecar(s) for a run.
+    """Find the constraint sidecar for a run.
 
-    Returns ``(base, kind, paths)`` where kind is 'postprocessed' (new single
-    file), 'legacy' (the _Neff + _external pair), or None (nothing found).
-    ``paths`` is a dict: {'pp': path} or {'neff': p, 'ext': p}.
+    Returns ``(base, kind, paths)`` where kind is 'postprocessed' or None
+    (nothing found), and ``paths`` is {'pp': path} or {}.
     """
     base = _strip_base(in_arg)
     pp = base + "_postprocessed.hdf5"
     if os.path.exists(pp):
         return base, "postprocessed", {"pp": pp}
-    neff, ext = base + "_Neff.hdf5", base + "_external.hdf5"
-    if os.path.exists(neff) and os.path.exists(ext):
-        return base, "legacy", {"neff": neff, "ext": ext}
     return base, None, {}
 
 
@@ -127,50 +109,26 @@ def load(in_arg, group_name="data"):
         interaction  str
         source       str (for logging)
 
-    Raises FileNotFoundError if no sidecar (new or legacy) is found.
+    Raises FileNotFoundError if no sidecar is found.
     """
     base, kind, paths = locate(in_arg)
     if kind is None:
         raise FileNotFoundError(
             f"no constraint sidecar for base {base!r}: expected "
-            f"{base}_postprocessed.hdf5 (or legacy {base}_Neff.hdf5 + "
-            f"{base}_external.hdf5).  Build it with postprocess.py.")
+            f"{base}_postprocessed.hdf5.  Build it with postprocess.py.")
 
     comp = {}
-    if kind == "postprocessed":
-        with h5py.File(paths["pp"], "r") as h:
-            g = h[group_name]
-            relic_LL = g["LogLike_relic"][...]
-            valid = g["LogLike_isvalid"][...].astype(bool)
-            for name, dset in CONSTRAINT_COLS.items():
-                comp[name] = g[dset][...] if dset in g else np.zeros_like(relic_LL)
-            avail = scan_axes.available(g.keys())
-            axis_raw = {k: g[avail[k][0]][...] for k in avail}
-            interaction = g["LogLike"].attrs.get(
-                "interaction", os.path.basename(base).split("_")[0])
-        source = paths["pp"]
-    else:  # legacy two-file
-        with h5py.File(paths["ext"], "r") as he, h5py.File(paths["neff"], "r") as hn:
-            ge, gn = he[group_name], hn[group_name]
-            if ge["LogLike"].shape[0] != gn["LogLike"].shape[0]:
-                raise ValueError("legacy sidecars have different row counts.")
-            relic_LL = ge["LogLike_relic"][...]
-            relic_n = gn["LogLike_relic"][...]
-            valid = ge["LogLike_isvalid"][...].astype(bool)
-            src = {"ext": ge, "neff": gn}
-            for name, dset in CONSTRAINT_COLS.items():
-                gg = src[_LEGACY_SRC[name]]
-                comp[name] = gg[dset][...] if dset in gg else np.zeros_like(relic_LL)
-            avail = scan_axes.available(ge.keys())
-            axis_raw = {k: ge[avail[k][0]][...] for k in avail}
-            interaction = ge["LogLike"].attrs.get(
-                "interaction", os.path.basename(base).split("_")[0])
-            rfin = valid & np.isfinite(relic_LL) & np.isfinite(relic_n)
-            d = np.nanmax(np.abs(relic_LL[rfin] - relic_n[rfin])) if rfin.any() else 0.0
-            if not (d < 1e-6):
-                print(f"  WARNING: LogLike_relic differs between legacy sidecars "
-                      f"(max|d|={d:.3g}).")
-        source = f"{paths['neff']} + {paths['ext']}"
+    with h5py.File(paths["pp"], "r") as h:
+        g = h[group_name]
+        relic_LL = g["LogLike_relic"][...]
+        valid = g["LogLike_isvalid"][...].astype(bool)
+        for name, dset in CONSTRAINT_COLS.items():
+            comp[name] = g[dset][...] if dset in g else np.zeros_like(relic_LL)
+        avail = scan_axes.available(g.keys())
+        axis_raw = {k: g[avail[k][0]][...] for k in avail}
+        interaction = g["LogLike"].attrs.get(
+            "interaction", os.path.basename(base).split("_")[0])
+    source = paths["pp"]
 
     comp = _merge(comp)
     total_LL = relic_LL + sum(comp.values())

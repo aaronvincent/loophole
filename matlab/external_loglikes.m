@@ -42,7 +42,6 @@ function L = external_loglikes(mx, mphi, gx, g, interaction, opts)
 %                ~gx^2; not applicable to SxS/SxP (velocity-suppressed) (mesonandCMB_ratio.m).
 %   integral     DM annihilation <sigma v> vs the INTEGRAL telescope bound; ~gx^2;
 %                all models, light DM only (mesonandCMB_ratio.m).
-%   beamdump     Terrestrial / beam-dump -- STUB (no data yet).
 %
 % Convention (matches gambit/cpp/likelihoods.cpp):
 %   * each loglike is <= 0, with 0 in the allowed region and a smooth one-sided
@@ -63,7 +62,7 @@ function L = external_loglikes(mx, mphi, gx, g, interaction, opts)
 %
 % Output struct L:
 %   .sn1987a .neutronstar .fifthforce .bullet .kaon .kphi .cmb .integral
-%   .mesoninv .beamdump
+%   .mesoninv
 %               per-constraint loglike
 %   .total      sum over finite contributions
 %   .info       per-constraint struct (derived observable, bound, applicable/
@@ -92,8 +91,7 @@ constraints = { ...
     'kphi',        @kphi_loglike,        opts.enable_kphi;        ...
     'cmb',         @cmb_loglike,         opts.enable_cmb;         ...
     'integral',    @integral_loglike,    opts.enable_integral;    ...
-    'mesoninv',    @mesoninv_loglike,    opts.enable_mesoninv;    ...
-    'beamdump',    @beamdump_loglike,    opts.enable_beamdump};
+    'mesoninv',    @mesoninv_loglike,    opts.enable_mesoninv};
 
 for k = 1:size(constraints, 1)
     name = constraints{k, 1};
@@ -115,7 +113,7 @@ end
 % Combined total over finite contributions (a -Inf would veto the point; NaN is
 % treated as no contribution).
 vals = [L.sn1987a, L.neutronstar, L.stellar, L.fifthforce, L.bullet, L.kaon, ...
-        L.kphi, L.cmb, L.integral, L.mesoninv, L.beamdump];
+        L.kphi, L.cmb, L.integral, L.mesoninv];
 L.total = sum(vals(isfinite(vals)));
 if any(vals == -Inf)
     L.total = -Inf;
@@ -143,7 +141,6 @@ o.enable_kphi        = true;
 o.enable_cmb         = true;
 o.enable_integral    = true;
 o.enable_mesoninv    = true;
-o.enable_beamdump    = true;
 
 o.sigma_sn       = 0.3;   % log10 depth inside the SN1987A contour
 o.sigma_ns       = 0.3;   % log10 depth above the neutron-star bound
@@ -163,7 +160,6 @@ o.sigma_integral = 0.3;   % log10 depth above the INTEGRAL <sigma v> bound
 o.bound_integral = 1.0;   % <sigma v> / INTEGRAL limit; excluded above 1
 o.sigma_mesoninv = 0.3;   % log10 depth above the pi0/eta/eta' -> invisible limits
 o.bound_mesoninv = 1.0;   % max_j Gamma(j -> chi chi) / limit_j; excluded above 1
-o.sigma_beamdump = 0.3;   % TODO (stub)
 end
 
 function o = fill_defaults(o, d)
@@ -642,15 +638,4 @@ info.applicable = true;
 depth = log10(ratio) - log10(bound);   % >0 when over the bound
 l = softregion(depth, sigma);
 info.excluded = depth > 0;
-end
-
-% ======================================================================
-% Terrestrial (beam dump)  --  STUB (no data)
-% ======================================================================
-function [l, info] = beamdump_loglike(pt, opts) %#ok<INUSD>
-% Terrestrial beam-dump bound: accelerator production + decay of the mediator.
-%   Observable : mediator-SM coupling vs mphi; exclusion in (mphi, coupling).
-% TODO(user): supply the effective production coupling and the exclusion data.
-l = 0;
-info = struct('applicable', false, 'excluded', false, 'value', NaN, 'bound', NaN);
 end
