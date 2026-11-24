@@ -8,9 +8,9 @@ Single source of truth (used by both ``plot_2D_profiles.py`` and
     quark couplings, whose ``double_log_flat`` prior changes sign);
   * pretty axis labels;
   * **data-driven axis bounds** (so a frame is never clipped to a hardcoded
-    window that does not match the scan -- the eta-scan cut-off bug);
+    window that does not match the scan -- the g_q-scan cut-off bug);
   * which input parameters *actually varied* in a given scan, with
-    perfectly-correlated (``same_as``-tied) axes collapsed -- so eta / gu / gd /
+    perfectly-correlated (``same_as``-tied) axes collapsed -- so gq / gu / gd /
     gs planes appear only for the scans that move them.
 
 Each scan therefore gets an axis for every varied model parameter automatically.
@@ -27,7 +27,9 @@ KNOWN = {
     "mx":         ("input::mx",          "log",    r"$\log_{10}(m_\chi\,/\,\mathrm{GeV})$"),
     "mphi":       ("input::mphi",        "log",    r"$\log_{10}(m_\phi\,/\,\mathrm{GeV})$"),
     "gx":         ("input::gx",          "log",    r"$\log_{10} g_\chi$"),
-    "eta":        ("input::eta",         "log",    r"$\log_{10}\eta$"),
+    "gq":         ("input::gq",          "log",    r"$\log_{10} g_q$"),
+    # legacy name of the gq master coupling in older scan files
+    "eta":        ("input::eta",         "log",    r"$\log_{10} g_q$"),
     "gu":         ("input::gu",          "symlog", r"signed $\log_{10} g_u$"),
     "gd":         ("input::gd",          "symlog", r"signed $\log_{10} g_d$"),
     "gs":         ("input::gs",          "symlog", r"signed $\log_{10} g_s$"),
@@ -35,21 +37,21 @@ KNOWN = {
 }
 
 # Preference order for de-duplicating perfectly-correlated axes (a master like
-# eta wins over the gu/gd/gs it ties together) and for ordering default planes.
-ORDER = ["mx", "mphi", "gx", "eta", "gu", "gd", "gs", "sigma_chiN"]
+# gq wins over the gu/gd/gs it ties together) and for ordering default planes.
+ORDER = ["mx", "mphi", "gx", "gq", "eta", "gu", "gd", "gs", "sigma_chiN"]
 
 MASSES = ("mx", "mphi")
-COUPLINGS = ("gx", "eta", "gu", "gd", "gs")
+COUPLINGS = ("gx", "gq", "eta", "gu", "gd", "gs")
 QUARK_COUPLINGS = ("gu", "gd", "gs")
 
 # Derived axes: quantities NOT stored as their own dataset, computed on the fly
 # from several scanned columns.  Used for the gquark scans, where the quark
-# couplings gu/gd/gs are varied independently (no `input::eta`): we want a plot
-# axis for the *magnitude* of the coupling vector, eta = |(g_u, g_d, g_s)|.
+# couplings gu/gd/gs are varied independently (no `input::gq`): we want a plot
+# axis for the *magnitude* of the coupling vector, |g| = |(g_u, g_d, g_s)|.
 # key -> (source axis keys, transform mode, pretty axis label)
 DERIVED = {
     "gmag": (("gu", "gd", "gs"), "log",
-             r"$\log_{10}\eta,\ \ \eta\equiv\sqrt{g_u^2+g_d^2+g_s^2}$"),
+             r"$\log_{10}|g|,\ \ |g|\equiv\sqrt{g_u^2+g_d^2+g_s^2}$"),
 }
 
 
@@ -123,7 +125,7 @@ def _is_varied(raw):
 
 def varied_axes(raw_by_key):
     """Input axes that actually move, with perfectly-correlated ones collapsed
-    (keep the registry-preferred member -- e.g. eta over the gu/gd/gs it ties).
+    (keep the registry-preferred member -- e.g. gq over the gu/gd/gs it ties).
 
     ``sigma_chiN`` is excluded: it is a derived output, handled separately.
     Correlation is computed on the *raw* sampled values, so ``same_as``-tied
@@ -164,7 +166,7 @@ def default_pairs(varied, have_sigma):
             pairs.append((m, c))
     # Quark-coupling planes.  The gquark scans move gu/gd/gs independently, and
     # the pi0/eta-mixing physics lives in their differences (g_u - g_d, ...), so
-    # the mutual planes carry structure no mass plane shows.  In an eta-tied scan
+    # the mutual planes carry structure no mass plane shows.  In a gq-tied scan
     # they collapse to a single axis and none of these pairs appear.
     quarks = [k for k in QUARK_COUPLINGS if k in varied]
     for i, a in enumerate(quarks):

@@ -7,13 +7,13 @@ function test_freeze_coupled_phiphi()
 %      quadrature) to < 1%, S⊗S / P⊗S / axialVector, including mx < mphi; the
 %      reverse rate is O(1) deep in the tail where mphi > mx (phi phi -> chi chibar
 %      is exothermic), where the forward one is exponentially small.
-%   3. Thermal limit: phi held in equilibrium by its SM link (light phi, large eta)
+%   3. Thermal limit: phi held in equilibrium by its SM link (light phi, large g_q)
 %      => freeze_coupled = freeze_loop with production 'all' (phi phi -> chi chibar
 %      at equilibrium phi), on both relic branches.
 %   4. Fast-phi elimination = full 2x2 integration (LOOP_FC_FULL2D=1) at a point
 %      where both converge; the dark-exchange shortcut = full 2x2 (LOOP_FC_NOEXCH=1)
 %      in a closed dark sector, and finite where the 2x2 system cannot start.
-%   5. No step in Omega h^2(eta) across the Y_phi initial-condition and fast-phi
+%   5. No step in Omega h^2(g_q) across the Y_phi initial-condition and fast-phi
 %      switches: finite everywhere, bounded log-slope.
 % Run from matlab/:  matlab -batch "test_freeze_coupled_phiphi"   (~2 min)
 
@@ -53,12 +53,12 @@ for ic = {'heavyScalar','heavyScalarPS','axialVector'}
 end
 
 % --- 3 -------------------------------------------------------------------
-% lightScalarPS, mphi = 1e-9: phi is in the bath (Primakoff, pi gamma) at these eta.
+% lightScalarPS, mphi = 1e-9: phi is in the bath (Primakoff, pi gamma) at these g_q.
 for pt = {[0.0299 3.64], [0.03 2e-2]}
-    mx = pt{1}(1);  eta = pt{1}(2);  g = eta*[2 -1 -1];
+    mx = pt{1}(1);  gq = pt{1}(2);  g = gq*[2 -1 -1];
     fc = freeze_coupled(mx, 1e-9, 0.01, g, 'lightScalarPS', 0.01);
     fl = freeze_loop(mx, 1e-9, 0.01, g, 'lightScalarPS', 0.01, false, 'all');
-    check(sprintf('thermal phi: coupled = loop(all), mx=%g eta=%g', mx, eta), ...
+    check(sprintf('thermal phi: coupled = loop(all), mx=%g gq=%g', mx, gq), ...
           abs(fc/fl - 1) < 2e-2, sprintf('%.4g / %.4g', fc, fl));
 end
 
@@ -88,7 +88,7 @@ for pt = {{'heavyScalarPS', 0.01, 0.1, 0.01}, {'heavyScalar', 0.001, 0.01, 1}, {
     [ic, mx, mp, gx] = pt{1}{:};
     v = arrayfun(@(l) freeze_coupled(mx, mp, gx, 10^l*[2 -1 -1], ic, 0.01), le);
     d = diff(log(v)) ./ diff(le*log(10));
-    check(sprintf('Oh2(eta) continuous, %s mx=%g mphi=%g gx=%g', ic, mx, mp, gx), ...
+    check(sprintf('Oh2(gq) continuous, %s mx=%g mphi=%g gx=%g', ic, mx, mp, gx), ...
           all(isfinite(v)) && max(abs(diff(d))) < 1.5, ...
           sprintf('max slope change %.2f', max(abs(diff(d)))));
 end

@@ -1,6 +1,6 @@
 # M7 validation: the physics merged from `main` into the Julia port — the
 # pseudoscalar nucleon coupling h̃_P for SP/PP (DMnucxsec), the axialVector
-# EFT-validity ceilings/floors (axial_gx_ceiling / axial_eta_ceiling /
+# EFT-validity ceilings/floors (axial_gx_ceiling / axial_gq_ceiling /
 # axial_mixing_floor) and the isolated χχ̄→A′A′ piece (sigma_xxphiphi / svavg_phiphi).
 #
 # Reference: test/ref/m7_ref.csv, regenerate with
@@ -47,10 +47,10 @@ check("heavyScalarPP (deg g → 0)",
 println("=== M7: axialVector EFT ceilings/floors (mφ=mx=0.05, g=[1 1 1]) ===")
 check("axial_gx_ceiling", axial_gx_ceiling(0.05, 0.05, [1.0, 1, 1]), "axial_gx_ceiling")
 em, mm, jb = axial_mixing_floor(0.05, 0.05, [1.0, 1, 1], 0.3)
-check("axial_mixing_floor eta_mix", em, "axial_mixing_floor_eta_mix")
+check("axial_mixing_floor gq_mix", em, "axial_mixing_floor_gq_mix")
 check("axial_mixing_floor mxmix",   mm, "axial_mixing_floor_mxmix")
 check_bool("axial_mixing_floor jbind", jb == Int(ref("axial_mixing_floor_jbind")))
-check("axial_eta_ceiling", axial_eta_ceiling(0.05, 0.05, 1e-3, [1.0, 1, 1]), "axial_eta_ceiling")
+check("axial_gq_ceiling", axial_gq_ceiling(0.05, 0.05, 1e-3, [1.0, 1, 1]), "axial_gq_ceiling")
 
 println("=== M7: χχ̄→A′A′ thermal average (svavg_phiphi axialVector) ===")
 ma = AxialVector(0.05, 0.02, 1e-3, (1.0, 1.0, 1.0))

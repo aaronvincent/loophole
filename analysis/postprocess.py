@@ -97,7 +97,7 @@ _RDCC = dict(rdcc_nbytes=512 * 1024**2, rdcc_nslots=2_000_003)
 _DATA_DIR = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data"))
 
-_AXES = ["input::mx", "input::mphi", "input::gx", "input::eta",
+_AXES = ["input::mx", "input::mphi", "input::gx", "input::gq", "input::eta",
          "input::gu", "input::gd", "input::gs", "output::sigma_chiN"]
 _OBS  = ["output::Oh2", "output::dNeff_bbn", "output::dNeff_cmb"]
 

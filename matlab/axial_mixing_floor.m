@@ -1,22 +1,22 @@
-function [eta_mix, mxmix, jbind] = axial_mixing_floor(mphi, mx, g, smax)
+function [gq_mix, mxmix, jbind] = axial_mixing_floor(mphi, mx, g, smax)
 % axial_mixing_floor  Small-mixing-breakdown boundary for the axialVector
-% interaction (companion of axial_eta_ceiling / axial_gx_ceiling).
+% interaction (companion of axial_gq_ceiling / axial_gx_ceiling).
 %
-%   [eta_mix, mxmix, jbind] = axial_mixing_floor(mphi, mx, g, smax)
+%   [gq_mix, mxmix, jbind] = axial_mixing_floor(mphi, mx, g, smax)
 %
 % The axial-vector meson->chi chi coupling lambda_{j chi} = lambda_a m_{jA'}/m_A'^2
 % comes from diagonalising the A'-meson mass matrix to first order in the mixing
 % angle sin(theta_j) ~ m_{jA'}/m_A'.  That leading-order (small-mixing) expansion
 % degrades as the mixing angle grows and is meaningless once m_A' <~ m_{jA'}.
-% Here we return the eta-scan boundary at which the largest mixing angle reaches
+% Here we return the g_q scan boundary at which the largest mixing angle reaches
 % a threshold smax (default 0.3):
 %
-%   sin(theta_j) = eta*|m_{jA'}(g)|/m_A' = smax   ->   eta_mix = smax*mphi/mxmix,
+%   sin(theta_j) = g_q*|m_{jA'}(g)|/m_A' = smax   ->   gq_mix = smax*mphi/mxmix,
 %
 % with mxmix = max_j |m_{jA'}(g)| (the eta'-A' mixing mass binds).  In the
-% eta-scan the quark couplings scale as g_eff = eta*g and the mixing masses are
-% linear in g, so eta_mix is mx-independent.  Outputs:
-%   eta_mix  boundary eta (sin(theta)=smax); NaN if it cannot be evaluated
+% g_q scan the quark couplings scale as g_eff = g_q*g and the mixing masses are
+% linear in g, so gq_mix is mx-independent.  Outputs:
+%   gq_mix  boundary g_q (sin(theta)=smax); NaN if it cannot be evaluated
 %   mxmix    max_j |m_{jA'}(g)|  [GeV]  (so the gx-scan can form sin(theta)=mxmix/mphi)
 %   jbind    index of the binding meson in {pi0, eta, eta'}
 %
@@ -51,7 +51,7 @@ for it = 1:200
     end
 end
 if ~ok
-    eta_mix = NaN; mxmix = NaN; jbind = NaN;
+    gq_mix = NaN; mxmix = NaN; jbind = NaN;
     return;
 end
 
@@ -60,8 +60,8 @@ m_jAp = abs(lam_chi) * mphi^2 / gx_probe;
 [mxmix, jbind] = max(m_jAp);
 
 if mxmix > 0
-    eta_mix = smax * mphi / mxmix;
+    gq_mix = smax * mphi / mxmix;
 else
-    eta_mix = Inf;   % no mixing (e.g. couplings cancel) -> no breakdown
+    gq_mix = Inf;   % no mixing (e.g. couplings cancel) -> no breakdown
 end
 end

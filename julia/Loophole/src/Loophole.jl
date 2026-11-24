@@ -51,7 +51,7 @@ export threebody_refresh!, threepi_enabled, pipiphi_enabled
 export threepi_weight, pipiphi_weight, threebody_sigma, axial3pi_weight, axial3pi_sigma, pipiA_weight
 
 # axialVector EFT-validity ceilings/floors
-export axial_gx_ceiling, axial_eta_ceiling, axial_mixing_floor
+export axial_gx_ceiling, axial_gq_ceiling, axial_mixing_floor
 export sppp_mixing_angles
 
 # thermal averaging

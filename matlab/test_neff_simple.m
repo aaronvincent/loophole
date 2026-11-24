@@ -34,15 +34,15 @@ nfail = nfail + check('phi only massless: dNeff', d, 3.046*((13/11)^(-4/3) - 1),
 % bath {gamma, e, chi, phi} at T_nu_dec (S = 10), {gamma, phi} after, so
 % T_phi = T_gamma = (10/3)^(1/3) T_nu.  P_free divides out phi decays.
 % phi must have NO photon link of its own: the gamma gamma <-> phi phi meson
-% loop goes as eta^4 and couples phi directly from eta ~ 1e-2, so take
-% eta = 2e-3 (w_phi ~ 1e-3) and a large gx for full chi <-> phi contact. ---
+% loop goes as g_q^4 and couples phi directly from g_q ~ 1e-2, so take
+% g_q = 2e-3 (w_phi ~ 1e-3) and a large gx for full chi <-> phi contact. ---
 [~, In] = neff_simple(1e-11, 1e-4, 30, 2e-3*[1 1 1]/3, 'heavyScalar');
 nfail = nfail + check('phi via chi: T_phi/T_nu = (10/3)^(1/3)', ...
     In.Tphi_over_Tnu / In.P_free^(1/4), (10/3)^(1/3), 2e-2);
 
 % --- uncoupled -> 0 ---
 [d, In] = neff_simple(1e-9, 1e-4, gx, 1e-9*g, I);
-nfail = nfail + assert_true('tiny eta: nothing coupled, dNeff = 0', ...
+nfail = nfail + assert_true('tiny gq: nothing coupled, dNeff = 0', ...
     ~In.phi_coupled && ~In.chi_coupled && abs(d) < 1e-5);
 
 if nfail > 0

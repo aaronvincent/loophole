@@ -37,11 +37,11 @@ w('signuc_deg_heavyScalarPP', ...
 
 % --- axialVector EFT ceilings / floors (mphi = mx = 0.05, g = [1 1 1]) ------
 w('axial_gx_ceiling', axial_gx_ceiling(0.05, 0.05, [1 1 1]));
-[eta_mix, mxmix, jbind] = axial_mixing_floor(0.05, 0.05, [1 1 1], 0.3);
-w('axial_mixing_floor_eta_mix', eta_mix);
+[gq_mix, mxmix, jbind] = axial_mixing_floor(0.05, 0.05, [1 1 1], 0.3);
+w('axial_mixing_floor_gq_mix', gq_mix);
 w('axial_mixing_floor_mxmix',   mxmix);
 w('axial_mixing_floor_jbind',   jbind);
-w('axial_eta_ceiling', axial_eta_ceiling(0.05, 0.05, 1e-3, [1 1 1]));
+w('axial_gq_ceiling', axial_gq_ceiling(0.05, 0.05, 1e-3, [1 1 1]));
 
 % --- chi chibar -> A'A' thermal average -------------------------------------
 % Julia: AxialVector(mx=0.05, mphi=0.02, gx=1e-3, g=(1,1,1)) at T = mx/20.

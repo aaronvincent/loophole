@@ -220,7 +220,7 @@ if force_2d, adiabatic_phi = false; end
 % coefficients solves exactly:
 %   Y(dtau0) = Y* tanh(sqrt(a cf) dtau0),   Y* = Y_eq sqrt(cp/cf),  a = cp Y_eq^2.
 % The start is continuous in the coupling, so Omega h^2 is too.  (A rate test
-% choosing Y = 0 or Y = Y* made Omega h^2(eta) jump by up to ~500x near
+% choosing Y = 0 or Y = Y* made Omega h^2(g_q) jump by up to ~500x near
 % mx ~ 20 T_RH, which fzero reported as a root.)  The phi -> chi chibar
 % source is left out of the seed; over dtau0 it is negligible.
 %
@@ -240,7 +240,7 @@ x0    = exp(tau0);
 % Y_phi IC: like chi, nothing before T_RH -- phi gets the same analytic first
 % step over dtau0, Y_phi_eq (1 - exp(-Gamma_SM dtau0 / H)): zero unless its bath
 % link is fast enough to equilibrate it within dtau0, and continuous in the
-% couplings (a 0-or-equilibrium switch put a step into Omega h^2(eta)).  A phi
+% couplings (a 0-or-equilibrium switch put a step into Omega h^2(g_q)).  A phi
 % population present at T_RH would instead depend on reheating: on the P(x)S
 % mphi = 0.1 GeV freeze-in branch above mphi/2, one Hubble time of gamma gamma
 % -> phi before T_RH sets ~98% of the relic.

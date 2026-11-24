@@ -255,10 +255,10 @@ function axial_gx_ceiling(mphi, mx, g)
 end
 
 """
-    axial_mixing_floor(mphi, mx, g, smax=0.3) -> (eta_mix, mxmix, jbind)
+    axial_mixing_floor(mphi, mx, g, smax=0.3) -> (gq_mix, mxmix, jbind)
 
-Small-mixing-breakdown boundary: η at which the largest A′–meson mixing angle
-sin θ_j = η|m_jA′|/m_A′ reaches `smax`.  `mxmix = max_j|m_jA′|` (so a gx-scan can
+Small-mixing-breakdown boundary: g_q at which the largest A′–meson mixing angle
+sin θ_j = g_q|m_jA′|/m_A′ reaches `smax`.  `mxmix = max_j|m_jA′|` (so a gx-scan can
 form sin θ = mxmix/mφ).  Overlay diagnostic only — never gates a scan.  Port of
 axial_mixing_floor.m.
 """
@@ -268,20 +268,20 @@ function axial_mixing_floor(mphi, mx, g, smax=0.3)
     gx_probe, _, lam_chi, _, _ = pr
     m_jAp = abs.(lam_chi) .* mphi^2 ./ gx_probe
     mxmix, jbind = findmax(m_jAp)
-    eta_mix = mxmix > 0 ? smax * mphi / mxmix : Inf
-    return (eta_mix, mxmix, jbind)
+    gq_mix = mxmix > 0 ? smax * mphi / mxmix : Inf
+    return (gq_mix, mxmix, jbind)
 end
 
 """
-    axial_eta_ceiling(mphi, mx, gx, g) -> eta_max
+    axial_gq_ceiling(mphi, mx, gx, g) -> gq_max
 
-EFT-validity ceiling on the η-scan normalization (companion of
-`axial_gx_ceiling` for the η-scan): largest η with `_axial_couplings(mphi, mx,
-gx, η·g)` valid, bisected on log10 η.  `Inf` if η=1e12 is still valid, `NaN` if
-even η=1e-30 is invalid.  Port of axial_eta_ceiling.m.
+EFT-validity ceiling on the g_q scan normalization (companion of
+`axial_gx_ceiling` for the g_q scan): largest g_q with `_axial_couplings(mphi, mx,
+gx, g_q·g)` valid, bisected on log10 g_q.  `Inf` if g_q=1e12 is still valid, `NaN` if
+even g_q=1e-30 is invalid.  Port of axial_gq_ceiling.m.
 """
-function axial_eta_ceiling(mphi, mx, gx, g)
-    valid(le) = _axial_eta_valid(mphi, mx, gx, 10.0^le, g)
+function axial_gq_ceiling(mphi, mx, gx, g)
+    valid(le) = _axial_gq_valid(mphi, mx, gx, 10.0^le, g)
     lo = -30.0; hi = 12.0
     valid(hi) && return Inf
     valid(lo) || return NaN
@@ -292,9 +292,9 @@ function axial_eta_ceiling(mphi, mx, gx, g)
     return 10.0^lo
 end
 
-function _axial_eta_valid(mphi, mx, gx, eta, g)
+function _axial_gq_valid(mphi, mx, gx, gq, g)
     try
-        _axial_couplings(mphi, mx, gx, eta .* g)
+        _axial_couplings(mphi, mx, gx, gq .* g)
         return true
     catch e
         e isa AxialMediatorTooLight && return false

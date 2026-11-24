@@ -6,8 +6,8 @@ signuc_lightScalarSP,0.00014938475105296338
 signuc_scalarPP,4.8273576155688253e-11
 signuc_deg_heavyScalarPP,0
 axial_gx_ceiling,0.24907986792856965
-axial_mixing_floor_eta_mix,0.029731889465207259
+axial_mixing_floor_gq_mix,0.029731889465207259
 axial_mixing_floor_mxmix,0.50450880417651367
 axial_mixing_floor_jbind,3
-axial_eta_ceiling,249.07986792856948
+axial_gq_ceiling,249.07986792856948
 svavg_phiphi,1.9235014205377546e-10

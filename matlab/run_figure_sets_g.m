@@ -1,21 +1,21 @@
 % run_figure_sets_g.m
-% Batch driver for the eta-scan: one FULL set of compare_limits_g.m figures per
+% Batch driver for the g_q scan: one FULL set of compare_limits_g.m figures per
 % (model, mphi), at fixed DM coupling g_chi and fixed quark-coupling DIRECTION.
-% g_chi is fixed and the scanned quantity is eta, the scalar normalization of
-% g = eta * g_ref.
+% g_chi is fixed and the scanned quantity is g_q, the scalar normalization of
+% g = g_q * ghat.
 %
 %   models:  every physics family listed in RUNSET.families, with the mediator
 %            regime chosen by mass -- light* at the eV-scale mphi, heavy* at the
 %            two GeV-scale ones (see the job-list block for what that does/doesn't
 %            change), so a family is 3 runs, not 6
 %   mphi:    1e-9, 0.1, 1 GeV   (three figure sets per family)
-%   gx:      fixed (RUNSET.gx),  g_ref: fixed direction (RUNSET.g_ref)
+%   gx:      fixed (RUNSET.gx),  ghat: fixed direction (RUNSET.ghat)
 %
 % Each run produces up to three compare_limits_g panels (toggled individually by
-% RUNSET.plot_sigma / plot_eta / plot_svgg), named
+% RUNSET.plot_sigma / plot_gq / plot_svgg), named
 % <figtag> = compare_limits_g_<interaction>_mphi<mphi>_gx<gx> --
 %   <figtag>_sigma.pdf   sigma_chiN vs m_chi
-%   <figtag>_eta.pdf     eta       vs m_chi
+%   <figtag>_gq.pdf     g_q       vs m_chi
 %   <figtag>_svgg.pdf    <sigma v>_{gg -> chi chi} vs m_chi
 % gx is in the name (as it already was in the .dat/.mat) so that runs at
 % different RUNSET.gx accumulate side by side instead of overwriting.
@@ -39,7 +39,7 @@
 % -----------------------------------------------------------------------
 RUNSET = struct();
 RUNSET.gx       = .01;                 % FIXED dark coupling
-RUNSET.g_ref    = [2, -1, -1];         % quark-coupling DIRECTION (eta multiplies this)
+RUNSET.ghat    = [2, -1, -1];         % quark-coupling DIRECTION (gq multiplies this)
 RUNSET.mphi_vec = [1e-9, 0.1, 1];    % mediator masses [GeV] -- 3 sets per model
 
 % One row per physics family: {light variant, heavy variant}.  The variant used
@@ -144,7 +144,7 @@ RUNSET.label_pos = label_pos_load();
 % one off saves plotting time, not solver time -- except plot_svgg, which gates
 % compare_limits_g.m's extra <sigma v>_gg evaluation block.
 RUNSET.plot_sigma = true;            % sigma_chiN vs m_chi
-RUNSET.plot_eta   = false;            % eta       vs m_chi
+RUNSET.plot_gq   = false;            % gq       vs m_chi
 RUNSET.plot_svgg  = false;            % <sigma v>_{gg -> chi chi} vs m_chi
 
 % Overrides from a caller: any RUNSET field, applied after the
@@ -184,11 +184,11 @@ end
 % Panel suffixes actually being produced -- drives the skip_existing check.
 RUNSET.panels = {};
 if RUNSET.plot_sigma, RUNSET.panels{end+1} = 'sigma'; end
-if RUNSET.plot_eta,   RUNSET.panels{end+1} = 'eta';   end
+if RUNSET.plot_gq,   RUNSET.panels{end+1} = 'gq';   end
 if RUNSET.plot_svgg,  RUNSET.panels{end+1} = 'svgg';  end
 if isempty(RUNSET.panels)
     warning('run_figure_sets_g:noPanels', ...
-        'plot_sigma/plot_eta/plot_svgg are all false: the sweep will write .dat files only.');
+        'plot_sigma/plot_gq/plot_svgg are all false: the sweep will write .dat files only.');
 end
 
 RUNSET.n_jobs = numel(RUNSET.jobs);
@@ -241,7 +241,7 @@ while RUNSET.g0 <= RUNSET.n_jobs
         batch_params.interaction = RUNSET.this_interaction;
         batch_params.mphi        = RUNSET.this_mphi;
         batch_params.gx          = RUNSET.gx;
-        batch_params.g_ref       = RUNSET.g_ref;
+        batch_params.ghat       = RUNSET.ghat;
         batch_params.T_RH        = RUNSET.T_RH;
         batch_params.production  = RUNSET.production;
         batch_params.mx_vec      = RUNSET.mx_vec;
@@ -255,7 +255,7 @@ while RUNSET.g0 <= RUNSET.n_jobs
         batch_params.close_figs  = true;
         batch_params.show        = RUNSET.show;
         batch_params.plot_sigma_chiN = RUNSET.plot_sigma;
-        batch_params.plot_eta        = RUNSET.plot_eta;
+        batch_params.plot_gq        = RUNSET.plot_gq;
         batch_params.plot_svgg       = RUNSET.plot_svgg;
         % no figdir -> nothing is written; this pass only reads PANEL_YLIM back
         PANEL_YLIM = struct();
@@ -337,7 +337,7 @@ while RUNSET.g0 <= RUNSET.n_jobs
         batch_params.interaction = RUNSET.this_interaction;
         batch_params.mphi        = RUNSET.this_mphi;
         batch_params.gx          = RUNSET.gx;
-        batch_params.g_ref       = RUNSET.g_ref;
+        batch_params.ghat       = RUNSET.ghat;
         batch_params.T_RH        = RUNSET.T_RH;
         batch_params.production  = RUNSET.production;
         batch_params.mx_vec      = RUNSET.mx_vec;
@@ -350,7 +350,7 @@ while RUNSET.g0 <= RUNSET.n_jobs
         batch_params.dat_tag     = RUNSET.dat_tag;
         batch_params.close_figs  = RUNSET.close_figs;
         batch_params.plot_sigma_chiN = RUNSET.plot_sigma;
-        batch_params.plot_eta        = RUNSET.plot_eta;
+        batch_params.plot_gq        = RUNSET.plot_gq;
         batch_params.plot_svgg       = RUNSET.plot_svgg;
         batch_params.show            = RUNSET.show;
         if isKey(RUNSET.label_pos, RUNSET.figtag)

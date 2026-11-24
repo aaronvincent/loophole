@@ -1,14 +1,14 @@
 % compare_limits_g.m
 % Instead of solving for gx that reproduces Omega h^2 = 0.12 at fixed
 % (g, mphi), fix gx and scan a scalar
-% normalization `eta` on the quark-coupling vector g (g_eff = eta*g).
+% normalization `g_q` on the quark-coupling vector g (g_eff = g_q*g).
 %
 % Effect on observables (heavyScalar / lightScalar branch):
-%   Dscript ~ eta^2  ->  Gamma(phi->gg) ~ eta^2, sigma(gg<->xx) ~ eta^2
-%   Gamma(phi->pipi/KK) ~ eta^2
-%   nucleon coupling fp ~ eta  ->  sigma_chiN ~ eta^2 * gx^2
-% Non-resonant: Oh2_FI ~ eta^4, Oh2_FO ~ 1/eta^4 (rate dominated).
-% Resonant: the BW saturates the eta dependence; root-find handles either.
+%   Dscript ~ g_q^2  ->  Gamma(phi->gg) ~ g_q^2, sigma(gg<->xx) ~ g_q^2
+%   Gamma(phi->pipi/KK) ~ g_q^2
+%   nucleon coupling fp ~ g_q  ->  sigma_chiN ~ g_q^2 * gx^2
+% Non-resonant: Oh2_FI ~ g_q^4, Oh2_FO ~ 1/g_q^4 (rate dominated).
+% Resonant: the BW saturates the g_q dependence; root-find handles either.
 tic
 alltheconstants;
 
@@ -43,7 +43,7 @@ LABEL_POS   = {};            % manual inline-label placement on the sigma panel:
                              %   inline_labels runs; everything else stays
                              %   automatic.  For the rare panel the placer gets
                              %   wrong.  Reset every run, like STYLE.
-g_ref       = [2 -1 -1];  % quark-coupling DIRECTION (eta multiplies this); asymmetric
+ghat       = [2 -1 -1];  % quark-coupling DIRECTION (gq multiplies this); asymmetric
 Oh2_target  = 0.12;
 T_RH        = 0.01;          % reheat temperature [GeV]
 production  = 'sm';          % chi production from the bath: 'sm' (gamma gamma + meson pairs) or 'gg' (photons only)
@@ -66,7 +66,7 @@ mx_vec = 10.^(mx_dec_lo + (mx_dec_hi - mx_dec_lo) * w);
 
 % Plot toggles -- each draws one figure; set false to skip.
 plot_sigma_chiN = true;     % Fig 1: sigma_chiN vs m_chi
-plot_eta        = true;     % Fig 2: eta vs m_chi
+plot_gq        = true;     % Fig 2: gq vs m_chi
 plot_svgg       = true;     % Fig 3: <sigma v>_{gamma gamma -> chi chi} vs m_chi (at T = m_chi/20)
 
 % Small-mixing-breakdown overlay (axialVector): sin(theta) threshold above which
@@ -94,8 +94,8 @@ SHOW.relic_fo     = false;   % Freeze-out
 SHOW.relic_loop   = true;   % self-consistent loop, BOTH branches (Omega h^2 = 0.12)
 SHOW.overabundant = true;   % Omega h^2 > 0.12 fill between the loop branches
 % -- theory / validity --------------------------------------------------
-SHOW.pert_line    = true;   % eta = 1 boundary
-SHOW.nonpert      = true;   % shaded eta > 1 region
+SHOW.pert_line    = true;   % gq = 1 boundary
+SHOW.nonpert      = true;   % shaded gq > 1 region
 SHOW.unitarity    = true;   % axialVector: Gamma_A' >= m_A' ceiling
 SHOW.large_mixing = true;   % axialVector: sin(theta_A') > s_mix
 SHOW.mediator_relic = false; % stable mediator (axialVector A') overcloses: Omega_A' h^2 > 0.12.
@@ -148,13 +148,13 @@ if exist('batch_params', 'var') && isstruct(batch_params)
     if isfield(batch_params, 'interaction'),     interaction     = batch_params.interaction;     end
     if isfield(batch_params, 'mphi'),            mphi            = batch_params.mphi;            end
     if isfield(batch_params, 'gx'),              gx              = batch_params.gx;              end
-    if isfield(batch_params, 'g_ref'),           g_ref           = batch_params.g_ref;           end
+    if isfield(batch_params, 'ghat'),           ghat           = batch_params.ghat;           end
     if isfield(batch_params, 'Oh2_target'),      Oh2_target      = batch_params.Oh2_target;      end
     if isfield(batch_params, 'T_RH'),            T_RH            = batch_params.T_RH;            end
     if isfield(batch_params, 'production'),      production      = batch_params.production;      end
     if isfield(batch_params, 'mx_vec'),          mx_vec          = batch_params.mx_vec;          end
     if isfield(batch_params, 'plot_sigma_chiN'), plot_sigma_chiN = batch_params.plot_sigma_chiN; end
-    if isfield(batch_params, 'plot_eta'),        plot_eta        = batch_params.plot_eta;        end
+    if isfield(batch_params, 'plot_gq'),        plot_gq        = batch_params.plot_gq;        end
     if isfield(batch_params, 'plot_svgg'),       plot_svgg       = batch_params.plot_svgg;       end
     if isfield(batch_params, 's_mix'),           s_mix           = batch_params.s_mix;           end
     % show: merge field-by-field so a partial struct keeps the defaults above.
@@ -206,25 +206,25 @@ interaction_sig = full_sigma_name(interaction);
 logT0 = log(T0);
 
 % -----------------------------------------------------------------------
-% Unitarity / EFT-validity ceiling (axialVector only): above eta_ceiling the
+% Unitarity / EFT-validity ceiling (axialVector only): above gq_ceiling the
 % meson->chichi width exceeds the meson mass (or the A'-meson mixing mass
 % reaches m_A'), so the meson-mixing EFT is invalid (axial_couplings.m
-% hard-errors there).  In the eta-scan gx is FIXED and eta scales g, so the
-% ceiling lives in eta (axial_eta_ceiling, the companion of axial_gx_ceiling).
+% hard-errors there).  In the g_q scan gx is FIXED and g_q scales g, so the
+% ceiling lives in g_q (axial_gq_ceiling, the companion of axial_gx_ceiling).
 % Mapped to sigma_chiN via DMnucxsec.  Computed FIRST (before FI/FO/loop) so
 % every coupling scan can cap its bracket at it: at small m_A' the relic roots
 % sit far below the fixed scan floors but still inside the EFT-valid region
-% (eta < ceiling), so an uncapped [-15,..] scan misses them entirely.
+% (g_q < ceiling), so an uncapped [-15,..] scan misses them entirely.
 % -----------------------------------------------------------------------
-eta_ceiling = nan(size(mx_vec));
+gq_ceiling = nan(size(mx_vec));
 sg_ceiling  = nan(size(mx_vec));
 if strcmp(interaction, 'axialVector')
     for j = 1:length(mx_vec)
         try
-            ec = axial_eta_ceiling(mphi, mx_vec(j), gx, g_ref);
-            eta_ceiling(j) = ec;
+            ec = axial_gq_ceiling(mphi, mx_vec(j), gx, ghat);
+            gq_ceiling(j) = ec;
             if isfinite(ec)
-                sg_ceiling(j) = DMnucxsec(mx_vec(j), mphi, gx, ec*g_ref, interaction_sig) * hbarc^2;
+                sg_ceiling(j) = DMnucxsec(mx_vec(j), mphi, gx, ec*ghat, interaction_sig) * hbarc^2;
             end
         catch
         end
@@ -232,27 +232,27 @@ if strcmp(interaction, 'axialVector')
 end
 
 % -----------------------------------------------------------------------
-% Small-mixing-breakdown boundary (axialVector only): eta above which the
-% largest A'-meson mixing angle sin(theta_j) = eta*|m_{jA'}|/m_A' exceeds s_mix,
+% Small-mixing-breakdown boundary (axialVector only): g_q above which the
+% largest A'-meson mixing angle sin(theta_j) = g_q*|m_{jA'}|/m_A' exceeds s_mix,
 % so the leading-order mixing expansion behind lambda_{jchi} ~ 1/m_A'^2 is
-% suspect.  Distinct from the unitarity ceiling above (eta_unit ~ mphi^2 vs
-% eta_mix ~ mphi; they cross near mphi ~ 0.01 GeV).  eta_mix is mx-independent
+% suspect.  Distinct from the unitarity ceiling above (gq_unit ~ mphi^2 vs
+% gq_mix ~ mphi; they cross near mphi ~ 0.01 GeV).  gq_mix is mx-independent
 % (mixing masses are linear in g); mapped to sigma_chiN via DMnucxsec.  Drawn as
 % an overlay ONLY -- it does not cap any scan (axial_couplings mixingTooLarge
-% stays disabled).  No-op for non-axialVector (eta_mix NaN).
+% stays disabled).  No-op for non-axialVector (gq_mix NaN).
 % -----------------------------------------------------------------------
-eta_mix = NaN;
+gq_mix = NaN;
 sg_mix  = nan(size(mx_vec));
 if strcmp(interaction, 'axialVector')
     try
-        eta_mix = axial_mixing_floor(mphi, mx_vec(1), g_ref, s_mix);
+        gq_mix = axial_mixing_floor(mphi, mx_vec(1), ghat, s_mix);
     catch
-        eta_mix = NaN;
+        gq_mix = NaN;
     end
-    if isfinite(eta_mix)
+    if isfinite(gq_mix)
         for j = 1:length(mx_vec)
             try
-                sg_mix(j) = DMnucxsec(mx_vec(j), mphi, gx, eta_mix*g_ref, interaction_sig) * hbarc^2;
+                sg_mix(j) = DMnucxsec(mx_vec(j), mphi, gx, gq_mix*ghat, interaction_sig) * hbarc^2;
             catch
             end
         end
@@ -321,7 +321,7 @@ if ~exist('REPLOT',  'var'), REPLOT  = false; end
 % external constraint -- the expensive blocks are untouched, the band scan
 % costs seconds.  REPLOT = true reuses everything.
 % REPLOT = 'neff' reuses only the cached RELIC loci (freeze-in / freeze-out /
-% loop eta and sigma, and the perturbativity line) and recomputes everything
+% loop g_q and sigma, and the perturbativity line) and recomputes everything
 % downstream of them -- Delta-Neff, <sigma v>_gg, the external bands -- then
 % re-saves.  For a Delta-Neff change: the relic solves are the expensive (and,
 % for light-mediator SP, memory-hungry) part and do not depend on it.
@@ -364,68 +364,68 @@ clear relic_tip_mx
 if ~REPLOT
 if REFRESH_NEFF
     % Relic loci from the cache (see REPLOT = 'neff' above); the grid must match.
-    RELIC_CACHED = load(cache_fname, 'mx_vec', 'etavec_fi', 'etavec_fo', ...
-        'etavec_loop_fi', 'etavec_loop_fo', 'sglim_fi', 'sglim_fo', ...
+    RELIC_CACHED = load(cache_fname, 'mx_vec', 'gqvec_fi', 'gqvec_fo', ...
+        'gqvec_loop_fi', 'gqvec_loop_fo', 'sglim_fi', 'sglim_fo', ...
         'sglim_loop_fi', 'sglim_loop_fo', 'sglim_pert');
     if ~isequal(RELIC_CACHED.mx_vec, mx_vec)
         error('compare_limits_g:neffReplotGrid', ...
               '%s was built on a different mx grid; rerun with replot = false.', cache_fname);
     end
-    etavec_fi      = RELIC_CACHED.etavec_fi;       etavec_fo      = RELIC_CACHED.etavec_fo;
-    etavec_loop_fi = RELIC_CACHED.etavec_loop_fi;  etavec_loop_fo = RELIC_CACHED.etavec_loop_fo;
+    gqvec_fi      = RELIC_CACHED.gqvec_fi;       gqvec_fo      = RELIC_CACHED.gqvec_fo;
+    gqvec_loop_fi = RELIC_CACHED.gqvec_loop_fi;  gqvec_loop_fo = RELIC_CACHED.gqvec_loop_fo;
     sglim_fi       = RELIC_CACHED.sglim_fi;        sglim_fo       = RELIC_CACHED.sglim_fo;
     sglim_loop_fi  = RELIC_CACHED.sglim_loop_fi;   sglim_loop_fo  = RELIC_CACHED.sglim_loop_fo;
     sglim_pert     = RELIC_CACHED.sglim_pert;
     MED_CACHED = load(cache_fname);   % the mediator band rides along with the loci
     if isfield(MED_CACHED, 'relic_tip_mx'), relic_tip_mx = MED_CACHED.relic_tip_mx; end
-    if isfield(MED_CACHED, 'eta_med_lo')
-        eta_med_lo = MED_CACHED.eta_med_lo;  eta_med_hi = MED_CACHED.eta_med_hi;
+    if isfield(MED_CACHED, 'gq_med_lo')
+        gq_med_lo = MED_CACHED.gq_med_lo;  gq_med_hi = MED_CACHED.gq_med_hi;
         sg_med_lo  = MED_CACHED.sg_med_lo;   sg_med_hi  = MED_CACHED.sg_med_hi;
     else
-        [eta_med_lo, eta_med_hi, sg_med_lo, sg_med_hi] = deal(nan(size(mx_vec)));
+        [gq_med_lo, gq_med_hi, sg_med_lo, sg_med_hi] = deal(nan(size(mx_vec)));
     end
     clear MED_CACHED
     fprintf('[compare_limits_g] Relic loci from %s (not re-solved)\n', cache_fname);
 else
 % -----------------------------------------------------------------------
-% Freeze-in -- root-find on Oh2_FI(eta) = Oh2_target.
+% Freeze-in -- root-find on Oh2_FI(g_q) = Oh2_target.
 % -----------------------------------------------------------------------
 sglim_fi   = nan(size(mx_vec));
-etavec_fi  = nan(size(mx_vec));
+gqvec_fi  = nan(size(mx_vec));
 
 t_fi = tic;
 parfor j = 1:length(mx_vec)
     m = mx_vec(j);
-    flog_FI = @(le) Oh2_FI(m, mphi, gx, 10^le * g_ref, interaction, T_RH, Mpl, s0, rhoc, T0, production) - Oh2_target;
+    flog_FI = @(le) Oh2_FI(m, mphi, gx, 10^le * ghat, interaction, T_RH, Mpl, s0, rhoc, T0, production) - Oh2_target;
     % Cap the scan at the EFT ceiling and scan the valid decades below it.  At
     % small m_A' the FI root sits ~10 decades below the old fixed -15 floor but
-    % still inside the valid region (eta < ceiling); the fixed grid missed it
-    % entirely.  No-op for non-axialVector (eta_ceiling NaN -> the [-15,5] grid).
+    % still inside the valid region (g_q < ceiling); the fixed grid missed it
+    % entirely.  No-op for non-axialVector (gq_ceiling NaN -> the [-15,5] grid).
     le_lo = -15; le_hi = 5; n_fi = 14;
-    capj = eta_ceiling(j);
+    capj = gq_ceiling(j);
     if isfinite(capj) && capj > 0
         le_hi = log10(capj) - 0.05;   % stay just below the ceiling
         le_lo = le_hi - 20;           % reach well past the relic root
-        n_fi  = 28;                   % denser: Oh2 ~ eta^4 crossing is steep
+        n_fi  = 28;                   % denser: Oh2 ~ gq^4 crossing is steep
     end
     le_grid = linspace(le_lo, le_hi, n_fi);
     Oh_grid = nan(size(le_grid));
     for kk = 1:length(le_grid)
         try
-            v = Oh2_FI(m, mphi, gx, 10^le_grid(kk) * g_ref, interaction, T_RH, Mpl, s0, rhoc, T0, production);
+            v = Oh2_FI(m, mphi, gx, 10^le_grid(kk) * ghat, interaction, T_RH, Mpl, s0, rhoc, T0, production);
             if isfinite(v), Oh_grid(kk) = v; end
         catch err
             fprintf(2, '[FI scan] mx=%.4g le=%.2f: %s\n', m, le_grid(kk), err.message);
         end
     end
     sgrid = Oh_grid - Oh2_target;
-    etac = NaN;
+    gqc = NaN;
     for kk = 1:length(le_grid)-1
         if isnan(sgrid(kk)) || isnan(sgrid(kk+1)), continue; end
         if sgrid(kk)*sgrid(kk+1) < 0
             try
                 lec = fzero(flog_FI, [le_grid(kk), le_grid(kk+1)], optimset('TolX',1e-3));
-                etac = 10^lec;
+                gqc = 10^lec;
                 break;
             catch err
                 fprintf(2, '[FI fzero] mx=%.4g bracket=[%.2f,%.2f]: %s\n', ...
@@ -433,30 +433,30 @@ parfor j = 1:length(mx_vec)
             end
         end
     end
-    etavec_fi(j) = etac;
-    if ~isnan(etac)
-        sglim_fi(j) = DMnucxsec(m, mphi, gx, etac * g_ref, interaction_sig) * hbarc^2;
+    gqvec_fi(j) = gqc;
+    if ~isnan(gqc)
+        sglim_fi(j) = DMnucxsec(m, mphi, gx, gqc * ghat, interaction_sig) * hbarc^2;
     end
 end
 
 fprintf('[compare_limits_g] FI block: %.2f s (%.2f s/mass)\n', toc(t_fi), toc(t_fi)/length(mx_vec));
 
 % -----------------------------------------------------------------------
-% Freeze-out -- root-find on freeze_out(eta) = Oh2_target.
+% Freeze-out -- root-find on freeze_out(g_q) = Oh2_target.
 % -----------------------------------------------------------------------
 sglim_fo  = nan(size(mx_vec));
-etavec_fo = nan(size(mx_vec));
+gqvec_fo = nan(size(mx_vec));
 
 t_fo = tic;
 parfor k = 1:length(mx_vec)
     m = mx_vec(k);
-    flog_FO = @(le) freeze_out(m, mphi, gx, 10^le * g_ref, interaction) - Oh2_target;
-    % Densified vs the gx-scan: with rate ~ eta^4 (not eta^2), the
-    % sub/over-abundant transition is sharper in log10(eta).  A coarse
+    flog_FO = @(le) freeze_out(m, mphi, gx, 10^le * ghat, interaction) - Oh2_target;
+    % Densified vs the gx-scan: with rate ~ g_q^4 (not g_q^2), the
+    % sub/over-abundant transition is sharper in log10(g_q).  A coarse
     % grid easily misses the sign change.  Capped at the EFT ceiling like the
     % FI/loop scans (no-op for non-axialVector).
     le_lo = -12; le_hi = 4; n_fo = 20;
-    capj = eta_ceiling(k);
+    capj = gq_ceiling(k);
     if isfinite(capj) && capj > 0
         le_hi = log10(capj) - 0.05;
         le_lo = le_hi - 18;
@@ -466,14 +466,14 @@ parfor k = 1:length(mx_vec)
     % Each freeze_out solves a stiff ode15s (+200-pt svavg_grid), so the dense
     % grid is ~28 ODE solves/mass.  At small m_A' the WIMP mechanism never
     % thermalizes -> Oh2 sits orders of magnitude from 0.12 across the whole
-    % valid eta range with no crossing.  Scan a handful of points; only run the
+    % valid g_q range with no crossing.  Scan a handful of points; only run the
     % dense grid if the coarse scan crosses, or comes within ~2 decades of, the
     % target.  Skip (NaN) otherwise.  ~9 ODE solves instead of ~28+fzero.
     le_coarse = linspace(le_lo, le_hi, 9);
     Ohc = nan(size(le_coarse));
     for kk = 1:numel(le_coarse)
         try
-            v = freeze_out(m, mphi, gx, 10^le_coarse(kk) * g_ref, interaction);
+            v = freeze_out(m, mphi, gx, 10^le_coarse(kk) * ghat, interaction);
             if isfinite(v), Ohc(kk) = v; end
         catch err
             fprintf(2, '[FO coarse] mx=%.4g le=%.2f: %s\n', m, le_coarse(kk), err.message);
@@ -482,7 +482,7 @@ parfor k = 1:length(mx_vec)
     finc = ~isnan(Ohc);
     if ~any(finc)
         fprintf(2, '[FO no-root] mx=%.4g: all NaN on coarse grid\n', m);
-        continue;   % etavec_fo(k) stays NaN
+        continue;   % gqvec_fo(k) stays NaN
     end
     sc_coarse = sign(Ohc(finc) - Oh2_target);
     has_sc  = any(diff(sc_coarse(:)) ~= 0);                       % crosses target
@@ -490,26 +490,26 @@ parfor k = 1:length(mx_vec)
     if ~has_sc && ~near_tg
         fprintf(2, '[FO no-root] mx=%.4g: coarse Oh2 in [%.3g,%.3g], far from target -> skip dense\n', ...
             m, min(Ohc(finc)), max(Ohc(finc)));
-        continue;   % etavec_fo(k) stays NaN
+        continue;   % gqvec_fo(k) stays NaN
     end
     le_grid = linspace(le_lo, le_hi, n_fo);
     Oh_grid = nan(size(le_grid));
     for kk = 1:length(le_grid)
         try
-            v = freeze_out(m, mphi, gx, 10^le_grid(kk) * g_ref, interaction);
+            v = freeze_out(m, mphi, gx, 10^le_grid(kk) * ghat, interaction);
             if isfinite(v), Oh_grid(kk) = v; end
         catch err
             fprintf(2, '[FO scan] mx=%.4g le=%.2f: %s\n', m, le_grid(kk), err.message);
         end
     end
     sgrid = Oh_grid - Oh2_target;
-    etac = NaN;
+    gqc = NaN;
     for kk = 1:length(le_grid)-1
         if isnan(sgrid(kk)) || isnan(sgrid(kk+1)), continue; end
         if sgrid(kk)*sgrid(kk+1) < 0
             try
                 lec = fzero(flog_FO, [le_grid(kk), le_grid(kk+1)], optimset('TolX',1e-3));
-                etac = 10^lec;
+                gqc = 10^lec;
                 break;
             catch err
                 fprintf(2, '[FO fzero] mx=%.4g bracket=[%.2f,%.2f]: %s\n', ...
@@ -517,7 +517,7 @@ parfor k = 1:length(mx_vec)
             end
         end
     end
-    if isnan(etac)
+    if isnan(gqc)
         % Diagnose why: count finite, dump min/max of Oh2 across grid.
         finite_mask = ~isnan(Oh_grid);
         if any(finite_mask)
@@ -528,25 +528,25 @@ parfor k = 1:length(mx_vec)
             fprintf(2, '[FO no-root] mx=%.4g: all NaN on scan grid\n', m);
         end
     end
-    etavec_fo(k) = etac;
-    if ~isnan(etac)
-        sglim_fo(k) = DMnucxsec(m, mphi, gx, etac * g_ref, interaction_sig) * hbarc^2;
+    gqvec_fo(k) = gqc;
+    if ~isnan(gqc)
+        sglim_fo(k) = DMnucxsec(m, mphi, gx, gqc * ghat, interaction_sig) * hbarc^2;
     end
 end
 
 fprintf('[compare_limits_g] FO block: %.2f s (%.2f s/mass)\n', toc(t_fo), toc(t_fo)/length(mx_vec));
 
 % -----------------------------------------------------------------------
-% Self-consistent loop -- two roots (FIMP branch / WIMP branch) in eta.
+% Self-consistent loop -- two roots (FIMP branch / WIMP branch) in g_q.
 % -----------------------------------------------------------------------
 sglim_loop_fi   = nan(size(mx_vec));
 sglim_loop_fo   = nan(size(mx_vec));
-etavec_loop_fi  = nan(size(mx_vec));
-etavec_loop_fo  = nan(size(mx_vec));
+gqvec_loop_fi  = nan(size(mx_vec));
+gqvec_loop_fo  = nan(size(mx_vec));
 % Stable-mediator overclosure (freeze_coupled only; in practice the axialVector
-% A' below min(2 mx, 3 m_pi)): the eta interval where Omega_med h^2 > Oh2_target.
-eta_med_lo      = nan(size(mx_vec));
-eta_med_hi      = nan(size(mx_vec));
+% A' below min(2 mx, 3 m_pi)): the g_q interval where Omega_med h^2 > Oh2_target.
+gq_med_lo      = nan(size(mx_vec));
+gq_med_hi      = nan(size(mx_vec));
 
 if mphi > 50 * T_RH
     solver_name = 'freeze_loop';
@@ -562,29 +562,29 @@ parfor j = 1:length(mx_vec)
         case 'freeze_coupled', solver_local = @freeze_coupled;
     end
     m = mx_vec(j);
-    flog = @(le) solver_local(m, mphi, gx, 10^le * g_ref, interaction, T_RH, false, production) - Oh2_target;
-    % Wide bracket on BOTH sides: at fixed gx, production scales as eta^4
-    % (two vertices through D ~ eta^2) but depletion through SM final states
-    % scales only as eta^2 (one vertex on the SM side; the dark side is
+    flog = @(le) solver_local(m, mphi, gx, 10^le * ghat, interaction, T_RH, false, production) - Oh2_target;
+    % Wide bracket on BOTH sides: at fixed gx, production scales as g_q^4
+    % (two vertices through D ~ g_q^2) but depletion through SM final states
+    % scales only as g_q^2 (one vertex on the SM side; the dark side is
     % already saturated by gx).  So the WIMP-falling branch falls half as
-    % fast in log(eta) as the FIMP-rising branch climbs, and the WIMP root
+    % fast in log(g_q) as the FIMP-rising branch climbs, and the WIMP root
     % for Oh2=0.12 sits ~2x as many decades above the peak as the FIMP root
-    % sits below.  Peak Oh2(eta) for sub-GeV mx at gx=1 can be enormous,
-    % pushing the WIMP root past eta ~ 10^10.
+    % sits below.  Peak Oh2(g_q) for sub-GeV mx at gx=1 can be enormous,
+    % pushing the WIMP root past g_q ~ 10^10.
     % Cap the upper end at the EFT ceiling (axialVector): above it the solver
     % only returns NaN, and an uncapped scan wastes points / risks a degenerate
-    % bracket.  No-op for non-axialVector (eta_ceiling NaN); keeps 40 points so
+    % bracket.  No-op for non-axialVector (gq_ceiling NaN); keeps 40 points so
     % the no-ceiling density is unchanged.
     % Floor tied to the FI root, not fixed: the FIMP branch drifts down with mx,
-    % and a fixed floor loses it once log10(eta_FI) falls below.  With only the
+    % and a fixed floor loses it once log10(gq_FI) falls below.  With only the
     % WIMP root left in the window the proximity selection below puts it in the
-    % fi slot and leaves fo empty, which reads as a 13-order jump in eta_loop_fi
-    % and a vanishing lower branch.  etavec_fi is complete before this loop.
+    % fi slot and leaves fo empty, which reads as a 13-order jump in gq_loop_fi
+    % and a vanishing lower branch.  gqvec_fi is complete before this loop.
     le_lo = -16; le_hi = 20;
-    if isfinite(etavec_fi(j)) && etavec_fi(j) > 0
-        le_lo = min(le_lo, log10(etavec_fi(j)) - 3);
+    if isfinite(gqvec_fi(j)) && gqvec_fi(j) > 0
+        le_lo = min(le_lo, log10(gqvec_fi(j)) - 3);
     end
-    capj = eta_ceiling(j);
+    capj = gq_ceiling(j);
     if isfinite(capj) && capj > 0
         le_hi = min(le_hi, log10(capj) - 0.05);   % stay just below the ceiling
         le_lo = min(le_lo, le_hi - 14);            % always span 14 valid decades
@@ -598,10 +598,10 @@ parfor j = 1:length(mx_vec)
     for kk = 1:length(le_grid)
         try
             if strcmp(solver_name, 'freeze_coupled')
-                [v, finf] = freeze_coupled(m, mphi, gx, 10^le_grid(kk) * g_ref, interaction, T_RH, false, production);
+                [v, finf] = freeze_coupled(m, mphi, gx, 10^le_grid(kk) * ghat, interaction, T_RH, false, production);
                 if finf.phi_stable, OA_grid(kk) = finf.Omega_phi_h2; end
             else
-                v = solver_local(m, mphi, gx, 10^le_grid(kk) * g_ref, interaction, T_RH, false, production);
+                v = solver_local(m, mphi, gx, 10^le_grid(kk) * ghat, interaction, T_RH, false, production);
             end
             if isfinite(v), Oh_grid(kk) = v; end
         catch err
@@ -625,7 +625,7 @@ parfor j = 1:length(mx_vec)
         end
     end
     roots_found = roots_found(1:n_roots);
-    [eta_med_lo(j), eta_med_hi(j)] = overclosed_interval(le_grid, OA_grid, Oh2_target);
+    [gq_med_lo(j), gq_med_hi(j)] = overclosed_interval(le_grid, OA_grid, Oh2_target);
 
     % Near the FIMP/WIMP merge the two roots close to well under the coarse
     % grid step, and the wide window makes that step large: 48 points over the
@@ -640,16 +640,16 @@ parfor j = 1:length(mx_vec)
     % anchors exist, re-scan finely across the span they bracket.  It costs a
     % second sweep only on the masses that need it, and the window is a few
     % decades instead of 36.
-    if n_roots < 2 && isfinite(etavec_fi(j)) && etavec_fi(j) > 0 ...
-                   && isfinite(etavec_fo(j)) && etavec_fo(j) > 0
-        lf = log10(etavec_fi(j)); lo_ = log10(etavec_fo(j));
+    if n_roots < 2 && isfinite(gqvec_fi(j)) && gqvec_fi(j) > 0 ...
+                   && isfinite(gqvec_fo(j)) && gqvec_fo(j) > 0
+        lf = log10(gqvec_fi(j)); lo_ = log10(gqvec_fo(j));
         fine_lo = min(lf, lo_) - 1.0;
         fine_hi = max(lf, lo_) + 1.0;
         fine_grid = linspace(fine_lo, fine_hi, 40);
         Oh_fine = nan(size(fine_grid));
         for kk = 1:length(fine_grid)
             try
-                v = solver_local(m, mphi, gx, 10^fine_grid(kk) * g_ref, interaction, T_RH, false, production);
+                v = solver_local(m, mphi, gx, 10^fine_grid(kk) * ghat, interaction, T_RH, false, production);
                 if isfinite(v), Oh_fine(kk) = v; end
             catch
             end
@@ -672,7 +672,7 @@ parfor j = 1:length(mx_vec)
         end
     end
     if n_roots < 2
-        % Surface the Oh2(eta) profile so we can see whether the WIMP
+        % Surface the Oh2(g_q) profile so we can see whether the WIMP
         % branch root is missing because (a) the peak doesn't reach 0.12,
         % (b) both roots fell inside one segment, or (c) the grid is too
         % narrow.  Reports peak Oh2 + the le at which it occurs.
@@ -685,60 +685,60 @@ parfor j = 1:length(mx_vec)
                 le_grid(end), Oh_grid(end));
         end
     end
-    % Root selection.  Oh2(eta) can have 4 roots: physical FIMP / WIMP pair,
+    % Root selection.  Oh2(g_q) can have 4 roots: physical FIMP / WIMP pair,
     % plus a second pair on the BW-broadened "secluded" branch once Gphi/mphi
     % grows past 1.  Min/max picks the outer two and discards the physical
-    % WIMP root.  Pick by proximity in log10(eta) to the standalone FI / FO
+    % WIMP root.  Pick by proximity in log10(g_q) to the standalone FI / FO
     % solution instead; fall back to min/max if standalone has no root.
     if ~isempty(roots_found)
         le_roots = log10(roots_found);
-        if ~isnan(etavec_fi(j))
-            [~, ii] = min(abs(le_roots - log10(etavec_fi(j))));
-            etavec_loop_fi(j) = roots_found(ii);
+        if ~isnan(gqvec_fi(j))
+            [~, ii] = min(abs(le_roots - log10(gqvec_fi(j))));
+            gqvec_loop_fi(j) = roots_found(ii);
         else
-            etavec_loop_fi(j) = min(roots_found);
+            gqvec_loop_fi(j) = min(roots_found);
         end
-        sglim_loop_fi(j) = DMnucxsec(m, mphi, gx, etavec_loop_fi(j) * g_ref, interaction_sig) * hbarc^2;
-        % The WIMP root is ALWAYS above the FIMP root (Oh2(eta) rises, peaks,
+        sglim_loop_fi(j) = DMnucxsec(m, mphi, gx, gqvec_loop_fi(j) * ghat, interaction_sig) * hbarc^2;
+        % The WIMP root is ALWAYS above the FIMP root (Oh2(g_q) rises, peaks,
         % falls), so search only the roots above the FIMP pick.  Without this
         % restriction both proximity searches can return the SAME root: the
-        % standalone FO root sits BETWEEN the two loop branches (eta_FO ~ 1e2
+        % standalone FO root sits BETWEEN the two loop branches (gq_FO ~ 1e2
         % against loop roots ~1e-9 and ~1e13), ~11 decades from each, so the
         % nearest-root test is a coin flip decided in the third decimal and
-        % flips to the FIMP root once eta_FO drops below the geometric mean of
+        % flips to the FIMP root once gq_FO drops below the geometric mean of
         % the two.  That collapsed loop_fo onto loop_fi over a wide mx band --
         % a zero-height "Overabundant" patch (invisible fill), a single drawn
         % branch, and a spurious vertical connector where the tie flipped back.
         % numel(roots_found) >= 2 only guarantees two roots EXIST, not that two
         % DIFFERENT ones were selected.
-        % No eta_FO anchor -> leave the branch NaN rather than substituting a
-        % root.  eta_FO goes NaN exactly where the WIMP mechanism stops having
-        % a solution (min_eta Oh2 rises above 0.12), and there the only root
+        % No gq_FO anchor -> leave the branch NaN rather than substituting a
+        % root.  gq_FO goes NaN exactly where the WIMP mechanism stops having
+        % a solution (min_gq Oh2 rises above 0.12), and there the only root
         % left above the FIMP one is the far secluded root ~10 decades higher
         % -- a qualitatively different branch.  Drawing it as the WIMP curve
         % put a spurious low-mass segment plus a vertical connector in the
         % panel.  (This ties the branch to the standalone FO solve, so a
-        % SPURIOUS eta_FO failure would drop a real loop root too; the loop is
+        % SPURIOUS gq_FO failure would drop a real loop root too; the loop is
         % parfor, so anchoring on the neighbouring mass instead is not an
         % option here.)
-        above = find(roots_found > etavec_loop_fi(j));
-        if ~isempty(above) && ~isnan(etavec_fo(j))
-            [~, ii] = min(abs(le_roots(above) - log10(etavec_fo(j))));
-            etavec_loop_fo(j) = roots_found(above(ii));
-            sglim_loop_fo(j) = DMnucxsec(m, mphi, gx, etavec_loop_fo(j) * g_ref, interaction_sig) * hbarc^2;
+        above = find(roots_found > gqvec_loop_fi(j));
+        if ~isempty(above) && ~isnan(gqvec_fo(j))
+            [~, ii] = min(abs(le_roots(above) - log10(gqvec_fo(j))));
+            gqvec_loop_fo(j) = roots_found(above(ii));
+            sglim_loop_fo(j) = DMnucxsec(m, mphi, gx, gqvec_loop_fo(j) * ghat, interaction_sig) * hbarc^2;
         end
     end
 end
 
 fprintf('[compare_limits_g] Loop block (%s): %.2f s (%.2f s/mass)\n', solver_name, toc(t_loop), toc(t_loop)/length(mx_vec));
 sg_med_lo = nan(size(mx_vec));  sg_med_hi = nan(size(mx_vec));
-for j = find(isfinite(eta_med_lo))
-    sg_med_lo(j) = DMnucxsec(mx_vec(j), mphi, gx, eta_med_lo(j)*g_ref, interaction_sig) * hbarc^2;
-    sg_med_hi(j) = DMnucxsec(mx_vec(j), mphi, gx, eta_med_hi(j)*g_ref, interaction_sig) * hbarc^2;
+for j = find(isfinite(gq_med_lo))
+    sg_med_lo(j) = DMnucxsec(mx_vec(j), mphi, gx, gq_med_lo(j)*ghat, interaction_sig) * hbarc^2;
+    sg_med_hi(j) = DMnucxsec(mx_vec(j), mphi, gx, gq_med_hi(j)*ghat, interaction_sig) * hbarc^2;
 end
-if any(isfinite(eta_med_lo))
+if any(isfinite(gq_med_lo))
     fprintf('[compare_limits_g] Stable mediator overcloses at %d of %d masses\n', ...
-            sum(isfinite(eta_med_lo)), numel(mx_vec));
+            sum(isfinite(gq_med_lo)), numel(mx_vec));
 end
 
 % Close the FIMP/WIMP coalescence gap.
@@ -754,17 +754,17 @@ end
 % not be a root, and the lobe can close at too low an mx.  PxP, gx = 0.01:
 % the tip is at 181 MeV, while the roots at mphi = 1 keV are still 1.3e-2 and
 % 3.4e-2 at 180 MeV and merge near 194 MeV.  A correct merge needs a fine scan
-% for where peak Oh2(eta) = 0.12.
+% for where peak Oh2(g_q) = 0.12.
 COALESCE_MAX_DEC = 2;
-both = ~isnan(etavec_loop_fi) & ~isnan(etavec_loop_fo);
+both = ~isnan(gqvec_loop_fi) & ~isnan(gqvec_loop_fo);
 snap_at = NaN;
 for j = 1:length(mx_vec)-1
     if both(j) && ~both(j+1) && ...
-       abs(log10(etavec_loop_fo(j) / etavec_loop_fi(j))) <= COALESCE_MAX_DEC
-        eta_mid = sqrt(etavec_loop_fi(j) * etavec_loop_fo(j));
-        etavec_loop_fi(j) = eta_mid;
-        etavec_loop_fo(j) = eta_mid;
-        sg_mid = DMnucxsec(mx_vec(j), mphi, gx, eta_mid * g_ref, interaction_sig) * hbarc^2;
+       abs(log10(gqvec_loop_fo(j) / gqvec_loop_fi(j))) <= COALESCE_MAX_DEC
+        gq_mid = sqrt(gqvec_loop_fi(j) * gqvec_loop_fo(j));
+        gqvec_loop_fi(j) = gq_mid;
+        gqvec_loop_fo(j) = gq_mid;
+        sg_mid = DMnucxsec(mx_vec(j), mphi, gx, gq_mid * ghat, interaction_sig) * hbarc^2;
         sglim_loop_fi(j)  = sg_mid;
         sglim_loop_fo(j)  = sg_mid;
         if isnan(snap_at), snap_at = j; end
@@ -779,13 +779,13 @@ end
 % Blank both branches past the merge so the locus actually closes.
 if ~isnan(snap_at) && snap_at < length(mx_vec)
     tail = (snap_at+1):length(mx_vec);
-    etavec_loop_fi(tail) = NaN;  etavec_loop_fo(tail) = NaN;
+    gqvec_loop_fi(tail) = NaN;  gqvec_loop_fo(tail) = NaN;
     sglim_loop_fi(tail)  = NaN;  sglim_loop_fo(tail)  = NaN;
 end
 
 % Close the LOW-mass end of each island (2026-11-18).  With the dark sector
-% filled, chi chi <-> phi phi at fixed gx sets Oh2 by dark freeze-out: Oh2(eta) is
-% a plateau, flat to 4 digits over ~5 decades of eta and ~ mx^2 (mphi = 1e-9,
+% filled, chi chi <-> phi phi at fixed gx sets Oh2 by dark freeze-out: Oh2(g_q) is
+% a plateau, flat to 4 digits over ~5 decades of g_q and ~ mx^2 (mphi = 1e-9,
 % gx = 0.01).  As mx falls the
 % whole plateau drops through 0.12 at once, so the Oh2 = 0.12 contour is a
 % near-vertical wall between two grid masses.  The column-wise root find sees
@@ -796,35 +796,35 @@ end
 % there (relic_tip_mx(j), NaN = no wall).  If Oh2 is still above 0.12 at the
 % previous mass (the lower branch carries on, open-topped), there is no wall.
 % A lone lower root just below the wall is the tip of the small bump at the
-% plateau's onset (an overabundant sliver ~0.25 dex wide in eta whose upper
-% root the etavec_fo anchor rejects); its fill would run up to eta = 1, so it
+% plateau's onset (an overabundant sliver ~0.25 dex wide in g_q whose upper
+% root the gqvec_fo anchor rejects); its fill would run up to g_q = 1, so it
 % is dropped.
-relic_tip_mx = relic_island_tips(mx_vec, etavec_loop_fi, etavec_loop_fo, COALESCE_MAX_DEC, ...
-    relic_oh2_at(solver_name, mphi, gx, g_ref, interaction, T_RH, production), Oh2_target);
+relic_tip_mx = relic_island_tips(mx_vec, gqvec_loop_fi, gqvec_loop_fo, COALESCE_MAX_DEC, ...
+    relic_oh2_at(solver_name, mphi, gx, ghat, interaction, T_RH, production), Oh2_target);
 for j = find(isfinite(relic_tip_mx))
     k = j - 1;
-    while k >= 1 && ~isnan(etavec_loop_fi(k)) && isnan(etavec_loop_fo(k))
-        etavec_loop_fi(k) = NaN;  sglim_loop_fi(k) = NaN;  k = k - 1;
+    while k >= 1 && ~isnan(gqvec_loop_fi(k)) && isnan(gqvec_loop_fo(k))
+        gqvec_loop_fi(k) = NaN;  sglim_loop_fi(k) = NaN;  k = k - 1;
     end
     fprintf('[compare_limits_g] Relic island closes at mx = %.4g GeV (grid %.4g-%.4g)\n', ...
             relic_tip_mx(j), mx_vec(j-1), mx_vec(j));
 end
 
 % -----------------------------------------------------------------------
-% Perturbativity boundary: eta = 1 (g_eff = g_ref).  sigma ~ eta^2 at fixed
-% gx, so points above this line need eta > 1 -- coupling enhanced past the
+% Perturbativity boundary: g_q = 1 (g_eff = ghat).  sigma ~ g_q^2 at fixed
+% gx, so points above this line need g_q > 1 -- coupling enhanced past the
 % reference normalization.
 % -----------------------------------------------------------------------
 sglim_pert = zeros(size(mx_vec));
 for j = 1:length(mx_vec)
-    sglim_pert(j) = DMnucxsec(mx_vec(j), mphi, gx, g_ref, interaction_sig) * hbarc^2;
+    sglim_pert(j) = DMnucxsec(mx_vec(j), mphi, gx, ghat, interaction_sig) * hbarc^2;
 end
 end   % REFRESH_NEFF: relic blocks skipped
 
 % -----------------------------------------------------------------------
 % Delta-Neff exclusion band: a |dNeff - mu| > nsig*sigma cut on the SIGNED
 % total dNeff (the 2-sigma region of the same two-sided Gaussian likelihood
-% used in the GAMBIT-light scan), scanned in eta at fixed gx; the edges are
+% used in the GAMBIT-light scan), scanned in g_q at fixed gx; the edges are
 % mapped through DMnucxsec to sigma_chiN.
 % -----------------------------------------------------------------------
 % Bands = the nsig-sigma exclusion of the SAME two-sided Gaussian likelihood
@@ -839,7 +839,7 @@ thr_pos_bbn = neff_mu_bbn + neff_nsig*neff_sig_bbn;   % ~ +0.28
 thr_neg_bbn = neff_mu_bbn - neff_nsig*neff_sig_bbn;   % ~ -0.56
 thr_pos_cmb = neff_mu_cmb + neff_nsig*neff_sig_cmb;   % ~ +0.29
 thr_neg_cmb = neff_mu_cmb - neff_nsig*neff_sig_cmb;   % ~ -0.39
-% -10, not -8: the Delta-Neff thermalisation onset sits at log10(eta) = -8.038
+% -10, not -8: the Delta-Neff thermalisation onset sits at log10(g_q) = -8.038
 % at mphi = 0.1 GeV, gx = 1 -- 0.04 decades BELOW a window floor of -8.  Every
 % scanned coupling then comes back excluded, allon fires, and the band is drawn
 % as a full-height column to the axis floor: a bottom edge that is the axis, not
@@ -849,28 +849,28 @@ le_scan_lo = -10;
 le_scan_hi = 8;
 % ...but the Delta-Neff scan stops at PERTURBATIVITY.  le_scan_hi = 8 is a
 % DRAWING choice -- it exists so the exclusion patch fills the panel rather than
-% stopping mid-axis -- and eta = 1 already means O(1) quark couplings, so eight
+% stopping mid-axis -- and g_q = 1 already means O(1) quark couplings, so eight
 % decades above it is not a coupling the EFT describes.  Sending the solver
 % there is not free: the band search probes its window ENDS first, so every mass
-% paid a solve at eta = 1e8 before anything else, in the regime where the dark
+% paid a solve at g_q = 1e8 before anything else, in the regime where the dark
 % sector is maximally thermalised and the integration is worst-behaved.
-% MEASURED at mphi = 1e-9 GeV, mx = 1e-4 GeV, eta = 1e8: 8.8 s and an ode15s
+% MEASURED at mphi = 1e-9 GeV, mx = 1e-4 GeV, g_q = 1e8: 8.8 s and an ode15s
 % "unable to meet integration tolerances" warning, for Delta-Neff = 18.4.
 %
 % The picture is unchanged because the drawing already handles it: a band whose
 % upper edge is NaN means "open above" and is filled up to cap_fn, which is the
-% perturbativity / EFT cap.  So stopping the SCAN at eta = 1 and reporting the
+% perturbativity / EFT cap.  So stopping the SCAN at g_q = 1 and reporting the
 % band as open-above draws the same patch without ever solving above it.
-% le_scan_hi still sets the external-constraint window and the sg/eta/svgg caps,
+% le_scan_hi still sets the external-constraint window and the sg/g_q/svgg caps,
 % which is why this is a separate knob rather than a smaller le_scan_hi.
 le_neff_hi = 0;
 n_neff     = 40;
 % The EXTERNAL-constraint band scan (SN1987A / neutron star / 5th force, further
 % down) gets its OWN window, deliberately decoupled from the Delta-Neff one
-% above.  Those bands are set by a nucleon coupling times eta, and the
-% pseudoscalar h~_P carries an m_N/m_q chiral enhancement of ~500 per unit eta,
+% above.  Those bands are set by a nucleon coupling times g_q, and the
+% pseudoscalar h~_P carries an m_N/m_q chiral enhancement of ~500 per unit g_q,
 % so e.g. the SP/PP SN1987A band at mphi = 1e-9 GeV sits at
-% eta ~ [7.5e-12, 9.1e-9] -- entirely below le_scan_lo, which is why it never
+% g_q ~ [7.5e-12, 9.1e-9] -- entirely below le_scan_lo, which is why it never
 % appeared on the light-mediator panels.  Widening le_scan_lo itself would
 % instead spread n_neff's fixed 40-point budget over 12 extra decades and
 % coarsen the Delta-Neff bands, so the two windows are kept separate.
@@ -880,7 +880,7 @@ n_ext      = 1 + round((le_ext_hi - le_ext_lo) / 0.04);   % ~0.04 dex, as before
 % TOGGLE, in increasing detail:
 %   'combined'  -> ONE band, one legend entry: excluded by BBN *or* CMB, either
 %                  sign.  The default: the four signed/epoch bands and the two
-%                  per-species edge lines all constrain the same eta interval,
+%                  per-species edge lines all constrain the same g_q interval,
 %                  so splitting them out mostly clutters the legend.
 %   'signed'    -> per epoch, separate colours for dNeff_total>+max and <-max,
 %                  plus the chi-only / phi-only edge lines.
@@ -895,25 +895,25 @@ use_bbn = false;
 use_cmb = true;
 neff_want_bbn = {'tot','tot_pos','tot_neg'};
 
-[eta_chi_lo, eta_chi_hi, eta_phi_lo, eta_phi_hi, eta_tot_lo, eta_tot_hi] = deal(nan(size(mx_vec)));
+[gq_chi_lo, gq_chi_hi, gq_phi_lo, gq_phi_hi, gq_tot_lo, gq_tot_hi] = deal(nan(size(mx_vec)));
 [sg_chi_lo,  sg_chi_hi,  sg_phi_lo,  sg_phi_hi,  sg_tot_lo,  sg_tot_hi ] = deal(nan(size(mx_vec)));
-[eta_pos_lo, eta_pos_hi, eta_neg_lo, eta_neg_hi] = deal(nan(size(mx_vec)));
+[gq_pos_lo, gq_pos_hi, gq_neg_lo, gq_neg_hi] = deal(nan(size(mx_vec)));
 [sg_pos_lo,  sg_pos_hi,  sg_neg_lo,  sg_neg_hi ] = deal(nan(size(mx_vec)));
 [allon_chi,  allon_phi,  allon_tot, allon_pos, allon_neg] = deal(false(size(mx_vec)));
 % CMB-epoch counterparts (signed total + magnitude total).
-[eta_tot_lo_c, eta_tot_hi_c, eta_pos_lo_c, eta_pos_hi_c, eta_neg_lo_c, eta_neg_hi_c] = deal(nan(size(mx_vec)));
+[gq_tot_lo_c, gq_tot_hi_c, gq_pos_lo_c, gq_pos_hi_c, gq_neg_lo_c, gq_neg_hi_c] = deal(nan(size(mx_vec)));
 [sg_tot_lo_c, sg_tot_hi_c, sg_pos_lo_c, sg_pos_hi_c, sg_neg_lo_c, sg_neg_hi_c] = deal(nan(size(mx_vec)));
 [allon_tot_c, allon_pos_c, allon_neg_c] = deal(false(size(mx_vec)));
 % Combined single band ('combined' mode): excluded by EITHER epoch, either sign.
-[eta_all_lo, eta_all_hi, sg_all_lo, sg_all_hi] = deal(nan(size(mx_vec)));
+[gq_all_lo, gq_all_hi, sg_all_lo, sg_all_hi] = deal(nan(size(mx_vec)));
 allon_all = false(size(mx_vec));
-% Second layer of the combined band.  dNeff can change sign along eta (Primakoff:
+% Second layer of the combined band.  dNeff can change sign along g_q (Primakoff:
 % positive while phi leaves as late free radiation, negative once it stays coupled
-% through recombination, or chi heating vs phi release), so the excluded eta set
+% through recombination, or chi heating vs phi release), so the excluded g_q set
 % at one mass can be two intervals with an allowed strip between.  Layer 1 is the
 % lowest interval, layer 2 the next (any further ones merged into it, warned).
-[eta_all_lo2, eta_all_hi2, sg_all_lo2, sg_all_hi2] = deal(nan(size(mx_vec)));
-[eta_all_lo3, eta_all_hi3, sg_all_lo3, sg_all_hi3] = deal(nan(size(mx_vec)));
+[gq_all_lo2, gq_all_hi2, sg_all_lo2, sg_all_hi2] = deal(nan(size(mx_vec)));
+[gq_all_lo3, gq_all_hi3, sg_all_lo3, sg_all_hi3] = deal(nan(size(mx_vec)));
 
 t_phi = tic;
 % parfor for the same reason the other blocks use it: the cache is
@@ -922,16 +922,16 @@ t_phi = tic;
 % serial block left.
 parfor j = 1:length(mx_vec)
     m  = mx_vec(j);
-    % One Delta-Neff call per eta, memoized, both epochs extracted.
+    % One Delta-Neff call per g_q, memoized, both epochs extracted.
     cache = containers.Map('KeyType', 'double', 'ValueType', 'any');
-    ndinfo = @(le) nd_cached(cache, mphi, m, gx, 10^le * g_ref, interaction, T_RH);
-    % Cap the eta-scan at the EFT ceiling: above it the rates trip
+    ndinfo = @(le) nd_cached(cache, mphi, m, gx, 10^le * ghat, interaction, T_RH);
+    % Cap the g_q scan at the EFT ceiling: above it the rates trip
     % axial_couplings (NaN), so the fixed [le_scan_lo, le_scan_hi] window can
     % sit entirely in the invalid region (axialVector at small mphi) and return
     % empty bands.  Scan the EFT-valid decades below the ceiling instead.  No-op
-    % for non-axialVector (eta_ceiling NaN).
+    % for non-axialVector (gq_ceiling NaN).
     lo_j = le_scan_lo; hi_j = min(le_scan_hi, le_neff_hi);
-    capj = eta_ceiling(j);
+    capj = gq_ceiling(j);
     if isfinite(capj) && capj > 0
         hi_j = min(hi_j, log10(capj) - 0.05);   % stay just below the ceiling
         lo_j = min([lo_j, hi_j - 12, -25]);      % reach down past the relic curves
@@ -963,24 +963,24 @@ parfor j = 1:length(mx_vec)
                             use_bbn, use_cmb, true)], ...
                          lo_j, hi_j, n_neff, 0, 1, neff_nsig, {'tot'});
 
-    sgmap = @(eta) DMnucxsec(m, mphi, gx, eta*g_ref, interaction_sig) * hbarc^2;
+    sgmap = @(gq) DMnucxsec(m, mphi, gx, gq*ghat, interaction_sig) * hbarc^2;
     sg1 = @(e) ternan(e, sgmap);
 
-    eta_chi_lo(j)=E.chi(1); eta_chi_hi(j)=E.chi(2);
-    eta_phi_lo(j)=E.phi(1); eta_phi_hi(j)=E.phi(2);
-    eta_tot_lo(j)=E.tot(1); eta_tot_hi(j)=E.tot(2);
-    eta_pos_lo(j)=E.tot_pos(1); eta_pos_hi(j)=E.tot_pos(2);
-    eta_neg_lo(j)=E.tot_neg(1); eta_neg_hi(j)=E.tot_neg(2);
+    gq_chi_lo(j)=E.chi(1); gq_chi_hi(j)=E.chi(2);
+    gq_phi_lo(j)=E.phi(1); gq_phi_hi(j)=E.phi(2);
+    gq_tot_lo(j)=E.tot(1); gq_tot_hi(j)=E.tot(2);
+    gq_pos_lo(j)=E.tot_pos(1); gq_pos_hi(j)=E.tot_pos(2);
+    gq_neg_lo(j)=E.tot_neg(1); gq_neg_hi(j)=E.tot_neg(2);
     allon_chi(j)=E.allon.chi; allon_phi(j)=E.allon.phi; allon_tot(j)=E.allon.tot;
     allon_pos(j)=E.allon.tot_pos; allon_neg(j)=E.allon.tot_neg;
 
-    eta_tot_lo_c(j)=Ec.tot(1); eta_tot_hi_c(j)=Ec.tot(2);
-    eta_pos_lo_c(j)=Ec.tot_pos(1); eta_pos_hi_c(j)=Ec.tot_pos(2);
-    eta_neg_lo_c(j)=Ec.tot_neg(1); eta_neg_hi_c(j)=Ec.tot_neg(2);
+    gq_tot_lo_c(j)=Ec.tot(1); gq_tot_hi_c(j)=Ec.tot(2);
+    gq_pos_lo_c(j)=Ec.tot_pos(1); gq_pos_hi_c(j)=Ec.tot_pos(2);
+    gq_neg_lo_c(j)=Ec.tot_neg(1); gq_neg_hi_c(j)=Ec.tot_neg(2);
     allon_tot_c(j)=Ec.allon.tot; allon_pos_c(j)=Ec.allon.tot_pos; allon_neg_c(j)=Ec.allon.tot_neg;
 
     % A band reaching the top of the (perturbativity-capped) scan is OPEN ABOVE,
-    % not closed at eta = 1: everything above is excluded too, it just is not a
+    % not closed at g_q = 1: everything above is excluded too, it just is not a
     % coupling we solve at.  NaN is how draw_neff_band says "fill to cap_fn".
     % Split into disjoint intervals.
     if isfield(Ea, 'iv'), ivj = Ea.iv.tot; else, ivj = Ea.tot; end
@@ -1023,9 +1023,9 @@ parfor j = 1:length(mx_vec)
             lay(k,:) = ivj(q,:);
         end
     end
-    eta_all_lo(j)=lay(1,1);  eta_all_hi(j)=lay(1,2);
-    eta_all_lo2(j)=lay(2,1); eta_all_hi2(j)=lay(2,2);
-    eta_all_lo3(j)=lay(3,1); eta_all_hi3(j)=lay(3,2);
+    gq_all_lo(j)=lay(1,1);  gq_all_hi(j)=lay(1,2);
+    gq_all_lo2(j)=lay(2,1); gq_all_hi2(j)=lay(2,2);
+    gq_all_lo3(j)=lay(3,1); gq_all_hi3(j)=lay(3,2);
 
     sg_chi_lo(j)=sg1(E.chi(1)); sg_chi_hi(j)=sg1(E.chi(2));
     sg_phi_lo(j)=sg1(E.phi(1)); sg_phi_hi(j)=sg1(E.phi(2));
@@ -1035,20 +1035,20 @@ parfor j = 1:length(mx_vec)
     sg_tot_lo_c(j)=sg1(Ec.tot(1)); sg_tot_hi_c(j)=sg1(Ec.tot(2));
     sg_pos_lo_c(j)=sg1(Ec.tot_pos(1)); sg_pos_hi_c(j)=sg1(Ec.tot_pos(2));
     sg_neg_lo_c(j)=sg1(Ec.tot_neg(1)); sg_neg_hi_c(j)=sg1(Ec.tot_neg(2));
-    sg_all_lo(j)=sg1(eta_all_lo(j)); sg_all_hi(j)=sg1(eta_all_hi(j));
-    sg_all_lo2(j)=sg1(eta_all_lo2(j)); sg_all_hi2(j)=sg1(eta_all_hi2(j));
-    sg_all_lo3(j)=sg1(eta_all_lo3(j)); sg_all_hi3(j)=sg1(eta_all_hi3(j));
+    sg_all_lo(j)=sg1(gq_all_lo(j)); sg_all_hi(j)=sg1(gq_all_hi(j));
+    sg_all_lo2(j)=sg1(gq_all_lo2(j)); sg_all_hi2(j)=sg1(gq_all_hi2(j));
+    sg_all_lo3(j)=sg1(gq_all_lo3(j)); sg_all_hi3(j)=sg1(gq_all_hi3(j));
 end
 fprintf('[compare_limits_g] Delta-Neff block (BBN+CMB): %.2f s\n', toc(t_phi));
 
 % -----------------------------------------------------------------------
-% External constraints (external_loglikes.m) as eta-BANDS.  Here g = eta*g_ref varies
-% and the nucleon couplings are linear in eta, so SN1987A / neutron-star /
-% 5th-force each exclude a fixed eta-INTERVAL (mphi & g_ref fixed ->
+% External constraints (external_loglikes.m) as g_q-BANDS.  Here g = g_q*ghat varies
+% and the nucleon couplings are linear in g_q, so SN1987A / neutron-star /
+% 5th-force each exclude a fixed g_q-INTERVAL (mphi & ghat fixed ->
 % mx-independent).  The min/max below assume ONE contiguous interval per
 % constraint, which holds because every nucleon coupling (and hence every
-% product the 5th-force curves bound) is monotonic in eta.
-% Derive each interval from external_loglikes by scanning eta once over
+% product the 5th-force curves bound) is monotonic in g_q.
+% Derive each interval from external_loglikes by scanning g_q once over
 % [le_ext_lo, le_ext_hi] (its OWN window -- see the note there), then remap the
 % edges onto the sigma_chiN / <sigma v>_gg axes per-mx, exactly like the
 % Delta-Neff bands.  {field, label, colour}:
@@ -1057,16 +1057,16 @@ fprintf('[compare_limits_g] Delta-Neff block (BBN+CMB): %.2f s\n', toc(t_phi));
 % (kaon / kphi / CMB / INTEGRAL, drawn separately below, kaon being a phase-space
 % integral) is switched off so the wider, denser grid costs no more than the old
 % narrow one -- it is in fact ~7x cheaper.
-[ext_eta_lo, ext_eta_hi, ext_sg_lo, ext_sg_hi, ext_vg_lo, ext_vg_hi] = ...
-    ext_bands(ext_specs, mx_vec, mphi, gx, g_ref, interaction, interaction_sig, ...
+[ext_gq_lo, ext_gq_hi, ext_sg_lo, ext_sg_hi, ext_vg_lo, ext_vg_hi] = ...
+    ext_bands(ext_specs, mx_vec, mphi, gx, ghat, interaction, interaction_sig, ...
               hbarc, le_ext_lo, le_ext_hi, n_ext, plot_svgg);
 
 % -----------------------------------------------------------------------
 % <sigma v>_{gamma gamma -> chi chi} at the freeze-out scale T = m_chi/20,
 % via detailed balance from svavg('gg').  Mirrors the sigma_chiN figure: one
 % value per mechanism at its Omega h^2 = 0.12 coupling, the perturbativity
-% (eta=1) line, and the Delta-Neff band edges remapped from eta.  Units: cm^3/s.
-% Gated by plot_svgg (each non-NaN eta costs one svavg('gg') call).
+% (g_q=1) line, and the Delta-Neff band edges remapped from g_q.  Units: cm^3/s.
+% Gated by plot_svgg (each non-NaN g_q costs one svavg('gg') call).
 % -----------------------------------------------------------------------
 svgg_fi      = nan(size(mx_vec)); svgg_fo      = nan(size(mx_vec));
 svgg_loop_fi = nan(size(mx_vec)); svgg_loop_fo = nan(size(mx_vec));
@@ -1080,57 +1080,57 @@ if plot_svgg
     t_svgg = tic;
     parfor j = 1:length(mx_vec)
         m = mx_vec(j);
-        f = @(etav) svgg_eta(m, mphi, gx, etav, g_ref, interaction, hbarc);   %#ok<PFBNS>
-        svgg_fi(j)      = f(etavec_fi(j));
-        svgg_fo(j)      = f(etavec_fo(j));
-        svgg_loop_fi(j) = f(etavec_loop_fi(j));
-        svgg_loop_fo(j) = f(etavec_loop_fo(j));
+        f = @(gqv) svgg_gq(m, mphi, gx, gqv, ghat, interaction, hbarc);   %#ok<PFBNS>
+        svgg_fi(j)      = f(gqvec_fi(j));
+        svgg_fo(j)      = f(gqvec_fo(j));
+        svgg_loop_fi(j) = f(gqvec_loop_fi(j));
+        svgg_loop_fo(j) = f(gqvec_loop_fo(j));
         svgg_pert(j)    = f(1);
-        vg_chi_lo(j)=f(eta_chi_lo(j)); vg_chi_hi(j)=f(eta_chi_hi(j));
-        vg_phi_lo(j)=f(eta_phi_lo(j)); vg_phi_hi(j)=f(eta_phi_hi(j));
-        vg_tot_lo(j)=f(eta_tot_lo(j)); vg_tot_hi(j)=f(eta_tot_hi(j));
-        vg_pos_lo(j)=f(eta_pos_lo(j)); vg_pos_hi(j)=f(eta_pos_hi(j));
-        vg_neg_lo(j)=f(eta_neg_lo(j)); vg_neg_hi(j)=f(eta_neg_hi(j));
-        vg_tot_lo_c(j)=f(eta_tot_lo_c(j)); vg_tot_hi_c(j)=f(eta_tot_hi_c(j));
-        vg_pos_lo_c(j)=f(eta_pos_lo_c(j)); vg_pos_hi_c(j)=f(eta_pos_hi_c(j));
-        vg_neg_lo_c(j)=f(eta_neg_lo_c(j)); vg_neg_hi_c(j)=f(eta_neg_hi_c(j));
-        vg_all_lo(j)=f(eta_all_lo(j)); vg_all_hi(j)=f(eta_all_hi(j));
-        vg_all_lo2(j)=f(eta_all_lo2(j)); vg_all_hi2(j)=f(eta_all_hi2(j));
-        vg_all_lo3(j)=f(eta_all_lo3(j)); vg_all_hi3(j)=f(eta_all_hi3(j));
-        vg_med_lo(j)=f(eta_med_lo(j)); vg_med_hi(j)=f(eta_med_hi(j));
+        vg_chi_lo(j)=f(gq_chi_lo(j)); vg_chi_hi(j)=f(gq_chi_hi(j));
+        vg_phi_lo(j)=f(gq_phi_lo(j)); vg_phi_hi(j)=f(gq_phi_hi(j));
+        vg_tot_lo(j)=f(gq_tot_lo(j)); vg_tot_hi(j)=f(gq_tot_hi(j));
+        vg_pos_lo(j)=f(gq_pos_lo(j)); vg_pos_hi(j)=f(gq_pos_hi(j));
+        vg_neg_lo(j)=f(gq_neg_lo(j)); vg_neg_hi(j)=f(gq_neg_hi(j));
+        vg_tot_lo_c(j)=f(gq_tot_lo_c(j)); vg_tot_hi_c(j)=f(gq_tot_hi_c(j));
+        vg_pos_lo_c(j)=f(gq_pos_lo_c(j)); vg_pos_hi_c(j)=f(gq_pos_hi_c(j));
+        vg_neg_lo_c(j)=f(gq_neg_lo_c(j)); vg_neg_hi_c(j)=f(gq_neg_hi_c(j));
+        vg_all_lo(j)=f(gq_all_lo(j)); vg_all_hi(j)=f(gq_all_hi(j));
+        vg_all_lo2(j)=f(gq_all_lo2(j)); vg_all_hi2(j)=f(gq_all_hi2(j));
+        vg_all_lo3(j)=f(gq_all_lo3(j)); vg_all_hi3(j)=f(gq_all_hi3(j));
+        vg_med_lo(j)=f(gq_med_lo(j)); vg_med_hi(j)=f(gq_med_hi(j));
     end
     fprintf('[compare_limits_g] <sigma v>_gg block: %.2f s\n', toc(t_svgg));
 end
 
 % -----------------------------------------------------------------------
-% Meson/indirect-detection exclusions in eta (the nucleon bounds SN1987A/NS/
-% 5th-force are already handled above as ext_specs eta-BANDS).  These five are
-% ratio constraints; eta_crit(mx) is the eta at which the ratio reaches 1 and
-% the point is excluded ABOVE it.  (Naively ratio ~ eta^2, but the mediator
+% Meson/indirect-detection exclusions in g_q (the nucleon bounds SN1987A/NS/
+% 5th-force are already handled above as ext_specs g_q-BANDS).  These five are
+% ratio constraints; gq_crit(mx) is the g_q at which the ratio reaches 1 and
+% the point is excluded ABOVE it.  (Naively ratio ~ g_q^2, but the mediator
 % width spoils that on resonance -- see docs/kaon_constraint.md --
-% so eta_crit comes from a root-find seeded with the eta^2 rescale.)  kaon
+% so gq_crit comes from a root-find seeded with the g_q^2 rescale.)  kaon
 % uses kaon_invisible_ratio; kphi/cmb/integral/mesoninv use mesonandCMB_ratio.  Each maps
-% to a sigma_chiN / <sigma v> curve at eta_crit.  (kphi is eta-dependent here --
+% to a sigma_chiN / <sigma v> curve at gq_crit.  (kphi is g_q-dependent here --
 % unlike the gx-scan, where it is gx-independent and has no curve.)  kphi can
-% also have a CEILING (eta_rat_hi): above it the phi decays visibly inside
+% also have a CEILING (gq_rat_hi): above it the phi decays visibly inside
 % NA62 and the bound switches off, so its excluded region is a band.
 % -----------------------------------------------------------------------
 t_ext = tic;
-[eta_rat, sg_rat, vg_rat, eta_rat_hi, sg_rat_hi, vg_rat_hi] = ratio_curves(mx_vec, mphi, ...
-    gx, g_ref, interaction, interaction_sig, hbarc, rat_show_of(SHOW), plot_svgg);
+[gq_rat, sg_rat, vg_rat, gq_rat_hi, sg_rat_hi, vg_rat_hi] = ratio_curves(mx_vec, mphi, ...
+    gx, ghat, interaction, interaction_sig, hbarc, rat_show_of(SHOW), plot_svgg);
 fprintf('[compare_limits_g] External ratio block: %.2f s\n', toc(t_ext));
 
 % -----------------------------------------------------------------------
 % Write data to .dat file
-% Columns: mx_GeV  eta_fi  eta_fo  eta_loop_fi  eta_loop_fo
+% Columns: mx_GeV  gq_fi  gq_fo  gq_loop_fi  gq_loop_fo
 %          sg_fi_cm2  sg_fo_cm2  sg_loop_fi_cm2  sg_loop_fo_cm2  sg_pert_cm2
-%          eta_neff_tot_lo  eta_neff_tot_hi  sg_neff_tot_lo_cm2  sg_neff_tot_hi_cm2
-%          eta_neff_chi_lo  eta_neff_chi_hi  eta_neff_phi_lo  eta_neff_phi_hi
-%          eta_neff_all_lo  eta_neff_all_hi  (the combined BBN-or-CMB band, plotted:
-%          up to three excluded eta intervals by role: *_all_lo/hi = dNeff<0
+%          gq_neff_tot_lo  gq_neff_tot_hi  sg_neff_tot_lo_cm2  sg_neff_tot_hi_cm2
+%          gq_neff_chi_lo  gq_neff_chi_hi  gq_neff_phi_lo  gq_neff_phi_hi
+%          gq_neff_all_lo  gq_neff_all_hi  (the combined BBN-or-CMB band, plotted:
+%          up to three excluded g_q intervals by role: *_all_lo/hi = dNeff<0
 %          below any positive one, *_all_lo2/hi2 = dNeff>0, *_all_lo3/hi3 = the
 %          rest above, usually open above)
-%          eta_med_lo  eta_med_hi  sg_med_lo_cm2  sg_med_hi_cm2  (stable mediator
+%          gq_med_lo  gq_med_hi  sg_med_lo_cm2  sg_med_hi_cm2  (stable mediator
 %          overcloses, Omega_A' h^2 > 0.12; freeze_coupled panels only)
 % NaN = no solution / no exclusion at that mass point.
 % -----------------------------------------------------------------------
@@ -1138,31 +1138,31 @@ if ~exist('dat_tag', 'var'), dat_tag = ''; end   % set by the batch block, if an
 dat_fname = sprintf('output/compare_limits_g_%s_mphi%.4g_gx%.4g%s.dat', interaction, mphi, gx, dat_tag);
 if ~isfolder('output'), mkdir('output'); end
 fid = fopen(dat_fname, 'w');
-fprintf(fid, '# compare_limits_g.m: interaction=%s  mphi=%.6g GeV  gx=%.6g  g_ref=[%.6g %.6g %.6g]  T_RH=%.6g GeV  neff_bbn=%.3g+/-%.3g  neff_cmb=%.3g+/-%.3g  nsig=%.3g\n', ...
-        interaction, mphi, gx, g_ref(1), g_ref(2), g_ref(3), T_RH, neff_mu_bbn, neff_sig_bbn, neff_mu_cmb, neff_sig_cmb, neff_nsig);
-fprintf(fid, ['# mx_GeV  eta_fi  eta_fo  eta_loop_fi  eta_loop_fo  sg_fi_cm2  sg_fo_cm2  sg_loop_fi_cm2  sg_loop_fo_cm2  sg_pert_cm2' ...
-              '  eta_neff_tot_lo  eta_neff_tot_hi  sg_neff_tot_lo_cm2  sg_neff_tot_hi_cm2  eta_neff_chi_lo  eta_neff_chi_hi  eta_neff_phi_lo  eta_neff_phi_hi' ...
-              '  eta_cmb_pos_lo  eta_cmb_pos_hi  eta_cmb_neg_lo  eta_cmb_neg_hi  sg_cmb_pos_lo_cm2  sg_cmb_pos_hi_cm2  sg_cmb_neg_lo_cm2  sg_cmb_neg_hi_cm2' ...
-              '  eta_neff_all_lo  eta_neff_all_hi  sg_neff_all_lo_cm2  sg_neff_all_hi_cm2' ...
-              '  eta_neff_all_lo2  eta_neff_all_hi2  sg_neff_all_lo2_cm2  sg_neff_all_hi2_cm2' ...
-              '  eta_neff_all_lo3  eta_neff_all_hi3  sg_neff_all_lo3_cm2  sg_neff_all_hi3_cm2' ...
-              '  eta_med_lo  eta_med_hi  sg_med_lo_cm2  sg_med_hi_cm2\n']);
+fprintf(fid, '# compare_limits_g.m: interaction=%s  mphi=%.6g GeV  gx=%.6g  ghat=[%.6g %.6g %.6g]  T_RH=%.6g GeV  neff_bbn=%.3g+/-%.3g  neff_cmb=%.3g+/-%.3g  nsig=%.3g\n', ...
+        interaction, mphi, gx, ghat(1), ghat(2), ghat(3), T_RH, neff_mu_bbn, neff_sig_bbn, neff_mu_cmb, neff_sig_cmb, neff_nsig);
+fprintf(fid, ['# mx_GeV  gq_fi  gq_fo  gq_loop_fi  gq_loop_fo  sg_fi_cm2  sg_fo_cm2  sg_loop_fi_cm2  sg_loop_fo_cm2  sg_pert_cm2' ...
+              '  gq_neff_tot_lo  gq_neff_tot_hi  sg_neff_tot_lo_cm2  sg_neff_tot_hi_cm2  gq_neff_chi_lo  gq_neff_chi_hi  gq_neff_phi_lo  gq_neff_phi_hi' ...
+              '  gq_cmb_pos_lo  gq_cmb_pos_hi  gq_cmb_neg_lo  gq_cmb_neg_hi  sg_cmb_pos_lo_cm2  sg_cmb_pos_hi_cm2  sg_cmb_neg_lo_cm2  sg_cmb_neg_hi_cm2' ...
+              '  gq_neff_all_lo  gq_neff_all_hi  sg_neff_all_lo_cm2  sg_neff_all_hi_cm2' ...
+              '  gq_neff_all_lo2  gq_neff_all_hi2  sg_neff_all_lo2_cm2  sg_neff_all_hi2_cm2' ...
+              '  gq_neff_all_lo3  gq_neff_all_hi3  sg_neff_all_lo3_cm2  sg_neff_all_hi3_cm2' ...
+              '  gq_med_lo  gq_med_hi  sg_med_lo_cm2  sg_med_hi_cm2\n']);
 for jj = 1:length(mx_vec)
     fprintf(fid, ['%.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e' ...
                   '  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e' ...
                   '  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e' ...
                   '  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e' ...
                   '  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e  %.6e\n'], ...
-        mx_vec(jj), etavec_fi(jj), etavec_fo(jj), etavec_loop_fi(jj), etavec_loop_fo(jj), ...
+        mx_vec(jj), gqvec_fi(jj), gqvec_fo(jj), gqvec_loop_fi(jj), gqvec_loop_fo(jj), ...
         sglim_fi(jj), sglim_fo(jj), sglim_loop_fi(jj), sglim_loop_fo(jj), sglim_pert(jj), ...
-        eta_tot_lo(jj), eta_tot_hi(jj), sg_tot_lo(jj), sg_tot_hi(jj), ...
-        eta_chi_lo(jj), eta_chi_hi(jj), eta_phi_lo(jj), eta_phi_hi(jj), ...
-        eta_pos_lo_c(jj), eta_pos_hi_c(jj), eta_neg_lo_c(jj), eta_neg_hi_c(jj), ...
+        gq_tot_lo(jj), gq_tot_hi(jj), sg_tot_lo(jj), sg_tot_hi(jj), ...
+        gq_chi_lo(jj), gq_chi_hi(jj), gq_phi_lo(jj), gq_phi_hi(jj), ...
+        gq_pos_lo_c(jj), gq_pos_hi_c(jj), gq_neg_lo_c(jj), gq_neg_hi_c(jj), ...
         sg_pos_lo_c(jj), sg_pos_hi_c(jj), sg_neg_lo_c(jj), sg_neg_hi_c(jj), ...
-        eta_all_lo(jj), eta_all_hi(jj), sg_all_lo(jj), sg_all_hi(jj), ...
-        eta_all_lo2(jj), eta_all_hi2(jj), sg_all_lo2(jj), sg_all_hi2(jj), ...
-        eta_all_lo3(jj), eta_all_hi3(jj), sg_all_lo3(jj), sg_all_hi3(jj), ...
-        eta_med_lo(jj), eta_med_hi(jj), sg_med_lo(jj), sg_med_hi(jj));
+        gq_all_lo(jj), gq_all_hi(jj), sg_all_lo(jj), sg_all_hi(jj), ...
+        gq_all_lo2(jj), gq_all_hi2(jj), sg_all_lo2(jj), sg_all_hi2(jj), ...
+        gq_all_lo3(jj), gq_all_hi3(jj), sg_all_lo3(jj), sg_all_hi3(jj), ...
+        gq_med_lo(jj), gq_med_hi(jj), sg_med_lo(jj), sg_med_hi(jj));
 end
 fclose(fid);
 fprintf('[compare_limits_g] Wrote %s\n', dat_fname);
@@ -1170,7 +1170,7 @@ fprintf('[compare_limits_g] Wrote %s\n', dat_fname);
 % Cache the computed arrays (see the "Computation cache" header above).
 CACHE_SKIP = {'SHOW','BATCH','batch_params','REPLOT','REFRESH_EXT','REFRESH_NEFF','RELIC_CACHED','cache_fname','dat_tag', ...
               'dat_fname','fid','ans','plot_sigma_chiN','plot_gx','plot_svgg', ...
-              'plot_eta','plot_kaon','plot_cmb','plot_integral','plot_kphi', ...
+              'plot_gq','plot_kaon','plot_cmb','plot_integral','plot_kphi', ...
               'ext_specs','ext_show','nE','ext_excl','s_mix','SIGMA_YCAP','sigma_ycap_run_','FLOAT_ALIGN','CACHE_SKIP','cache_vars','wv_','k_','v_'};
 wv_ = who; cache_vars = {};
 for k_ = 1:numel(wv_)
@@ -1193,17 +1193,17 @@ load(cache_fname);
 SIGMA_YCAP = BATCH.sigma_ycap_run;
 fprintf('[compare_limits_g] Replot from %s (no recomputation)\n', cache_fname);
 % A cache from before the two-interval dNeff band has no second layer.
-if ~exist('eta_all_lo2', 'var')
-    [eta_all_lo2, eta_all_hi2, sg_all_lo2, sg_all_hi2, vg_all_lo2, vg_all_hi2] = deal(nan(size(mx_vec)));
+if ~exist('gq_all_lo2', 'var')
+    [gq_all_lo2, gq_all_hi2, sg_all_lo2, sg_all_hi2, vg_all_lo2, vg_all_hi2] = deal(nan(size(mx_vec)));
 end
 % ...and one from before the three-role band has no third (it put the rest in
 % layer 2); REPLOT = 'neff' rebuilds all three.
-if ~exist('eta_all_lo3', 'var')
-    [eta_all_lo3, eta_all_hi3, sg_all_lo3, sg_all_hi3, vg_all_lo3, vg_all_hi3] = deal(nan(size(mx_vec)));
+if ~exist('gq_all_lo3', 'var')
+    [gq_all_lo3, gq_all_hi3, sg_all_lo3, sg_all_hi3, vg_all_lo3, vg_all_hi3] = deal(nan(size(mx_vec)));
 end
 % ...and one from before 2026-11-17 has no mediator-relic band.
-if ~exist('eta_med_lo', 'var')
-    [eta_med_lo, eta_med_hi, sg_med_lo, sg_med_hi, vg_med_lo, vg_med_hi] = deal(nan(size(mx_vec)));
+if ~exist('gq_med_lo', 'var')
+    [gq_med_lo, gq_med_hi, sg_med_lo, sg_med_hi, vg_med_lo, vg_med_hi] = deal(nan(size(mx_vec)));
 end
 % Re-derive what the load may have clobbered with stale values: ext_show and nE
 % follow the CURRENT SHOW / ext_specs, and a cache written when there were
@@ -1218,26 +1218,26 @@ if ~exist('le_ext_hi', 'var'), le_ext_hi = 8;   end
 if ~exist('n_ext', 'var'), n_ext = 1 + round((le_ext_hi - le_ext_lo) / 0.04); end
 if REFRESH_EXT
     t_ext = tic;
-    [ext_eta_lo, ext_eta_hi, ext_sg_lo, ext_sg_hi, ext_vg_lo, ext_vg_hi] = ...
-        ext_bands(ext_specs, mx_vec, mphi, gx, g_ref, interaction, interaction_sig, ...
+    [ext_gq_lo, ext_gq_hi, ext_sg_lo, ext_sg_hi, ext_vg_lo, ext_vg_hi] = ...
+        ext_bands(ext_specs, mx_vec, mphi, gx, ghat, interaction, interaction_sig, ...
                   hbarc, le_ext_lo, le_ext_hi, n_ext, plot_svgg);
-    save(cache_fname, 'ext_eta_lo', 'ext_eta_hi', 'ext_sg_lo', 'ext_sg_hi', ...
+    save(cache_fname, 'ext_gq_lo', 'ext_gq_hi', 'ext_sg_lo', 'ext_sg_hi', ...
          'ext_vg_lo', 'ext_vg_hi', 'le_ext_lo', 'le_ext_hi', 'n_ext', '-append');
     fprintf('[compare_limits_g] External bands recomputed (%.1f s) -> %s\n', ...
             toc(t_ext), cache_fname);
     t_ext = tic;
-    [eta_rat, sg_rat, vg_rat, eta_rat_hi, sg_rat_hi, vg_rat_hi] = ratio_curves(mx_vec, ...
-        mphi, gx, g_ref, interaction, interaction_sig, hbarc, rat_show_of(SHOW), plot_svgg);
-    save(cache_fname, 'eta_rat', 'sg_rat', 'vg_rat', 'eta_rat_hi', 'sg_rat_hi', ...
+    [gq_rat, sg_rat, vg_rat, gq_rat_hi, sg_rat_hi, vg_rat_hi] = ratio_curves(mx_vec, ...
+        mphi, gx, ghat, interaction, interaction_sig, hbarc, rat_show_of(SHOW), plot_svgg);
+    save(cache_fname, 'gq_rat', 'sg_rat', 'vg_rat', 'gq_rat_hi', 'sg_rat_hi', ...
          'vg_rat_hi', '-append');
     fprintf('[compare_limits_g] Ratio constraints recomputed (%.1f s) -> %s\n', ...
             toc(t_ext), cache_fname);
-elseif size(eta_rat, 1) ~= numel(rat_show_of(SHOW))
+elseif size(gq_rat, 1) ~= numel(rat_show_of(SHOW))
     error('compare_limits_g:staleRat', ...
           ['%s predates the current ratio-constraint set (%d rows, now %d) -- ' ...
            'rerun with replot = ''ext'' to refresh them.'], ...
-          cache_fname, size(eta_rat, 1), numel(rat_show_of(SHOW)));
-elseif ~exist('ext_eta_lo', 'var') || numel(ext_eta_lo) ~= nE
+          cache_fname, size(gq_rat, 1), numel(rat_show_of(SHOW)));
+elseif ~exist('ext_gq_lo', 'var') || numel(ext_gq_lo) ~= nE
     error('compare_limits_g:staleExt', ...
           ['%s predates the current external-constraint set (ext_specs now has ' ...
            '%d) -- rerun with replot = ''ext'' to refresh the bands.'], ...
@@ -1245,8 +1245,8 @@ elseif ~exist('ext_eta_lo', 'var') || numel(ext_eta_lo) ~= nE
 end
 % A cache from before the kphi ceiling: no ceiling, i.e. excluded to the top,
 % as it was drawn then.  replot = 'ext' computes it.
-if ~exist('eta_rat_hi', 'var')
-    eta_rat_hi = nan(size(eta_rat));  sg_rat_hi = eta_rat_hi;  vg_rat_hi = eta_rat_hi;
+if ~exist('gq_rat_hi', 'var')
+    gq_rat_hi = nan(size(gq_rat));  sg_rat_hi = gq_rat_hi;  vg_rat_hi = gq_rat_hi;
 end
 % The toggles are deliberately not cached, so re-apply what the compute block
 % would have derived from the current SHOW.
@@ -1254,7 +1254,7 @@ if ~SHOW.neff, neff_color_mode = 'off'; end
 end
 
 % Bullet Cluster: sigma_T/m_chi depends on (mx, mphi, gx) only, so at fixed gx it
-% excludes whole m_chi intervals at every eta.  Closed form, so it is evaluated
+% excludes whole m_chi intervals at every g_q.  Closed form, so it is evaluated
 % on every run (replots included) and never cached; written to its own sidecar.
 [bullet_som, bullet_iv, bullet_bound] = bullet_mx_columns(mx_vec, mphi, gx, interaction);
 bullet_fname = sprintf('output/compare_limits_g_%s_mphi%.4g_gx%.4g%s_bullet.dat', ...
@@ -1307,45 +1307,45 @@ c_bullet = [0.45 0.50 0.05];  % Bullet Cluster m_chi columns
 % twice; neither labelled left an unexplained dotted line.)
 pert_line_args = {'HandleVisibility', 'off'};
 if SHOW.pert_line && ~SHOW.nonpert
-    pert_line_args = {'DisplayName', 'Perturbativity ($\eta = 1$)'};
+    pert_line_args = {'DisplayName', 'Perturbativity ($g_q = 1$)'};
 end
 
 % Low-mass island walls (see the loop block).  A cache from before 2026-11-18
 % has none: find them now with the same test, which costs one solve per
 % candidate mass (plus a bisection where a wall exists).  Without the test, a
 % run of lower-branch-only masses ahead of the first two-branch mass -- an
-% island open-topped there, its upper branch above eta = 1 -- was taken for a
+% island open-topped there, its upper branch above g_q = 1 -- was taken for a
 % bump tip and erased (SxS, mphi = 1: the whole Oh2 = 0.12 line below 0.13 GeV).
 if ~exist('relic_tip_mx', 'var') || numel(relic_tip_mx) ~= numel(mx_vec)
     tip_dec_ = 2;  if exist('COALESCE_MAX_DEC', 'var'), tip_dec_ = COALESCE_MAX_DEC; end
-    relic_tip_mx = relic_island_tips(mx_vec, etavec_loop_fi, etavec_loop_fo, tip_dec_, ...
-        relic_oh2_at(solver_name, mphi, gx, g_ref, interaction, T_RH, production), Oh2_target);
+    relic_tip_mx = relic_island_tips(mx_vec, gqvec_loop_fi, gqvec_loop_fo, tip_dec_, ...
+        relic_oh2_at(solver_name, mphi, gx, ghat, interaction, T_RH, production), Oh2_target);
     clear tip_dec_
 end
 % The loop branches on a grid with a column at each wall; an inserted column
 % carries the couplings of the mass above it.  A lone lower root just below a
 % wall (the bump tip, see the loop block; a cache from before 2026-11-18 still
 % holds it) is not drawn: its line overshoots the wall and its fill runs to
-% eta = 1.
-lo_d_ = etavec_loop_fi;  sglo_d_ = sglim_loop_fi;
+% g_q = 1.
+lo_d_ = gqvec_loop_fi;  sglo_d_ = sglim_loop_fi;
 for j = find(isfinite(relic_tip_mx))
     k = j - 1;
-    while k >= 1 && ~isnan(lo_d_(k)) && isnan(etavec_loop_fo(k))
+    while k >= 1 && ~isnan(lo_d_(k)) && isnan(gqvec_loop_fo(k))
         lo_d_(k) = NaN;  sglo_d_(k) = NaN;  k = k - 1;
     end
 end
 [mx_rel, ia_rel, ins_rel] = relic_tip_columns(mx_vec, relic_tip_mx);
-eta_rel_lo = lo_d_(ia_rel);           eta_rel_hi = etavec_loop_fo(ia_rel);
+gq_rel_lo = lo_d_(ia_rel);           gq_rel_hi = gqvec_loop_fo(ia_rel);
 sg_rel_lo  = sglo_d_(ia_rel);         sg_rel_hi  = sglim_loop_fo(ia_rel);
 clear lo_d_ sglo_d_
 sg_rel_pert = sglim_pert(ia_rel);
 for k = find(ins_rel)
-    sg_rel_lo(k)   = DMnucxsec(mx_rel(k), mphi, gx, eta_rel_lo(k) * g_ref, interaction_sig) * hbarc^2;
-    sg_rel_hi(k)   = DMnucxsec(mx_rel(k), mphi, gx, eta_rel_hi(k) * g_ref, interaction_sig) * hbarc^2;
-    sg_rel_pert(k) = DMnucxsec(mx_rel(k), mphi, gx, g_ref, interaction_sig) * hbarc^2;
+    sg_rel_lo(k)   = DMnucxsec(mx_rel(k), mphi, gx, gq_rel_lo(k) * ghat, interaction_sig) * hbarc^2;
+    sg_rel_hi(k)   = DMnucxsec(mx_rel(k), mphi, gx, gq_rel_hi(k) * ghat, interaction_sig) * hbarc^2;
+    sg_rel_pert(k) = DMnucxsec(mx_rel(k), mphi, gx, ghat, interaction_sig) * hbarc^2;
 end
 
-fig_sigma = gobjects(0); fig_eta = gobjects(0); fig_svgg = gobjects(0);
+fig_sigma = gobjects(0); fig_gq = gobjects(0); fig_svgg = gobjects(0);
 if plot_sigma_chiN
 fig_sigma = figure; hold on;
 
@@ -1370,12 +1370,12 @@ relic_show = [SHOW.relic_fi, SHOW.relic_fo, SHOW.relic_loop, SHOW.relic_loop];
 for ii = 1:4
     if ~relic_show(ii), continue; end
     switch ii
-        case 1, xv = mx_vec; yvec = sglim_fi;  etac = etavec_fi;  col = c_fi;   lbl = 'Freeze-in';           showleg = true;
-        case 2, xv = mx_vec; yvec = sglim_fo;  etac = etavec_fo;  col = c_fo;   lbl = 'Freeze-out';          showleg = true;
-        case 3, xv = mx_rel; yvec = sg_rel_lo; etac = eta_rel_lo; col = c_loop; lbl = '$\Omega h^2 = 0.12$'; showleg = true;
-        case 4, xv = mx_rel; yvec = sg_rel_hi; etac = eta_rel_hi; col = c_loop; lbl = '';                    showleg = false;
+        case 1, xv = mx_vec; yvec = sglim_fi;  gqc = gqvec_fi;  col = c_fi;   lbl = 'Freeze-in';           showleg = true;
+        case 2, xv = mx_vec; yvec = sglim_fo;  gqc = gqvec_fo;  col = c_fo;   lbl = 'Freeze-out';          showleg = true;
+        case 3, xv = mx_rel; yvec = sg_rel_lo; gqc = gq_rel_lo; col = c_loop; lbl = '$\Omega h^2 = 0.12$'; showleg = true;
+        case 4, xv = mx_rel; yvec = sg_rel_hi; gqc = gq_rel_hi; col = c_loop; lbl = '';                    showleg = false;
     end
-    pert = etac <= 1;
+    pert = gqc <= 1;
     ys = yvec; ys(~pert) = NaN;
     yd = yvec; yd( pert) = NaN;
     if showleg
@@ -1386,15 +1386,15 @@ for ii = 1:4
     loglog(xv, yd, '--', 'LineWidth', 2, 'Color', col, 'HandleVisibility', 'off');
 end
 if SHOW.relic_loop
-    draw_relic_walls(mx_rel, ins_rel, eta_rel_lo, eta_rel_hi, c_loop, ...
-        @(m, e) DMnucxsec(m, mphi, gx, e * g_ref, interaction_sig) * hbarc^2);
+    draw_relic_walls(mx_rel, ins_rel, gq_rel_lo, gq_rel_hi, c_loop, ...
+        @(m, e) DMnucxsec(m, mphi, gx, e * ghat, interaction_sig) * hbarc^2);
 end
 
 set(gca, 'yscale', 'log', 'xscale', 'log');
 
 yl_for_bbn = ylim; y_bottom = yl_for_bbn(1); y_top_bbn = yl_for_bbn(2);
 [y_bottom, y_top_bbn] = row_frame('sigma', y_bottom, y_top_bbn, BATCH);
-sg_cap = @(m) DMnucxsec(m, mphi, gx, ceiling_lookup(m, mx_vec, eta_ceiling, 10^le_scan_hi)*g_ref, interaction_sig) * hbarc^2;
+sg_cap = @(m) DMnucxsec(m, mphi, gx, ceiling_lookup(m, mx_vec, gq_ceiling, 10^le_scan_hi)*ghat, interaction_sig) * hbarc^2;
 
 % Delta-Neff exclusion.  TOGGLE neff_color_mode (set above):
 %   'combined'  -> ONE band: excluded by BBN or CMB, either sign (default)
@@ -1480,9 +1480,9 @@ if SHOW.mediator_relic && any(isfinite(sg_med_lo))
         sprintf('$\\Omega_{%s}h^2 > 0.12$', phi_tex(interaction)), y_bottom, y_top_bbn, sg_cap, 'shade');
 end
 
-% External eta-bands remapped to sigma_chiN (SN1987A / neutron star / axial).
+% External g_q-bands remapped to sigma_chiN (SN1987A / neutron star / axial).
 for ie = 1:nE
-    if isfinite(ext_eta_lo(ie)) && ext_show(ie)
+    if isfinite(ext_gq_lo(ie)) && ext_show(ie)
         draw_neff_band(mx_vec, ext_sg_lo(ie,:), ext_sg_hi(ie,:), false(size(mx_vec)), ...
             ext_specs{ie,3}, 0.12, ext_specs{ie,2}, y_bottom, y_top_bbn, sg_cap, 'shade');
     end
@@ -1498,9 +1498,9 @@ end
 % warning.  They lower the FLOOR only; the top stays on frame_yrange's 98th
 % percentile, which is what rejects the relic-solver spikes (pouring ~200 deep
 % band values into that pool would drag the percentile down with them).  The
-% eta panel has always framed its ext_eta_*; this gives sigma the same deal.
+% g_q panel has always framed its ext_gq_*; this gives sigma the same deal.
 eylo = min(eylo, ext_frame_floor(ext_sg_lo, ext_sg_hi, ...
-                                 isfinite(ext_eta_lo(:)') & ext_show));
+                                 isfinite(ext_gq_lo(:)') & ext_show));
 overlay_rat_externals(mx_vec, sg_rat, sg_rat_hi, ext_rat_cols, ext_rat_lbls, row_top('sigma', eyhi*1e3, BATCH));
 apply_ylim('sigma', [eylo/5, eyhi*5], BATCH, SIGMA_YCAP);  % shared-row override wins
 if SHOW.bullet, draw_mx_columns(bullet_iv, mx_vec, c_bullet, 0.15, 'Bullet Cluster'); end
@@ -1556,17 +1556,17 @@ if STYLE_classic, grid on; else, grid off; end
 end  % plot_sigma_chiN
 
 % =======================================================================
-% Figure 2: eta vs m_chi (reusing the
-% eta vectors already computed above -- no additional physics runs).
+% Figure 2: g_q vs m_chi (reusing the
+% g_q vectors already computed above -- no additional physics runs).
 % =======================================================================
-if plot_eta
-fig_eta = figure; hold on;
+if plot_gq
+fig_gq = figure; hold on;
 
-% Overabundant band between FIMP and WIMP loop branches, capped at eta = 1.
-mask2 = ~isnan(eta_rel_lo);
+% Overabundant band between FIMP and WIMP loop branches, capped at g_q = 1.
+mask2 = ~isnan(gq_rel_lo);
 if any(mask2) && SHOW.overabundant
-    y_lo = eta_rel_lo;
-    y_hi = eta_rel_hi;
+    y_lo = gq_rel_lo;
+    y_hi = gq_rel_hi;
     use_pert = isnan(y_hi) | (y_hi > 1);
     y_hi(use_pert) = 1;
     mx_shade = mx_rel(mask2);
@@ -1582,10 +1582,10 @@ relic_show = [SHOW.relic_fi, SHOW.relic_fo, SHOW.relic_loop, SHOW.relic_loop];
 for ii = 1:4
     if ~relic_show(ii), continue; end
     switch ii
-        case 1, xv = mx_vec; yvec = etavec_fi;  col = c_fi;   lbl = 'Freeze-in';           showleg = true;
-        case 2, xv = mx_vec; yvec = etavec_fo;  col = c_fo;   lbl = 'Freeze-out';          showleg = true;
-        case 3, xv = mx_rel; yvec = eta_rel_lo; col = c_loop; lbl = '$\Omega h^2 = 0.12$'; showleg = true;
-        case 4, xv = mx_rel; yvec = eta_rel_hi; col = c_loop; lbl = '';                    showleg = false;
+        case 1, xv = mx_vec; yvec = gqvec_fi;  col = c_fi;   lbl = 'Freeze-in';           showleg = true;
+        case 2, xv = mx_vec; yvec = gqvec_fo;  col = c_fo;   lbl = 'Freeze-out';          showleg = true;
+        case 3, xv = mx_rel; yvec = gq_rel_lo; col = c_loop; lbl = '$\Omega h^2 = 0.12$'; showleg = true;
+        case 4, xv = mx_rel; yvec = gq_rel_hi; col = c_loop; lbl = '';                    showleg = false;
     end
     pert = yvec <= 1;
     ys = yvec; ys(~pert) = NaN;
@@ -1598,41 +1598,41 @@ for ii = 1:4
     loglog(xv, yd, '--', 'LineWidth', 2, 'Color', col, 'HandleVisibility', 'off');
 end
 if SHOW.relic_loop
-    draw_relic_walls(mx_rel, ins_rel, eta_rel_lo, eta_rel_hi, c_loop, @(m, e) e);
+    draw_relic_walls(mx_rel, ins_rel, gq_rel_lo, gq_rel_hi, c_loop, @(m, e) e);
 end
 
 set(gca, 'yscale', 'log', 'xscale', 'log');
 
-% Delta-Neff bands in eta directly (see the sigma panel for the mode toggle).
+% Delta-Neff bands in g_q directly (see the sigma panel for the mode toggle).
 yl_for_bbn = ylim; y_bottom = yl_for_bbn(1); y_top_bbn = yl_for_bbn(2);
-[y_bottom, y_top_bbn] = row_frame('eta', y_bottom, y_top_bbn, BATCH);
-eta_cap = @(m) ceiling_lookup(m, mx_vec, eta_ceiling, 10^le_scan_hi);
+[y_bottom, y_top_bbn] = row_frame('gq', y_bottom, y_top_bbn, BATCH);
+gq_cap = @(m) ceiling_lookup(m, mx_vec, gq_ceiling, 10^le_scan_hi);
 if strcmp(neff_color_mode, 'off')
     % Delta-Neff drawing disabled (SHOW.neff = false).
 elseif strcmp(neff_color_mode, 'combined')
-    draw_neff_layers(mx_vec, {eta_all_lo, eta_all_lo2, eta_all_lo3}, ...
-        {eta_all_hi, eta_all_hi2, eta_all_hi3}, allon_all, c_bbn, 0.18, ...
-        '$\Delta N_{\rm eff}$', y_bottom, y_top_bbn, eta_cap, 'shade');
+    draw_neff_layers(mx_vec, {gq_all_lo, gq_all_lo2, gq_all_lo3}, ...
+        {gq_all_hi, gq_all_hi2, gq_all_hi3}, allon_all, c_bbn, 0.18, ...
+        '$\Delta N_{\rm eff}$', y_bottom, y_top_bbn, gq_cap, 'shade');
 elseif strcmp(neff_color_mode, 'signed')
-    draw_neff_band(mx_vec, eta_pos_lo, eta_pos_hi, allon_pos, c_pos, 0.18, ...
-        sprintf('$\\Delta N_{\\rm eff}^{\\rm BBN}>%.2g$', thr_pos_bbn), y_bottom, y_top_bbn, eta_cap, 'shade');
-    draw_neff_band(mx_vec, eta_neg_lo, eta_neg_hi, allon_neg, c_neg, 0.18, ...
-        sprintf('$\\Delta N_{\\rm eff}^{\\rm BBN}<%.2g$', thr_neg_bbn), y_bottom, y_top_bbn, eta_cap, 'shade');
-    draw_neff_band(mx_vec, eta_pos_lo_c, eta_pos_hi_c, allon_pos_c, c_cmb_pos, 0.16, ...
-        sprintf('$\\Delta N_{\\rm eff}^{\\rm CMB}>%.2g$', thr_pos_cmb), y_bottom, y_top_bbn, eta_cap, 'shade');
-    draw_neff_band(mx_vec, eta_neg_lo_c, eta_neg_hi_c, allon_neg_c, c_cmb_neg, 0.16, ...
-        sprintf('$\\Delta N_{\\rm eff}^{\\rm CMB}<%.2g$', thr_neg_cmb), y_bottom, y_top_bbn, eta_cap, 'shade');
+    draw_neff_band(mx_vec, gq_pos_lo, gq_pos_hi, allon_pos, c_pos, 0.18, ...
+        sprintf('$\\Delta N_{\\rm eff}^{\\rm BBN}>%.2g$', thr_pos_bbn), y_bottom, y_top_bbn, gq_cap, 'shade');
+    draw_neff_band(mx_vec, gq_neg_lo, gq_neg_hi, allon_neg, c_neg, 0.18, ...
+        sprintf('$\\Delta N_{\\rm eff}^{\\rm BBN}<%.2g$', thr_neg_bbn), y_bottom, y_top_bbn, gq_cap, 'shade');
+    draw_neff_band(mx_vec, gq_pos_lo_c, gq_pos_hi_c, allon_pos_c, c_cmb_pos, 0.16, ...
+        sprintf('$\\Delta N_{\\rm eff}^{\\rm CMB}>%.2g$', thr_pos_cmb), y_bottom, y_top_bbn, gq_cap, 'shade');
+    draw_neff_band(mx_vec, gq_neg_lo_c, gq_neg_hi_c, allon_neg_c, c_cmb_neg, 0.16, ...
+        sprintf('$\\Delta N_{\\rm eff}^{\\rm CMB}<%.2g$', thr_neg_cmb), y_bottom, y_top_bbn, gq_cap, 'shade');
 else
-    draw_neff_band(mx_vec, eta_tot_lo, eta_tot_hi, allon_tot, c_bbn, 0.18, ...
-        sprintf('$|\\Delta N_{\\rm eff}^{\\rm BBN}-\\mu|>%.2g$', neff_nsig*neff_sig_bbn), y_bottom, y_top_bbn, eta_cap, 'shade');
-    draw_neff_band(mx_vec, eta_tot_lo_c, eta_tot_hi_c, allon_tot_c, c_cmb_neg, 0.16, ...
-        sprintf('$|\\Delta N_{\\rm eff}^{\\rm CMB}-\\mu|>%.2g$', neff_nsig*neff_sig_cmb), y_bottom, y_top_bbn, eta_cap, 'shade');
+    draw_neff_band(mx_vec, gq_tot_lo, gq_tot_hi, allon_tot, c_bbn, 0.18, ...
+        sprintf('$|\\Delta N_{\\rm eff}^{\\rm BBN}-\\mu|>%.2g$', neff_nsig*neff_sig_bbn), y_bottom, y_top_bbn, gq_cap, 'shade');
+    draw_neff_band(mx_vec, gq_tot_lo_c, gq_tot_hi_c, allon_tot_c, c_cmb_neg, 0.16, ...
+        sprintf('$|\\Delta N_{\\rm eff}^{\\rm CMB}-\\mu|>%.2g$', neff_nsig*neff_sig_cmb), y_bottom, y_top_bbn, gq_cap, 'shade');
 end
 if ~any(strcmp(neff_color_mode, {'combined', 'off'}))
-    draw_neff_band(mx_vec, eta_phi_lo, eta_phi_hi, allon_phi, c_phi, 0.0, ...
-        sprintf('$\\Delta N_{\\rm eff}\\,(%s)$', phi_tex(interaction)), y_bottom, y_top_bbn, eta_cap, 'edges');
-    draw_neff_band(mx_vec, eta_chi_lo, eta_chi_hi, allon_chi, c_chi, 0.0, ...
-        '$\Delta N_{\rm eff}\,(\chi)$', y_bottom, y_top_bbn, eta_cap, 'edges');
+    draw_neff_band(mx_vec, gq_phi_lo, gq_phi_hi, allon_phi, c_phi, 0.0, ...
+        sprintf('$\\Delta N_{\\rm eff}\\,(%s)$', phi_tex(interaction)), y_bottom, y_top_bbn, gq_cap, 'edges');
+    draw_neff_band(mx_vec, gq_chi_lo, gq_chi_hi, allon_chi, c_chi, 0.0, ...
+        '$\Delta N_{\rm eff}\,(\chi)$', y_bottom, y_top_bbn, gq_cap, 'edges');
 end
 
 if SHOW.pert_line
@@ -1640,7 +1640,7 @@ if SHOW.pert_line
 end
 if SHOW.nonpert
     yl = ylim;
-    y_top = row_top('eta', max(yl(2), 1e3), BATCH);
+    y_top = row_top('gq', max(yl(2), 1e3), BATCH);
     patch([mx_vec(1), mx_vec(end), mx_vec(end), mx_vec(1)], ...
           [1, 1, y_top, y_top], [0.3 0.3 0.3], ...
           'FaceAlpha', 0.15, 'EdgeColor', 'none', 'HandleVisibility', 'off');
@@ -1649,62 +1649,62 @@ if SHOW.nonpert
 end
 
 % Unitarity / EFT-validity ceiling (axialVector): dashed line + shade above.
-if any(isfinite(eta_ceiling)) && SHOW.unitarity
+if any(isfinite(gq_ceiling)) && SHOW.unitarity
     c_eft = [0.49 0.18 0.56];
-    loglog(mx_vec, eta_ceiling, '-.', 'LineWidth', 2, 'Color', c_eft, ...
+    loglog(mx_vec, gq_ceiling, '-.', 'LineWidth', 2, 'Color', c_eft, ...
            'HandleVisibility', 'off');
-    yl_e = ylim; ytop_e = row_top('eta', max(yl_e(2), 1e3), BATCH);
-    me = isfinite(eta_ceiling);
+    yl_e = ylim; ytop_e = row_top('gq', max(yl_e(2), 1e3), BATCH);
+    me = isfinite(gq_ceiling);
     patch([mx_vec(me), fliplr(mx_vec(me))], ...
-          [eta_ceiling(me), ytop_e*ones(1, sum(me))], c_eft, ...
+          [gq_ceiling(me), ytop_e*ones(1, sum(me))], c_eft, ...
           'FaceAlpha', 0.12, 'EdgeColor', 'none', 'HandleVisibility', 'off');
     legend_swatch(c_eft, 0.12, "Unitarity ($\Gamma_{A'} \ge m_A$ )");
     ylim(yl_e);
 end
 
-% Small-mixing-breakdown (axialVector): horizontal line at eta_mix + shade above.
-if isfinite(eta_mix) && SHOW.large_mixing
+% Small-mixing-breakdown (axialVector): horizontal line at gq_mix + shade above.
+if isfinite(gq_mix) && SHOW.large_mixing
     c_mix = [0.90 0 0.50];
-    yl_m = ylim; ytop_m = row_top('eta', max(yl_m(2), 1e3), BATCH);
-    loglog([mx_vec(1) mx_vec(end)], [eta_mix eta_mix], '-.', ...
+    yl_m = ylim; ytop_m = row_top('gq', max(yl_m(2), 1e3), BATCH);
+    loglog([mx_vec(1) mx_vec(end)], [gq_mix gq_mix], '-.', ...
            'LineWidth', 2, 'Color', c_mix, 'HandleVisibility', 'off');
     patch([mx_vec(1), mx_vec(end), mx_vec(end), mx_vec(1)], ...
-          [eta_mix, eta_mix, ytop_m, ytop_m], c_mix, ...
+          [gq_mix, gq_mix, ytop_m, ytop_m], c_mix, ...
           'FaceAlpha', 0.10, 'EdgeColor', 'none', 'HandleVisibility', 'off');
     legend_swatch(c_mix, 0.10, sprintf('Large mixing ($\\sin\\theta_{A''}>%.2g$)', s_mix));
     ylim(yl_m);
 end
 
 % Stable mediator overcloses (freeze_coupled's Omega_A' h^2 > 0.12).
-if SHOW.mediator_relic && any(isfinite(eta_med_lo))
-    draw_neff_band(mx_vec, eta_med_lo, eta_med_hi, false(size(mx_vec)), c_med, 0.15, ...
-        sprintf('$\\Omega_{%s}h^2 > 0.12$', phi_tex(interaction)), y_bottom, y_top_bbn, eta_cap, 'shade');
+if SHOW.mediator_relic && any(isfinite(gq_med_lo))
+    draw_neff_band(mx_vec, gq_med_lo, gq_med_hi, false(size(mx_vec)), c_med, 0.15, ...
+        sprintf('$\\Omega_{%s}h^2 > 0.12$', phi_tex(interaction)), y_bottom, y_top_bbn, gq_cap, 'shade');
 end
 
-% External constraints as horizontal eta-bands (mphi & g_ref fixed here).
+% External constraints as horizontal g_q-bands (mphi & ghat fixed here).
 for ie = 1:nE
-    if isfinite(ext_eta_lo(ie)) && ext_show(ie)
+    if isfinite(ext_gq_lo(ie)) && ext_show(ie)
         yl_sn = ylim;
         patch([mx_vec(1), mx_vec(end), mx_vec(end), mx_vec(1)], ...
-              [ext_eta_lo(ie), ext_eta_lo(ie), ext_eta_hi(ie), ext_eta_hi(ie)], ...
+              [ext_gq_lo(ie), ext_gq_lo(ie), ext_gq_hi(ie), ext_gq_hi(ie)], ...
               ext_specs{ie,3}, 'FaceAlpha', 0.12, 'EdgeColor', 'none', ...
               'HandleVisibility', 'off');
         legend_swatch(ext_specs{ie,3}, 0.12, ext_specs{ie,2});
         ylim(yl_sn);
     end
 end
-% Meson/indirect exclusions (kaon/kphi/cmb/integral) as eta curves.
-[eylo, eyhi] = frame_yrange(etavec_fi, etavec_fo, etavec_loop_fi, etavec_loop_fo, ...
-    eta_ceiling, eta_rat, ext_eta_lo, ext_eta_hi);
-overlay_rat_externals(mx_vec, eta_rat, eta_rat_hi, ext_rat_cols, ext_rat_lbls, row_top('eta', eyhi*1e3, BATCH));
-apply_ylim('eta', [eylo/5, eyhi*5], BATCH);   % shared-row override wins if present
+% Meson/indirect exclusions (kaon/kphi/cmb/integral) as g_q curves.
+[eylo, eyhi] = frame_yrange(gqvec_fi, gqvec_fo, gqvec_loop_fi, gqvec_loop_fo, ...
+    gq_ceiling, gq_rat, ext_gq_lo, ext_gq_hi);
+overlay_rat_externals(mx_vec, gq_rat, gq_rat_hi, ext_rat_cols, ext_rat_lbls, row_top('gq', eyhi*1e3, BATCH));
+apply_ylim('gq', [eylo/5, eyhi*5], BATCH);   % shared-row override wins if present
 if SHOW.bullet, draw_mx_columns(bullet_iv, mx_vec, c_bullet, 0.15, 'Bullet Cluster'); end
 xlim([mx_vec(1), mx_vec(end)]);   % truncate to the scanned mx range (no empty pad on the right)
 
 xlabel('$m_\chi$ (GeV)', 'FontSize', FS.label, 'Interpreter', 'latex');
 % The y label and numbers are drawn even on a panel that hides them, and only
 % emptied afterwards by hide_y_labels -- see there for why.
-ylabel('$\eta$', 'FontSize', FS.label, 'Interpreter', 'latex');
+ylabel('$g_q$', 'FontSize', FS.label, 'Interpreter', 'latex');
 if SHOW.legend
     legend('show', 'Interpreter', 'latex', 'FontSize', FS.legend, 'Location', 'northwest');
 else
@@ -1745,13 +1745,13 @@ end
 if ~SHOW.ylabel, hide_y_labels(gca); end
 set(gca,'yscale','log'); set(gca,'xscale','log');
 if STYLE_classic, grid on; else, grid off; end
-end  % plot_eta
+end  % plot_gq
 
 % =======================================================================
 % Figure 3: <sigma v>_{gamma gamma -> chi chi} (at T = m_chi/20) vs m_chi.
 % Same structure as Figure 1, with sigma_chiN -> <sigma v>_gg.  Curves solid
-% where perturbative (eta <= 1), dashed otherwise; the Delta-Neff band edges
-% are the same exclusions remapped from eta to <sigma v>_gg.
+% where perturbative (g_q <= 1), dashed otherwise; the Delta-Neff band edges
+% are the same exclusions remapped from g_q to <sigma v>_gg.
 % =======================================================================
 if plot_svgg
 fig_svgg = figure; hold on;
@@ -1777,12 +1777,12 @@ relic_show = [SHOW.relic_fi, SHOW.relic_fo, SHOW.relic_loop, SHOW.relic_loop];
 for ii = 1:4
     if ~relic_show(ii), continue; end
     switch ii
-        case 1, yvec = svgg_fi;      etac = etavec_fi;      col = c_fi;   lbl = 'Freeze-in';        showleg = true;
-        case 2, yvec = svgg_fo;      etac = etavec_fo;      col = c_fo;   lbl = 'Freeze-out';       showleg = true;
-        case 3, yvec = svgg_loop_fi; etac = etavec_loop_fi; col = c_loop; lbl = '$\Omega h^2 = 0.12$'; showleg = true;
-        case 4, yvec = svgg_loop_fo; etac = etavec_loop_fo; col = c_loop; lbl = '';                   showleg = false;
+        case 1, yvec = svgg_fi;      gqc = gqvec_fi;      col = c_fi;   lbl = 'Freeze-in';        showleg = true;
+        case 2, yvec = svgg_fo;      gqc = gqvec_fo;      col = c_fo;   lbl = 'Freeze-out';       showleg = true;
+        case 3, yvec = svgg_loop_fi; gqc = gqvec_loop_fi; col = c_loop; lbl = '$\Omega h^2 = 0.12$'; showleg = true;
+        case 4, yvec = svgg_loop_fo; gqc = gqvec_loop_fo; col = c_loop; lbl = '';                   showleg = false;
     end
-    pert = etac <= 1;
+    pert = gqc <= 1;
     ys = yvec; ys(~pert) = NaN;   % solid where perturbative
     yd = yvec; yd( pert) = NaN;   % dashed where non-perturbative
     if showleg
@@ -1796,7 +1796,7 @@ end
 set(gca, 'yscale', 'log', 'xscale', 'log');
 yl_for_bbn = ylim; y_bottom = yl_for_bbn(1); y_top_bbn = yl_for_bbn(2);
 [y_bottom, y_top_bbn] = row_frame('svgg', y_bottom, y_top_bbn, BATCH);
-svgg_cap = @(m) svgg_eta(m, mphi, gx, ceiling_lookup(m, mx_vec, eta_ceiling, 10^le_scan_hi), g_ref, interaction, hbarc);
+svgg_cap = @(m) svgg_gq(m, mphi, gx, ceiling_lookup(m, mx_vec, gq_ceiling, 10^le_scan_hi), ghat, interaction, hbarc);
 if strcmp(neff_color_mode, 'off')
     % Delta-Neff drawing disabled (SHOW.neff = false).
 elseif strcmp(neff_color_mode, 'combined')
@@ -1829,7 +1829,7 @@ if SHOW.pert_line
     loglog(mx_vec, svgg_pert, ':', 'LineWidth', 2, 'Color', [0.3 0.3 0.3], pert_line_args{:});
 end
 
-% Shade above the perturbativity line: eta > 1 required -> ruled out.
+% Shade above the perturbativity line: g_q > 1 required -> ruled out.
 ppmask = ~isnan(svgg_pert);
 if any(ppmask) && SHOW.nonpert
     yl = ylim;
@@ -1847,10 +1847,10 @@ if plot_svgg && SHOW.mediator_relic && any(isfinite(vg_med_lo))
         sprintf('$\\Omega_{%s}h^2 > 0.12$', phi_tex(interaction)), y_bottom, y_top_bbn, svgg_cap, 'shade');
 end
 
-% External eta-bands remapped to <sigma v>_gg (SN1987A / neutron star / axial).
+% External g_q-bands remapped to <sigma v>_gg (SN1987A / neutron star / axial).
 if plot_svgg
     for ie = 1:nE
-        if isfinite(ext_eta_lo(ie)) && ext_show(ie)
+        if isfinite(ext_gq_lo(ie)) && ext_show(ie)
             draw_neff_band(mx_vec, ext_vg_lo(ie,:), ext_vg_hi(ie,:), false(size(mx_vec)), ...
                 ext_specs{ie,3}, 0.12, ext_specs{ie,2}, y_bottom, y_top_bbn, svgg_cap, 'shade');
         end
@@ -1860,7 +1860,7 @@ if plot_svgg
         svgg_pert, vg_rat);
     % Same clipping fix as the sigma panel above -- floor only.
     eylo = min(eylo, ext_frame_floor(ext_vg_lo, ext_vg_hi, ...
-                                     isfinite(ext_eta_lo(:)') & ext_show));
+                                     isfinite(ext_gq_lo(:)') & ext_show));
     overlay_rat_externals(mx_vec, vg_rat, vg_rat_hi, ext_rat_cols, ext_rat_lbls, row_top('svgg', eyhi*1e3, BATCH));
     apply_ylim('svgg', [eylo/5, eyhi*5], BATCH);   % shared-row override wins if present
     if SHOW.bullet, draw_mx_columns(bullet_iv, mx_vec, c_bullet, 0.15, 'Bullet Cluster'); end
@@ -1922,7 +1922,7 @@ end  % plot_svgg
 % -----------------------------------------------------------------------
 if BATCH.save
     save_batch_figure(fig_sigma, BATCH, 'sigma');
-    save_batch_figure(fig_eta,   BATCH, 'eta');
+    save_batch_figure(fig_gq,   BATCH, 'gq');
     save_batch_figure(fig_svgg,  BATCH, 'svgg');
 end
 toc
@@ -2103,7 +2103,7 @@ end
 
 function lo = ext_frame_floor(v_lo, v_hi, drawn)
 % Lowest positive finite value of the external nucleon bands that are actually
-% DRAWN -- same condition as the draw loop (a finite eta band AND its SHOW
+% DRAWN -- same condition as the draw loop (a finite g_q band AND its SHOW
 % toggle), so hiding a band also stops it stretching the axis.  Returns Inf
 % when nothing is drawn, which makes the min() at the call site a no-op.
 lo = Inf;
@@ -2116,9 +2116,9 @@ end
 function [lo, hi] = frame_yrange(varargin)
 % Robust y-range over all finite POSITIVE values of the supplied arrays.  The
 % low edge is the true minimum (frame reaches the bottom of the plotted lines --
-% in the eta-scan the freeze-in curves dive to very small sigma/<sv> as eta->0).
+% in the g_q scan the freeze-in curves dive to very small sigma/<sv> as g_q->0).
 % The high edge is the 98th percentile, which rejects the spurious relic-solver
-% spikes (occasional huge eta roots -> eta^2-scaled sigma/<sv> outliers) that
+% spikes (occasional huge g_q roots -> g_q^2-scaled sigma/<sv> outliers) that
 % would otherwise blow the top of the log-axis up by ~20 decades.
 v = [];
 for k = 1:numel(varargin)
@@ -2136,7 +2136,7 @@ function r = nd_cached(cache, mphi, mx, gx, g, interaction, T_RH)
 % Memoized Delta-Neff (neff_simple.m), returned as r.bbn / r.cmb, each the row
 % [dNeff_chi, dNeff_phi, dNeff_total] consumed by neff_band_edges.  neff_simple
 % is CMB-only and does not decompose, so r.bbn and the chi/phi entries are NaN.
-% Keyed on the (rounded) log10 of the q-coupling norm, which tracks eta, so the
+% Keyed on the (rounded) log10 of the q-coupling norm, which tracks g_q, so the
 % band sweeps share one evaluation per point.  A failure gives NaN (no band)
 % rather than killing the sweep.
 key = round(log10(norm(g) + realmin) * 1e9);
@@ -2200,10 +2200,10 @@ E = struct('chi',nan2, 'phi',nan2, 'tot',nan2, 'tot_pos',nan2, 'tot_neg',nan2, .
 end
 
 
-function [ext_eta_lo, ext_eta_hi, ext_sg_lo, ext_sg_hi, ext_vg_lo, ext_vg_hi] = ...
-    ext_bands(ext_specs, mx_vec, mphi, gx, g_ref, interaction, interaction_sig, ...
+function [ext_gq_lo, ext_gq_hi, ext_sg_lo, ext_sg_hi, ext_vg_lo, ext_vg_hi] = ...
+    ext_bands(ext_specs, mx_vec, mphi, gx, ghat, interaction, interaction_sig, ...
               hbarc, le_ext_lo, le_ext_hi, n_ext, plot_svgg)
-% External nucleon constraints as eta-BANDS -- see the call site for the
+% External nucleon constraints as g_q-BANDS -- see the call site for the
 % reasoning.  A function so that a replot can refresh JUST these bands
 % (REPLOT = 'ext') without re-solving anything else.
 nE = size(ext_specs, 1);
@@ -2213,45 +2213,45 @@ ext_opts = struct('enable_bullet', false, 'enable_kaon', false, ...
 le_sn = linspace(le_ext_lo, le_ext_hi, n_ext);
 excl_grid = false(numel(le_sn), nE);
 for i = 1:numel(le_sn)
-    Li = external_loglikes(mx_vec(1), mphi, gx, 10^le_sn(i)*g_ref, interaction, ext_opts);
+    Li = external_loglikes(mx_vec(1), mphi, gx, 10^le_sn(i)*ghat, interaction, ext_opts);
     for ie = 1:nE
         fi = Li.info.(ext_specs{ie, 1});
         excl_grid(i, ie) = isfield(fi, 'excluded') && fi.excluded;
     end
 end
-ext_eta_lo = nan(nE, 1);  ext_eta_hi = nan(nE, 1);
+ext_gq_lo = nan(nE, 1);  ext_gq_hi = nan(nE, 1);
 for ie = 1:nE
     if any(excl_grid(:, ie))
-        ext_eta_lo(ie) = 10^min(le_sn(excl_grid(:, ie)));
-        ext_eta_hi(ie) = 10^max(le_sn(excl_grid(:, ie)));
-        warning('compare_limits_g:ext', '%s excludes eta in [%.3g, %.3g].', ...
-            ext_specs{ie, 2}, ext_eta_lo(ie), ext_eta_hi(ie));
+        ext_gq_lo(ie) = 10^min(le_sn(excl_grid(:, ie)));
+        ext_gq_hi(ie) = 10^max(le_sn(excl_grid(:, ie)));
+        warning('compare_limits_g:ext', '%s excludes gq in [%.3g, %.3g].', ...
+            ext_specs{ie, 2}, ext_gq_lo(ie), ext_gq_hi(ie));
     end
 end
-% Remap each eta-band onto sigma_chiN (always) and <sigma v>_gg (if plotted),
-% mx-dependent because sigma/<sigma v> depend on mx at fixed eta.
+% Remap each g_q-band onto sigma_chiN (always) and <sigma v>_gg (if plotted),
+% mx-dependent because sigma/<sigma v> depend on mx at fixed g_q.
 ext_sg_lo = nan(nE, numel(mx_vec));  ext_sg_hi = nan(nE, numel(mx_vec));
 ext_vg_lo = nan(nE, numel(mx_vec));  ext_vg_hi = nan(nE, numel(mx_vec));
 for ie = 1:nE
-    if ~isfinite(ext_eta_lo(ie)), continue; end
+    if ~isfinite(ext_gq_lo(ie)), continue; end
     for j = 1:length(mx_vec)
-        ext_sg_lo(ie, j) = DMnucxsec(mx_vec(j), mphi, gx, ext_eta_lo(ie)*g_ref, interaction_sig) * hbarc^2;
-        ext_sg_hi(ie, j) = DMnucxsec(mx_vec(j), mphi, gx, ext_eta_hi(ie)*g_ref, interaction_sig) * hbarc^2;
+        ext_sg_lo(ie, j) = DMnucxsec(mx_vec(j), mphi, gx, ext_gq_lo(ie)*ghat, interaction_sig) * hbarc^2;
+        ext_sg_hi(ie, j) = DMnucxsec(mx_vec(j), mphi, gx, ext_gq_hi(ie)*ghat, interaction_sig) * hbarc^2;
     end
     if plot_svgg
         for j = 1:length(mx_vec)
-            ext_vg_lo(ie, j) = svgg_eta(mx_vec(j), mphi, gx, ext_eta_lo(ie), g_ref, interaction, hbarc);
-            ext_vg_hi(ie, j) = svgg_eta(mx_vec(j), mphi, gx, ext_eta_hi(ie), g_ref, interaction, hbarc);
+            ext_vg_lo(ie, j) = svgg_gq(mx_vec(j), mphi, gx, ext_gq_lo(ie), ghat, interaction, hbarc);
+            ext_vg_hi(ie, j) = svgg_gq(mx_vec(j), mphi, gx, ext_gq_hi(ie), ghat, interaction, hbarc);
         end
     end
 end
 end
 
-function sv = svgg_eta(m, mphi, gx, etav, g_ref, interaction, hbarc)
-% eta-scan wrapper for svgg_at_fo: gx is fixed, eta scales g_ref.  NaN eta
+function sv = svgg_gq(m, mphi, gx, gqv, ghat, interaction, hbarc)
+% g_q scan wrapper for svgg_at_fo: gx is fixed, g_q scales ghat.  NaN g_q
 % (no relic/edge solution) -> NaN out, so the parfor isn't fed a NaN g-vector.
-if isnan(etav), sv = NaN; return; end
-sv = svgg_at_fo(m, mphi, gx, etav*g_ref, interaction, hbarc);
+if isnan(gqv), sv = NaN; return; end
+sv = svgg_at_fo(m, mphi, gx, gqv*ghat, interaction, hbarc);
 end
 
 function sv = svgg_at_fo(m, mphi, gxv, g, interaction, hbarc)
@@ -2288,7 +2288,7 @@ end
 
 function draw_neff_band(mx, y_lo, y_hi, allon, col, alpha, lbl, y_bottom, y_top, cap_fn, mode)
 % Draw a Delta-Neff exclusion band given its lower/upper edges (y_lo, y_hi)
-% in the current axes' y-units (sigma_chiN or eta).  mode 'shade' fills the
+% in the current axes' y-units (sigma_chiN or g_q).  mode 'shade' fills the
 % band (NaN upper edge -> cap_fn(m)); mode 'edges' draws the two edge lines
 % only.  allon marks mass points excluded across the whole coupling scan
 % (filled full-height in 'shade' mode).
@@ -2623,33 +2623,33 @@ end
 end
 
 function show = rat_show_of(SHOW)
-% Row order of the ratio constraints (eta_rat / sg_rat / vg_rat and the
+% Row order of the ratio constraints (gq_rat / sg_rat / vg_rat and the
 % ext_rat_* colours and labels): kaon, kphi, cmb, integral, mesoninv.
 show = [SHOW.kaon, SHOW.kphi, SHOW.cmb, SHOW.integral, SHOW.mesoninv];
 end
 
-function [eta_rat, sg_rat, vg_rat, eta_rat_hi, sg_rat_hi, vg_rat_hi] = ratio_curves( ...
-    mx_vec, mphi, gx, g_ref, interaction, interaction_sig, hbarc, rat_show, plot_svgg)
-% eta_crit(mx) for each ratio constraint (row order: rat_show_of), and its image
+function [gq_rat, sg_rat, vg_rat, gq_rat_hi, sg_rat_hi, vg_rat_hi] = ratio_curves( ...
+    mx_vec, mphi, gx, ghat, interaction, interaction_sig, hbarc, rat_show, plot_svgg)
+% gq_crit(mx) for each ratio constraint (row order: rat_show_of), and its image
 % on the sigma_chiN and <sigma v>_gg axes.  Hidden rows skip the root-find.
 % *_hi: the ceiling of the excluded band (NaN = excluded all the way up); only
 % kphi (row 2) has one, so only it is searched.
 nmx = numel(mx_vec);
 nr  = numel(rat_show);
-eta_rat = nan(nr, nmx);  eta_rat_hi = nan(nr, nmx);
+gq_rat = nan(nr, nmx);  gq_rat_hi = nan(nr, nmx);
 parfor j = 1:nmx
     m = mx_vec(j);
     col = nan(nr, 1);  col_hi = nan(nr, 1);
     try
-        rfun = { @(e) kaon_invisible_ratio(m, mphi, gx, e*g_ref, interaction), ...
-                 @(e) mesonandCMB_ratio(m, mphi, gx, e*g_ref, interaction, 'kphi'), ...
-                 @(e) mesonandCMB_ratio(m, mphi, gx, e*g_ref, interaction, 'cmb'), ...
-                 @(e) mesonandCMB_ratio(m, mphi, gx, e*g_ref, interaction, 'integral'), ...
-                 @(e) mesonandCMB_ratio(m, mphi, gx, e*g_ref, interaction, 'mesoninv') };
+        rfun = { @(e) kaon_invisible_ratio(m, mphi, gx, e*ghat, interaction), ...
+                 @(e) mesonandCMB_ratio(m, mphi, gx, e*ghat, interaction, 'kphi'), ...
+                 @(e) mesonandCMB_ratio(m, mphi, gx, e*ghat, interaction, 'cmb'), ...
+                 @(e) mesonandCMB_ratio(m, mphi, gx, e*ghat, interaction, 'integral'), ...
+                 @(e) mesonandCMB_ratio(m, mphi, gx, e*ghat, interaction, 'mesoninv') };
         for ie = 1:nr
             if ~rat_show(ie), continue; end   %#ok<PFBNS> hidden -> skip the root-find
-            % eta^2 rescale as the seed, then root-find: the mediator width
-            % breaks eta^2 scaling wherever a pole is resonant (see
+            % g_q^2 rescale as the seed, then root-find: the mediator width
+            % breaks g_q^2 scaling wherever a pole is resonant (see
             % docs/kaon_constraint.md).  Off resonance the root-find returns
             % the seed to solver tolerance.
             r1 = rfun{ie}(1);
@@ -2657,13 +2657,13 @@ parfor j = 1:nmx
                 col(ie) = ratio_crit_coupling(rfun{ie}, 1/sqrt(r1));
             end
             if ~isfinite(col(ie))
-                % kphi falls to ~0 at eta = 1 once the phi decays well inside the
+                % kphi falls to ~0 at g_q = 1 once the phi decays well inside the
                 % detector (exp(-L/ell); for SxS from mphi ~ 0.013 GeV), while
-                % still excluding smaller eta.  Underflowed to 0, or tiny but
+                % still excluding smaller g_q.  Underflowed to 0, or tiny but
                 % nonzero, so that 1/sqrt(ratio) lands tens of decades above the
                 % band and the root-find runs out of range (was a spurious gap at
-                % mphi = 14-17 MeV, SxS): seed from a tiny eta instead, where the
-                % phi escapes and the ratio is ~eta^2.
+                % mphi = 14-17 MeV, SxS): seed from a tiny g_q instead, where the
+                % phi escapes and the ratio is ~g_q^2.
                 e0 = 1e-12;  r0 = rfun{ie}(e0);
                 if isfinite(r0) && r0 > 0
                     col(ie) = ratio_crit_coupling(rfun{ie}, e0/sqrt(r0));
@@ -2676,30 +2676,30 @@ parfor j = 1:nmx
     catch err
         fprintf(2, '[ext-ratio] mx=%.4g: %s\n', m, err.message);
     end
-    eta_rat(:, j) = col;  eta_rat_hi(:, j) = col_hi;
+    gq_rat(:, j) = col;  gq_rat_hi(:, j) = col_hi;
 end
-[sg_rat, vg_rat] = ratio_images(eta_rat, mx_vec, mphi, gx, g_ref, interaction, ...
+[sg_rat, vg_rat] = ratio_images(gq_rat, mx_vec, mphi, gx, ghat, interaction, ...
                                 interaction_sig, hbarc, plot_svgg);
-[sg_rat_hi, vg_rat_hi] = ratio_images(eta_rat_hi, mx_vec, mphi, gx, g_ref, interaction, ...
+[sg_rat_hi, vg_rat_hi] = ratio_images(gq_rat_hi, mx_vec, mphi, gx, ghat, interaction, ...
                                       interaction_sig, hbarc, plot_svgg);
 end
 
-function [sg, vg] = ratio_images(E, mx_vec, mphi, gx, g_ref, interaction, ...
+function [sg, vg] = ratio_images(E, mx_vec, mphi, gx, ghat, interaction, ...
                                  interaction_sig, hbarc, plot_svgg)
-% sigma_chiN and <sigma v>_gg at each eta in E (rows = ratio constraints).
+% sigma_chiN and <sigma v>_gg at each g_q in E (rows = ratio constraints).
 sg = nan(size(E));   vg = nan(size(E));
 for ie = 1:size(E, 1)
     for j = 1:numel(mx_vec)
         e = E(ie, j);
         if ~isfinite(e), continue; end
-        sg(ie, j) = DMnucxsec(mx_vec(j), mphi, gx, e*g_ref, interaction_sig) * hbarc^2;
-        if plot_svgg, vg(ie, j) = svgg_eta(mx_vec(j), mphi, gx, e, g_ref, interaction, hbarc); end
+        sg(ie, j) = DMnucxsec(mx_vec(j), mphi, gx, e*ghat, interaction_sig) * hbarc^2;
+        if plot_svgg, vg(ie, j) = svgg_gq(mx_vec(j), mphi, gx, e, ghat, interaction, hbarc); end
     end
 end
 end
 
 function [lo, hi] = overclosed_interval(le, OA, target)
-% eta interval on the coarse loop grid where a stable mediator's own relic
+% g_q interval on the coarse loop grid where a stable mediator's own relic
 % exceeds target.  Edges are log-interpolated in Omega against the neighbouring
 % grid point (grid step ~0.75 dex); an edge at the end of the grid stays at
 % that grid point.  Disjoint pieces are merged into one span.  NaN if none.
@@ -2733,12 +2733,12 @@ for j = 1:numel(mx)
 end
 end
 
-function draw_relic_walls(mxa, ins, eta_lo, eta_hi, col, yof)
+function draw_relic_walls(mxa, ins, gq_lo, gq_hi, col, yof)
 % The vertical Oh2 = 0.12 segment closing an island at each inserted column,
-% from the lower to the upper loop branch; solid up to eta = 1, dashed above,
-% as the branches themselves.  yof(m, eta) is the plotted quantity.
+% from the lower to the upper loop branch; solid up to g_q = 1, dashed above,
+% as the branches themselves.  yof(m, g_q) is the plotted quantity.
 for k = find(ins)
-    lo = eta_lo(k);  hi = eta_hi(k);
+    lo = gq_lo(k);  hi = gq_hi(k);
     if ~(isfinite(lo) && isfinite(hi)), continue; end
     m = mxa(k);  e1 = min(max(1, lo), hi);
     if lo < e1
@@ -2751,26 +2751,26 @@ end
 end
 
 
-function tips = relic_island_tips(mx_vec, eta_lo, eta_hi, max_dec, oh_at, target)
+function tips = relic_island_tips(mx_vec, gq_lo, gq_hi, max_dec, oh_at, target)
 % Low-mass walls of the relic islands; see the loop block.  At the first mass j
 % of a two-branch run whose branches are more than MAX_DEC decades apart, bisect
 % (6 steps in log mx) between mx(j-1) and mx(j) for where Oh2 at the branches'
 % mid coupling crosses TARGET.  No wall if Oh2 there is not below TARGET at
-% mx(j-1): the lower branch carries on below, open-topped.  OH_AT(m, eta) is
+% mx(j-1): the lower branch carries on below, open-topped.  OH_AT(m, g_q) is
 % Oh2; TIPS(j) is the wall mass, NaN where there is none.
 tips = nan(size(mx_vec));
-both = ~isnan(eta_lo) & ~isnan(eta_hi);
+both = ~isnan(gq_lo) & ~isnan(gq_hi);
 for j = 2:numel(mx_vec)
     if ~both(j) || both(j-1), continue; end
-    if abs(log10(eta_hi(j) / eta_lo(j))) <= max_dec, continue; end
-    eta_mid = sqrt(eta_lo(j) * eta_hi(j));
+    if abs(log10(gq_hi(j) / gq_lo(j))) <= max_dec, continue; end
+    gq_mid = sqrt(gq_lo(j) * gq_hi(j));
     la = log(mx_vec(j-1));  lb = log(mx_vec(j));
     try
-        fa = oh_at(exp(la), eta_mid) - target;
+        fa = oh_at(exp(la), gq_mid) - target;
         if ~(isfinite(fa) && fa < 0), continue; end    % no wall below mx(j)
         for it = 1:6
             lc = 0.5 * (la + lb);
-            fc = oh_at(exp(lc), eta_mid) - target;
+            fc = oh_at(exp(lc), gq_mid) - target;
             if ~isfinite(fc), break; end
             if fc < 0, la = lc; else, lb = lc; end
         end
@@ -2782,11 +2782,11 @@ for j = 2:numel(mx_vec)
 end
 end
 
-function f = relic_oh2_at(solver_name, mphi, gx, g_ref, interaction, T_RH, production)
-% Oh2(m, eta) with the relic solver this panel uses.
+function f = relic_oh2_at(solver_name, mphi, gx, ghat, interaction, T_RH, production)
+% Oh2(m, g_q) with the relic solver this panel uses.
 if strcmp(solver_name, 'freeze_coupled')
-    f = @(m, eta) freeze_coupled(m, mphi, gx, eta * g_ref, interaction, T_RH, false, production);
+    f = @(m, gq) freeze_coupled(m, mphi, gx, gq * ghat, interaction, T_RH, false, production);
 else
-    f = @(m, eta) freeze_loop(m, mphi, gx, eta * g_ref, interaction, T_RH, false, production);
+    f = @(m, gq) freeze_loop(m, mphi, gx, gq * ghat, interaction, T_RH, false, production);
 end
 end

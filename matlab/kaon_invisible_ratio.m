@@ -190,7 +190,7 @@ function r = kaon_invisible_ratio(mx, mphi, gx, g, interaction)
         % width-less 1/(s-mphi^2) makes the integrand singular there.  Gphi_reg
         % is the mediator's TOTAL width from the relic code (phi -> chi chibar,
         % gamma gamma, 3pi).  It was gamma gamma only until 2026-11-17: without
-        % phi -> chi chibar the on-shell rate went as eta^2/Gamma_gg, flat in the
+        % phi -> chi chibar the on-shell rate went as g_q^2/Gamma_gg, flat in the
         % quark coupling, so r never fell below 1 and no kaon bound was found
         % for 2 mx < mphi.  With it the on-shell rate is Gamma(K -> pi phi) *
         % BR(phi -> chi chibar), as in SxS/PxS.  r is no longer ~ gx^2 there:

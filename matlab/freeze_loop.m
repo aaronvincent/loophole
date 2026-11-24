@@ -90,7 +90,7 @@ S = gstar_interp(T_min, T_max);
 %   Y(dtau) = Y* tanh(sqrt(a b) dtau),  Y* = sqrt(a/b),  a = cp Y_eq^2.
 % This is ~a dtau at weak coupling and exactly Y* when the rate is huge, so
 % the start, and hence Omega h^2, is continuous in the coupling.  (A rate
-% test choosing Y = 0 or Y = Y_eq made Omega h^2(eta) jump by up to ~500x
+% test choosing Y = 0 or Y = Y_eq made Omega h^2(g_q) jump by up to ~500x
 % near mx ~ 20 T_RH, which fzero then reported as a root.)  The seed also
 % spares ode15s the fast initial transient at large coupling.
 % -----------------------------------------------------------------------
