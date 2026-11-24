@@ -1,9 +1,9 @@
 key,value
-signuc_heavyScalarPP,5.0182604410147586e-11
-signuc_lightScalarPP,5.0182604410147586e-11
-signuc_heavyScalarSP,0.00015529232478700249
-signuc_lightScalarSP,0.00015529232478700249
-signuc_scalarPP,5.0182604410147586e-11
+signuc_heavyScalarPP,4.8273576155688253e-11
+signuc_lightScalarPP,4.8273576155688253e-11
+signuc_heavyScalarSP,0.00014938475105296338
+signuc_lightScalarSP,0.00014938475105296338
+signuc_scalarPP,4.8273576155688253e-11
 signuc_deg_heavyScalarPP,0
 axial_gx_ceiling,0.24907986792856965
 axial_mixing_floor_eta_mix,0.029731889465207259
