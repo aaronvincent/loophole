@@ -36,9 +36,9 @@ CATALOG = {
                  "Existing SI limits"),
     # HeRALD Fig. 9 curves: 1 = 1 kg-day, 40 eV threshold; 2 = 1 kg-yr, 10 eV;
     # 3 = 10 kg-yr, 0.1 eV; 4 = 100 kg-yr, 1 meV.  Upper edge = 100 m overburden.
-    # Curve 1 is HeRALD's recommendation (2026-10-26: closest to the TESSERACT
+    # Curve 1 is HeRALD's recommendation (closest to the TESSERACT
     # requirement).  Floor digitised from the figure; ceiling taken from the
-    # earlier curve-4 file ("1 MeV 100 m.csv" -- the "MeV" there is the 1 meV
+    # curve-4 file ("1 MeV 100 m.csv" -- the "MeV" there is the 1 meV
     # threshold).
     "HeRALD":   ("Herald Spin Independent curve 1 100 m.csv", "region",
                  "HeRALD (proj.)"),

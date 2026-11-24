@@ -49,9 +49,7 @@ function [Omega_h2, info] = freeze_coupled(mx, mphi, gx, g, interaction, T_RH, d
 % Inverse decay chi chibar -> phi carries rho^2 (it needs chi), so phi is not
 % held at equilibrium by a chi population that is not there: in freeze-in with
 % fast phi -> chi chibar, Y_phi sits at Y_phi_eq c_SM/(c_SM + c_xx), far below
-% equilibrium, and on-shell production is 2 c_xx Y_phi = the old resonant rate.
-% Before 2026-11-16 phi <-> chi chibar used rho = 1 and phi phi -> chi chibar was
-% absent.
+% equilibrium, and on-shell production is 2 c_xx Y_phi.
 %
 % Fast phi (adiabatic_phi: total phi rate / H > 1e3 over the range): Y_phi is
 % eliminated at its exact quasi-steady value (a quadratic, chi_exch_adia), and
@@ -120,7 +118,7 @@ Gamma_meson = Gphi_struct.pipi + Gphi_struct.KK + Gphi_struct.eta;  % phi <-> me
 mes_eq      = strcmp(production, 'sm');          % mesons in the bath: inverse decay alive
 
 % phi <-> bath 2 -> 2 conversions (Primakoff, pi gamma -> pi phi, A' pi -> pi pi) on a fixed grid.
-% LOOP_PHI_SC=0 in the environment turns them off (the pre-2026-11-12 solver).
+% LOOP_PHI_SC=0 in the environment turns them off.
 Tsc = logspace(log10(5e-6), log10(T_RH), 120);
 Gsc = zeros(size(Tsc));
 use_sc = ~strcmp(getenv('LOOP_PHI_SC'), '0');
@@ -177,7 +175,7 @@ svDarkR = griddedInterpolant(logTgrid(:), lsvR(:), 'pchip');
 % axialVector: A'A' -> gamma gamma (charged-meson loop) and meson pairs, the
 % A' number-changing link to the bath.  Below 3 m_pi
 % it is the only one: Gamma(A' -> gamma gamma) = 0 (Landau-Yang).
-% LOOP_AA_SM=0 in the environment turns it off (the pre-2026-11-17 solver).
+% LOOP_AA_SM=0 in the environment turns it off.
 has_AA = strcmp(interaction, 'axialVector') && ~strcmp(getenv('LOOP_AA_SM'), '0');
 if has_AA
     lsvA = sv_AAsm_grid(mphi, g, Tgrid);

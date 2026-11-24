@@ -12,10 +12,7 @@
 % as do HeavyScalarSP/LightScalarSP -- because the prefix is inert everywhere
 % except a direct DMnucxsec call (docs/dmnucxsec.md).  The five names below therefore
 % collapse to TWO distinct values on both sides, and that aliasing contract is
-% what this block tests.  Until 2026-08-05 M7 called the raw heavy*/light*
-% approximations instead and asserted they differ; the port never implemented
-% those, so lightScalarPP/lightScalarSP failed permanently -- a test/port
-% contract mismatch, not a physics defect.
+% what this block tests.
 here   = fileparts(mfilename('fullpath'));
 refdir = fullfile(here, '..', 'ref');
 comb   = fullfile(here, '..', '..', '..', '..', 'matlab');

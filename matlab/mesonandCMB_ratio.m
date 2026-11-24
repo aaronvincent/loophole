@@ -35,9 +35,8 @@ function r = mesonandCMB_ratio(mx, mphi, gx, g, interaction, which)
 %
 %   r = NaN when the constraint is closed / not applicable to the interaction.
 %
-%   Port of an earlier Python reference, mesonandCMBlimits.py (the "k to pi phi" /
-%   "kaon to pi A'", "CMB" and "INTEGRAL" prints).  The low-velocity <sigma v>
-%   is the reference's analytic threshold expression (s = 4 m_chi^2), NOT a v->0
+%   Covers K -> pi phi / K -> pi A', CMB and INTEGRAL.  The low-velocity <sigma v>
+%   is the analytic threshold expression (s = 4 m_chi^2), NOT a v->0
 %   limit of the relic svavg (that is a genuine thermal average and does not
 %   reproduce the p-wave/velocity-suppressed models).  Interaction -> model map
 %   matches kaon_invisible_ratio.m.
@@ -52,7 +51,7 @@ function r = mesonandCMB_ratio(mx, mphi, gx, g, interaction, which)
         otherwise, r = NaN; return;
     end
 
-    % ---- constants (values as in mesonandCMBlimits.py) ----------------------
+    % ---- constants -----------------------------------------------------------
     P.MeV = 1e-3;  P.eV = 1e-9;
     P.e = 0.3;  P.alpha = 1/137;
     P.B0 = 0.13957^2/(0.0022 + 0.00469);   % = mpi+^2/(mu+md) ~ 2.827 GeV (was 2.6)
@@ -90,7 +89,7 @@ function r = mesonandCMB_ratio(mx, mphi, gx, g, interaction, which)
         Gamma = kphi_rate(model, P);
         if isnan(Gamma), r = NaN; return; end
         % x NA62 acceptance at m_miss^2 = mphi^2 (R1 [0, 0.010], R2 [0.026, 0.068]
-        % GeV^2, resolution 0.001; as kaon_invisible_ratio.m, since 2026-11-17)
+        % GeV^2, resolution 0.001; as kaon_invisible_ratio.m)
         r = Gamma * kphi_invisible_fraction(model, mx, mphi, gx, g) * na62_acceptance(mphi^2) / kplusinvlimit;
 
     % =====================================================================
@@ -152,8 +151,8 @@ function Gamma = kphi_rate(model, P)
     case {'SxP', 'PxP'}   % pseudoscalar phi-quark coupling (pi0/eta poles)
         % theta_j from sppp_mixing.m (NLO; pi0, eta AND eta'), the source the
         % relic cross sections and kaon_invisible_ratio.m use.  The eta' vertex
-        % (sqrt(6)/3)(2 + 3 g8s/g8)(mK^2 - mpi^2) is from eq. Klagrangian; it was
-        % missing until 2026-11-17 (matters off the g_u+g_d+g_s = 0 direction).
+        % (sqrt(6)/3)(2 + 3 g8s/g8)(mK^2 - mpi^2) is from eq. Klagrangian
+        % (matters off the g_u+g_d+g_s = 0 direction).
         [~, thj] = sppp_mixing(mmed, [P.Cu P.Cd P.Cs]);
         Epi = (mk^2 + mpip^2 - mmed^2) / (2*mk);
         gphipik = -(2*mk*Epi - mk^2) * thj(1) ...
@@ -168,10 +167,8 @@ function Gamma = kphi_rate(model, P)
         % only the part transverse to q = pK - ppi survives, (lak + lap) ppi_perp:
         %   sum|M|^2 = 2 GF^2 F^4 Vus^2 Vud^2 (lak + lap)^2 lambda / (4 mA^2),
         %   Gamma    = GF^2 F^4 Vus^2 Vud^2 (lak + lap)^2 lambda^(3/2) / (32 pi mA^2 mK^3).
-        % The earlier mesonandCMBlimits.py form contracted in the
-        % kaon rest frame (bracket 4 mK^2 [lak^2 mK^2 + 2 lak lap mK Epi +
-        % lap^2 (Epi^2 + mA^2)]), x1.69-1.81 low; the NWA residue of the 3-body
-        % K -> pi chi chibar rate (kaon_invisible_ratio.m) reproduces this one.
+        % The NWA residue of the 3-body K -> pi chi chibar rate
+        % (kaon_invisible_ratio.m) reproduces this form.
         lak = P.g8*(P.Cs + P.Cu) + P.g8s*(P.Cu + P.Cd + P.Cs);
         lap = P.g8*(P.Cd + P.Cu) + P.g8s*(P.Cu + P.Cd + P.Cs);
         Gamma = P.GF^2 * P.F^4 * P.Vus^2 * P.Vud^2 * (lak + lap)^2 ...
@@ -257,7 +254,7 @@ end
 
 % ======================================================================
 % Low-velocity <sigma v> [cm^3/s] used by the CMB / INTEGRAL bounds.
-% Analytic threshold (s = 4 m_chi^2) expressions from mesonandCMBlimits.py.
+% Analytic threshold (s = 4 m_chi^2) expressions.
 % ======================================================================
 function sv = sigmav_indirect(model, P)
     e = P.e;  alpha = P.alpha;  hbarc = P.hbarc;  cc = P.cc;
@@ -278,12 +275,10 @@ function sv = sigmav_indirect(model, P)
         % hbarc^2*cc (ONE factor of c), as in every other branch: the bracket is
         % [GeV^-2] (D ~ GeV^-2, the mass ratio and the halo <v^2> jfac
         % dimensionless), so GeV^-2 -> cm^2 needs (hbar c)^2 and cm^2 -> cm^3/s
-        % needs a single c.  The source (mesonandCMBlimits.py:418) had `*c *
-        % hbarc^2 * c`; the second c has nothing to convert and made this branch
-        % 3e10 too large.  Cf. the SxP branch below -- same p-wave structure,
-        % same jfac, one cc.  Fixed 2026-08-04.
-        % /589824 (was /294912): e^4/(589824 pi^6) = alpha^2/(36864 pi^4), the
-        % identical-photon S_gg = 1/2 now carried by every chi chibar -> gamma
+        % needs a single c.  Cf. the SxP branch below -- same p-wave structure,
+        % same jfac, one cc.
+        % /589824: e^4/(589824 pi^6) = alpha^2/(36864 pi^4), with the
+        % identical-photon S_gg = 1/2 carried by every chi chibar -> gamma
         % gamma cross section.
         sv = 4*pi * (gx^2*e^4*Dnew)/(589824*pi^6) ...
              * (8*mx^4*jfac)/(4*mx^2 - mmed^2)^2 ...
@@ -318,10 +313,9 @@ function sv = sigmav_indirect(model, P)
         Gammaetaprimegammagamma = (2.22/100)*0.196*P.MeV;
         Fetaprime = sqrt((alpha^2*P.metaprime^3)/(64*pi^3*Gammaetaprimegammagamma));
         lambdapi0gamma  = e^2/(4*pi^2*F);
-        % Data-driven F_eta (2026-08-11 draft Eq. lambdagamma); cf.
-        % axial_couplings.m.  sppp_poles_indirect below deliberately keeps the
-        % LO 1/sqrt(3), matching the draft's pseudoscalar section, which was not
-        % updated.
+        % Data-driven F_eta (paper Eq. lambdagamma); cf. axial_couplings.m.
+        % sppp_poles_indirect below uses the LO 1/sqrt(3), as in the paper's
+        % pseudoscalar section.
         Feta            = sqrt((alpha^2*P.meta^3)/(64*pi^3*5.16e-7));
         lambdaetagamma  = e^2/(4*pi^2*Feta);
         lambdaeta0gamma = e^2/(4*pi^2*Fetaprime);   % 4*pi^2, as pi0/eta above
@@ -390,7 +384,7 @@ function [mj, gcx, ggx, Gam] = sppp_poles_indirect(P, isPP)
         % --- SU(3) singlet: {eta', phi'} --------------------------------
         F_etap      = sqrt(alpha^2 * metap^3 / (64*pi^3 * G_etap_gg));
         g_etapgamma = alpha / (pi*F_etap);        % data-driven eta'->gg (1/pi: see sppp_couplings.m)
-        % eta' singlet mixing mass: sqrt(6)/3 * sum(g) * (B0 F + (L6+L7) NLO), the draft body's form (4.3x the old B0*F/sqrt(6), whose appendix was commented out 2026-08-12)
+        % eta' singlet mixing mass: sqrt(6)/3 * sum(g) * (B0 F + (L6+L7) NLO), as in sppp_mixing.m
         m_mix       = sqrt(6)/3 * (Cu + Cd + Cs) ...
                       * (B0*F + (P.L6 + P.L7)*32*B0^2/F*(P.mqu + P.mqd + P.mqs));
         denom       = (mmed^2 - metap^2);
@@ -517,7 +511,7 @@ function G = pseudo_chi_phi_width(gphichi, ggammaphi, mphi, mx)
     end
 end
 
-% ---- inlined digitized limit curves (from mesonandCMBlimits.py) -------
+% ---- inlined digitized limit curves -------------------------------------
 function lim = curve_slatyer(mx)
 % Slatyer CMB <sigma v> upper bound [cm^3/s] at DM mass mx.  Data: log10(mx/GeV)
 % vs log10(<sigma v>/(cm^3 s^-1)).  NaN (not constrained) outside the data range.

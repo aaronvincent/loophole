@@ -144,10 +144,8 @@ end
 # χχ̄ → φφ (or → jj), pseudoscalar χ vertex.  atanh argument can leave (−1,1),
 # so do it in complex and take real().
 #
-# REPLACED 2026-08-11 together with xxggxsec.m.  The previous closed form was
-# negative and ~1/v_rel in the non-relativistic regime; the true result is
-# positive and ~v_rel (a pseudoscalar χ vertex has no s-wave at all).  This form
-# matches a direct tree-level trace calculation to all digits and already
+# Positive and ~v_rel in the non-relativistic regime (a pseudoscalar χ vertex
+# has no s-wave).  As xxggxsec.m; matches a direct tree-level trace calculation to all digits and already
 # carries the identical-particle S = 1/2.
 function _sig_pp_ps(s::Real, mx, mphi, gx)
     kin = sqrt((s - 4mx^2) * (s - 4mphi^2))

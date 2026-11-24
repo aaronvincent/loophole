@@ -28,7 +28,7 @@ pole that can go on shell is cored: the s-channel phi BW (SxS/PxS), the pi0 AND
 the mediator (SxP/PxP, the latter on shell for 2 mx < mphi < mK - mpi+), and the
 pi0 in AxA.
 
-MATLAB (matlab/kaon_invisible_ratio.m) is the reference.  Verified 2026-08-04
+MATLAB (matlab/kaon_invisible_ratio.m) is the reference.  Verified
 across all five interactions over mx in {0.02, 0.05, 0.1} x mphi in
 {0.05, 0.2, 1.0}.  Agreement is ~1e-6 or better wherever the mediator pole is
 well inside the s range or out of it.  It degrades only as that pole approaches
@@ -58,7 +58,7 @@ import numpy as np
 from mesonandCMB import meson_pair_width, _sppp_theta, _relic_phi_widths
 
 # --- self-contained constants (identical to kaon_invisible_ratio.m;
-# verified 2026-08-04, MATLAB is the reference) ---------------------------------
+# MATLAB is the reference) ------------------------------------------------------
 _MK    = 493.68e-3
 _MPI   = 139.57e-3           # charged pion
 _MPI0  = 134.98e-3           # neutral pion
@@ -319,9 +319,7 @@ def _ratio_sxp_pxp(mx, mphi, gx, Cu, Cd, Cs, kind, panels=None):
 
     theta_j from _sppp_theta (sppp_mixing.m: NLO, with eta'), g_{j chi} = +gx theta_j
     for every j, K -> pi j vertices from eq. Klagrangian, mediator total width
-    (chi chibar + gamma gamma).  Until 2026-11-17: LO B0 F mixings, no eta', a
-    spurious minus on the pi0 chi coupling, and a gamma-gamma-only phi width.  As
-    kaon_invisible_ratio.m.  panels: as _ratio_sxs_pxs."""
+    (chi chibar + gamma gamma).  As kaon_invisible_ratio.m.  panels: as _ratio_sxs_pxs."""
     if panels is None:
         panels = _default_panels(mx)
     mphi2 = mphi ** 2
@@ -395,10 +393,10 @@ def _ratio_sxp_pxp(mx, mphi, gx, Cu, Cd, Cs, kind, panels=None):
 
 
 def _ratio_axa(mx, mphi, gx, Cu, Cd, Cs, panels=None):
-    """AxA: axial-vector A', pi0/eta/eta' A'-mixing.  Draft eq. (kpichichiA),
-    rechecked 2026-11-17: signed lambda_jpiK (common i dropped), the A' propagator
-    in the interference term, s - mA^2 = mK^2 + mpi^2 - 2 Epi mK in the |A'|^2
-    term, lambda_A'K^2 mA^4 mK^4, Gamma_A' = chi chibar width (no width before).
+    """AxA: axial-vector A', pi0/eta/eta' A'-mixing.  Paper eq. (kpichichiA):
+    signed lambda_jpiK (common i dropped), the A' propagator in the interference
+    term, s - mA^2 = mK^2 + mpi^2 - 2 Epi mK in the |A'|^2 term,
+    lambda_A'K^2 mA^4 mK^4, Gamma_A' = chi chibar width.
     The E_chi integral is analytic (quadratic); the pi0 pole and the on-shell A'
     (2 mx < mA < mK - mpi) are cored.  As kaon_invisible_ratio.m.
     panels: as _ratio_sxs_pxs."""
@@ -510,8 +508,7 @@ def _ratio_chunk(mx, mphi, gx, gu, gd, gs, kind):
     """The ratio is linear in the sum over E_pi panels, so integrate panel by
     panel on just the points it is non-empty for, and run the pole-core machinery
     (3 GL passes) only on those whose mediator pole lies in it; the rest take one
-    GL pass.  (Until 2026-11-18 every point ran every panel with both the pi0 and
-    the mediator core, ~35 passes: 10x slower than before the NA62 acceptance.)"""
+    GL pass."""
     if kind in ("SxS", "PxS"):
         f = lambda j, p: _ratio_sxs_pxs(mx[j], mphi[j], gx[j], gu[j], gd[j], gs[j], kind, p)
     elif kind in ("SxP", "PxP"):

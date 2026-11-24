@@ -49,9 +49,7 @@ RUNSET.mphi_vec = [1e-9, 0.1, 1];    % mediator masses [GeV] -- 3 sets per model
 % NB the bare 'scalarPP' is absent because it is not a separate family but the
 % name heavy*/light*PP already RESOLVE to: the heavy/light prefix is inert for
 % the relic curves, full_sigma_name maps both to 'scalarPP' for sigma_chiN, and
-% svavg whitelists and dispatches all three identically.  A 'scalarPP' row
-% reproduced the ScalarPP row column-for-column (verified 2026-08-19: all 30
-% .dat columns bit-identical, panels byte-identical).  Do not re-add it.
+% svavg whitelists and dispatches all three identically.
 % NB the bare 'scalarPS' is deliberately absent: svavg's 'gg' channel whitelist
 % omits it, which would leave the <sigma v> panel empty.  Use heavy*/light*PS.
 RUNSET.families = { ...

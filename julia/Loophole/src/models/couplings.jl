@@ -35,8 +35,6 @@ function _sppp_mixings(g)
     m2_etaphi = ((g[1] + g[2] - 2g[3]) * K +
                  32 * B0^2 * L7 / FPI * sg * (M_UP + M_DN - 2 * M_S)) / sqrt(3)
     # η′ (SU(3) singlet).  √6/3 = √(2/3) is the η₀ coefficient of Tr[g_q Π].
-    # Replaced B0*FPI/sqrt(6) (LO only, and √6/3 → 1/√6 — together 4.3× low) on
-    # 2026-08-12, when the draft appendix carrying that form was commented out.
     m2_etapphi = sqrt(6) / 3 * sg * (B0 * FPI + (L6 + L7) * 32 * B0^2 / FPI * summ)
     return m2_pi0phi, m2_etaphi, m2_etapphi
 end
@@ -45,8 +43,8 @@ end
     sppp_mixing_angles(mphi, g) -> (theta, theta_max, mj)
 
 Small-mixing angles θ_j = m²_{jφ}/(mφ² − m_j²) for j = π⁰, η, η′, and
-`theta_max = max|θ_j|`.  The 2026-08-12 draft states the SP/PP small-mixing
-limit as |m²_{jφ}| ≪ |mφ² − m_j²| for all three poles at once, so `theta_max`
+`theta_max = max|θ_j|`.  The SP/PP small-mixing
+limit is |m²_{jφ}| ≪ |mφ² − m_j²| for all three poles at once, so `theta_max`
 is the expansion parameter the whole sector rests on; `model_observables`
 rejects points where it exceeds `s_mix`.  The η′ is included even though the
 generic pole set is {π⁰, φ′, η}: the condition is on the validity of the
@@ -67,14 +65,13 @@ function _phi_gg_coupling(mphi, g)
         F_etap = sqrt(ALPHA_EM^2 * M_ETAP^3 / (64pi^3 * G_ETAP_GG))
         m_mix  = _sppp_mixings(g)[3]
         # ALPHA_EM/(pi*F_etap): F_etap is a decay constant, so it takes the same
-        # 1/pi as the gpigamma convention below.  Fixed 2026-08-05.
+        # 1/pi as the gpigamma convention below.
         return (ALPHA_EM / (pi * F_etap)) * m_mix / (mphi^2 - M_ETAP^2)
     else
         gpigamma  = ALPHA_EM / pi / FPI
         getagamma = ALPHA_EM / sqrt(3) / pi / FPI
         m2_pi0phi, m2_etaphi, _ = _sppp_mixings(g)
-        # Both terms same sign: g_{φ′γγ} = -Σ_j g_{jγγ} θ_j.  The π⁰ term used to
-        # carry the opposite sign; fixed 2026-08-10.
+        # Both terms same sign: g_{φ′γγ} = -Σ_j g_{jγγ} θ_j.
         return -gpigamma  * m2_pi0phi / (mphi^2 - MPI0^2) -
                 getagamma * m2_etaphi / (mphi^2 - M_ETA^2)
     end
@@ -132,9 +129,7 @@ function _sppp_couplings(mphi, mx, gx, g, isPP::Bool)
         getagamma      = ALPHA_EM / sqrt(3) / pi / FPI
         m2_pi0phi, m2_etaphi, _ = _sppp_mixings(g)
         # θ_j = m²_{jφ}/(mφ²-m_j²) for BOTH poles, so g_{jχ} = +gx θ_j with the
-        # same sign for π⁰ and η, and g_{φ′γγ} = -Σ_j g_{jγγ} θ_j.  Until
-        # 2026-08-10 the π⁰ block carried the opposite sign, so π⁰ and η
-        # interfered the wrong way round.
+        # same sign for π⁰ and η, and g_{φ′γγ} = -Σ_j g_{jγγ} θ_j.
         gpix           = gx * m2_pi0phi / (mphi^2 - MPI0^2)
         gphiprimex     = gx
         gphiprimegamma = -gpigamma  * m2_pi0phi / (mphi^2 - MPI0^2) -
@@ -182,11 +177,10 @@ width reaches its mass (the EFT validity floor).  Uses the corr4 L4 `+` sign
 """
 function _axial_couplings(mphi, mx, gx, g)
     F_etap     = sqrt(ALPHA_EM^2 * M_ETAP^3 / (64pi^3 * G_ETAP_GG))
-    # Data-driven F_eta as of the 2026-08-11 draft Eq. (lambdagamma): the LO
-    # octet value ALPHA_EM/(sqrt(3) pi FPI) gives Gamma(eta->gg) = 0.17 keV
-    # against a measured 0.52 keV.  1.73x in amplitude.  The draft's
-    # pseudoscalar section still carries the LO form, so _sppp_couplings below
-    # is deliberately NOT changed to match.
+    # Data-driven F_eta, paper Eq. (lambdagamma): the LO octet value
+    # ALPHA_EM/(sqrt(3) pi FPI) gives Gamma(eta->gg) = 0.17 keV against a
+    # measured 0.52 keV.  _sppp_couplings below uses the LO form, as in the
+    # paper's pseudoscalar section.
     F_eta      = sqrt(ALPHA_EM^2 * M_ETA^3 / (64pi^3 * G_ETA_GG))
     lam_pigg   = ALPHA_EM / (pi * FPI)
     lam_etagg  = ALPHA_EM / (pi * F_eta)

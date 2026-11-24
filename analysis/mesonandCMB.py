@@ -28,7 +28,7 @@ import os
 import numpy as np
 
 # --- self-contained constants (identical to mesonandCMB_ratio.m;
-# verified 2026-08-04, MATLAB is the reference) --------------------------------
+# MATLAB is the reference) -----------------------------------------------------
 _E     = 0.3
 _ALPHA = 1.0 / 137.0
 _B0    = 0.13957 ** 2 / (0.0022 + 0.00469)   # mpi+^2/(mu+md) ~ 2.8273 GeV; was 2.6
@@ -236,30 +236,28 @@ def kphi_ratio(mx, mphi, gx, gu, gd, gs, interaction):
         elif kind in ("SxP", "PxP"):
             # theta_j from _sppp_theta (sppp_mixing.m: NLO, pi0, eta AND eta'); the
             # eta' vertex (sqrt(6)/3)(2 + 3 g8s/g8)(mK^2 - mpi^2) is from eq.
-            # Klagrangian, missing until 2026-11-17.  As mesonandCMB_ratio.m.
+            # Klagrangian.  As mesonandCMB_ratio.m.
             th = _sppp_theta(np.atleast_1d(mphi), np.atleast_1d(Cu), np.atleast_1d(Cd),
                              np.atleast_1d(Cs)).reshape((3,) + mphi.shape)
             Epi = (_MK**2 + _MPI**2 - mphi**2) / (2 * _MK)
             gphipik = (-(2 * _MK * Epi - _MK**2) * th[0]
                        - (_MK**2 - 6 * _MK * Epi + 2 * _MPI**2) / np.sqrt(3) * th[1]
                        - np.sqrt(6) / 3 * (2 + 3 * _G8S / _G8) * (_MK**2 - _MPI**2) * th[2])
-            # No Epi factor: the draft's bracket [(mK^2+mpi^2-mphi^2)/(2mK)] is the
+            # No Epi factor: the bracket [(mK^2+mpi^2-mphi^2)/(2mK)] is the
             # EVALUATION ARGUMENT Epi* of gphipik (used above), not a multiplicative
-            # one -- as a factor the width is dimensionally wrong (GeV^2), and the
-            # NWA limit of the 3-body rate through the phi pole reproduces this form
-            # with no Epi.  Removed from mesonandCMB_ratio.m/.jl 2026-07-22; this
-            # port kept it until 2026-08-04 (~4x at small mphi).
+            # one; the NWA limit of the 3-body rate through the phi pole reproduces
+            # this form.
             Gamma = ((_GF * _F * _G8 * _VUS * _VUD)**2 / (32 * np.pi * _MK**3) * gphipik**2
                      * kin / _HBAR)
         else:  # AxA
-            # Covariant polarisation sum: (lak + lap)^2 lambda/(4 mA^2); the rest-frame
-            # bracket used until 2026-11-17 was x1.69-1.81 low.  As mesonandCMB_ratio.m.
+            # Covariant polarisation sum: (lak + lap)^2 lambda/(4 mA^2).  As
+            # mesonandCMB_ratio.m.
             lak = _G8 * (Cs + Cu) + _G8S * (Cu + Cd + Cs)
             lap = _G8 * (Cd + Cu) + _G8S * (Cu + Cd + Cs)
             Gamma = (_GF**2 * _F**4 * _VUS**2 * _VUD**2 * (lak + lap)**2 * kin**3
                      / (32 * np.pi * mphi**2 * _MK**3) / _HBAR)
         r = Gamma * kphi_invisible_fraction(kind, mx, mphi, gx, Cu, Cd, Cs) / _KINV
-    # x NA62 acceptance at m_miss^2 = mphi^2 (kaon_invisible.na62_acceptance; 2026-11-17)
+    # x NA62 acceptance at m_miss^2 = mphi^2 (kaon_invisible.na62_acceptance)
     from kaon_invisible import na62_acceptance
     r = r * na62_acceptance(mphi**2)
     return np.where(mphi >= KPHI_THRESHOLD, np.nan, r)
@@ -267,7 +265,7 @@ def kphi_ratio(mx, mphi, gx, gu, gd, gs, interaction):
 
 def _sigmav(kind, mx, mphi, gx, Cu, Cd, Cs, cmb=False):
     # Low-velocity <sigma v> [cm^3/s] used by the CMB / INTEGRAL bounds.  Analytic
-    # threshold (s = 4 m_chi^2) expressions from mesonandCMBlimits.py.
+    # threshold (s = 4 m_chi^2) expressions, as mesonandCMB_ratio.m.
     # cmb=True adds the s-wave three-body annihilation (_threebody_cmb_sv), each
     # channel weighted by its deposited-energy fraction relative to gamma gamma.
     sapprox = 4 * mx**2
@@ -278,10 +276,8 @@ def _sigmav(kind, mx, mphi, gx, Cu, Cd, Cs, cmb=False):
             # 4pi: the source expression is dsigma/dOmega.
             # _HBARC**2 * _CC (ONE factor of c), as in every other branch: the
             # bracket is [GeV^-2], so GeV^-2 -> cm^2 needs (hbar c)^2 and
-            # cm^2 -> cm^3/s a single c.  The source (mesonandCMBlimits.py:418)
-            # had `*c * hbarc^2 * c`; the second c has nothing to convert and made
-            # this branch 3e10 too large.  Cf. SxP below -- same p-wave structure,
-            # same jfac, one _CC.  Fixed 2026-08-04.
+            # cm^2 -> cm^3/s a single c.  Cf. SxP below -- same p-wave structure,
+            # same jfac, one _CC.
             return (4 * np.pi * (gx**2 * _E**4 * Dnew) / (589824 * np.pi**6)
                     * (8 * mx**4 * jfac) / (4 * mx**2 - mphi**2)**2 * _HBARC**2 * _CC)
         if kind == "PxS":
@@ -327,7 +323,7 @@ def _sigmav(kind, mx, mphi, gx, Cu, Cd, Cs, cmb=False):
             _GETAP_GG, _GETAP_TOT = 4.34e-6, 1.88e-4
             F_etap = np.sqrt(_ALPHA**2 * _METAP**3 / (64 * np.pi**3 * _GETAP_GG))
             g_etapgamma = _ALPHA / (np.pi * F_etap)   # 1/pi: see sppp_couplings.m
-            # eta' singlet mixing mass: sqrt(6)/3 * sum(g) * (B0 F + (L6+L7) NLO), the draft body's form (4.3x the old B0*F/sqrt(6), whose appendix was commented out 2026-08-12)
+            # eta' singlet mixing mass: sqrt(6)/3 * sum(g) * (B0 F + (L6+L7) NLO), as in sppp_mixing.m
             m_mix = (np.sqrt(6) / 3 * (Cu + Cd + Cs)
                      * (_B0 * _F + (_L6 + _L7) * 32 * _B0**2 / _F * (_MU + _MD + _MS)))
             denom = (mphi**2 - _METAP**2)
@@ -357,7 +353,7 @@ def _sigmav(kind, mx, mphi, gx, Cu, Cd, Cs, cmb=False):
         Getapgg = (2.22 / 100) * 0.196e-3
         Fetap = np.sqrt((_ALPHA**2 * _METAP**3) / (64 * np.pi**3 * Getapgg))
         lampi0gamma = _E**2 / (4 * np.pi**2 * _F)
-        # data-driven F_eta (2026-08-11 draft Eq. lambdagamma); cf. axial_couplings.m
+        # data-driven F_eta (paper Eq. lambdagamma); cf. axial_couplings.m
         F_eta = np.sqrt(_ALPHA**2 * _META**3 / (64 * np.pi**3 * 5.16e-7))
         lametagamma = _E**2 / (4 * np.pi**2 * F_eta)
         lameta0gamma = _E**2 / (4 * np.pi**2 * Fetap)   # 4*pi**2, as pi0/eta above

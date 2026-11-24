@@ -79,7 +79,7 @@ double loop_core(const std::string& interaction,
     // Points outside the EFT's domain of validity are unphysical:
     //   axialVector  -- above the unitarity/meson-mixing ceiling, or sin(theta) >= s_mix;
     //   SP / PP      -- max_j |theta_j| >= s_mix, i.e. the pseudoscalar mediator's
-    //                   mixing with pi0/eta/eta' is no longer a small-angle expansion
+    //                   mixing with pi0/eta/eta' is not a small-angle expansion
     //                   (every coupling in that sector is first order in theta).
     // S(x)S and P(x)S go through the chiral loop factor D and are always valid.
     if (obs.eft_valid == 0.0) {

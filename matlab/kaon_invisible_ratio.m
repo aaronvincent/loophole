@@ -30,7 +30,7 @@ function r = kaon_invisible_ratio(mx, mphi, gx, g, interaction)
 %   MPHI > m_K+- - m_pi+- (pole never on shell), the GX^2 rescale is exact and
 %   the root-find reproduces it to <= 0.1%.
 %
-%   Ported from matlab/mesonandCMBlimits.py.  Interaction -> Python model map:
+%   Interaction -> model map (as analysis/kaon_invisible.py):
 %     heavyScalar   / lightScalar   / scalar     -> SxS  (scalar chi, scalar quark)
 %     heavyScalarPS / lightScalarPS / scalarPS   -> PxS  (pseudoscalar chi, scalar quark)
 %     heavyScalarSP / lightScalarSP / scalarSP   -> SxP  (scalar chi, pseudoscalar quark)
@@ -44,8 +44,8 @@ function r = kaon_invisible_ratio(mx, mphi, gx, g, interaction)
 %       INSIDE the integration range and is razor-thin (Gamma_pi0 ~ 8 eV), so it
 %       is handled by an NWA notch: excised from the numerical continuum and added
 %       back analytically, giving an integrator-independent result.
-%   AxA follows the draft eq. (kpichichiA), rechecked term by term 2026-11-17
-%   (signed lambda_jpiK, A' width and propagators, lambda_A'K^2); see the branch.
+%   AxA follows paper eq. (kpichichiA) (signed lambda_jpiK, A' width and
+%   propagators, lambda_A'K^2); see the branch.
 %   Mediator widths (SxP/PxP/AxA) are the relic code's totals, incl. -> chi chibar.
 
     % ---- interaction string -> model branch ---------------------------------
@@ -58,7 +58,7 @@ function r = kaon_invisible_ratio(mx, mphi, gx, g, interaction)
         otherwise, r = NaN; return;
     end
 
-    % ---- constants (values as in mesonandCMBlimits.py) ----------------------
+    % ---- constants -----------------------------------------------------------
     MeV = 1e-3;  eV = 1e-9;
     e    = 0.3;
     B0   = 0.13957^2/(0.0022 + 0.00469);   % = mpi+^2/(mu+md) ~ 2.827 GeV (was 2.6)
@@ -99,7 +99,7 @@ function r = kaon_invisible_ratio(mx, mphi, gx, g, interaction)
         r = NaN;
         return;
     end
-    % NA62 acceptance in m_miss^2 = s (added 2026-11-17): signal regions R1 =
+    % NA62 acceptance in m_miss^2 = s: signal regions R1 =
     % [0, 0.010] and R2 = [0.026, 0.068] GeV^2, smeared by the m_miss^2 resolution
     % sigma = 0.001 GeV^2 (JHEP 06 (2021) 093).  The gap holds the K -> pi pi0 peak
     % (s = 0.0182, 8 sigma inside: weight ~1e-16; pi0 -> invisible is mesoninv's)
@@ -158,11 +158,8 @@ function r = kaon_invisible_ratio(mx, mphi, gx, g, interaction)
     % K+ -> pi+ j* (j = pi0, eta, eta'), j mixes into phi, phi -> chi chibar.
     % Mixing masses m^2_{j phi} and angles theta_j = m^2_{j phi}/(mphi^2 - mj^2)
     % come from sppp_mixing.m (NLO: L6, L7, and the eta'), the same source as the
-    % relic cross sections (sppp_couplings.m) and kphi.  Until 2026-11-17 this
-    % branch used LO B0 F mixings (x2.57 low in amplitude at L6 = 1.46e-3), had
-    % no eta', and carried the pi0 chi coupling with the spurious minus that
-    % sppp_couplings.m dropped on 2026-08-10: g_{j chi} = +gx theta_j for every
-    % j, so each meson pole and its share of the phi pole enter as
+    % relic cross sections (sppp_couplings.m) and kphi.  g_{j chi} = +gx theta_j
+    % for every j, so each meson pole and its share of the phi pole enter as
     % theta_j g_{j pi K} [1/(s - mj^2) - 1/(s - mphi^2)].
     % K -> pi j vertices from the weak chiral Lagrangian (eq. Klagrangian), in
     % units of g8, with s = (pK - pi)^2:
@@ -189,11 +186,8 @@ function r = kaon_invisible_ratio(mx, mphi, gx, g, interaction)
         % integration range whenever 2 mx < mphi < mK-mpi+ ~ 0.354 GeV, and a
         % width-less 1/(s-mphi^2) makes the integrand singular there.  Gphi_reg
         % is the mediator's TOTAL width from the relic code (phi -> chi chibar,
-        % gamma gamma, 3pi).  It was gamma gamma only until 2026-11-17: without
-        % phi -> chi chibar the on-shell rate went as g_q^2/Gamma_gg, flat in the
-        % quark coupling, so r never fell below 1 and no kaon bound was found
-        % for 2 mx < mphi.  With it the on-shell rate is Gamma(K -> pi phi) *
-        % BR(phi -> chi chibar), as in SxS/PxS.  r is no longer ~ gx^2 there:
+        % gamma gamma, 3pi), so the on-shell rate is Gamma(K -> pi phi) *
+        % BR(phi -> chi chibar), as in SxS/PxS.  r is not ~ gx^2 there:
         % callers root-find (ratio_crit_coupling).
         Wphi     = phi_partial_widths(mphi, mx, gx, g, interaction);
         Gphi_reg = Wphi.total;
@@ -294,19 +288,16 @@ function r = kaon_invisible_ratio(mx, mphi, gx, g, interaction)
     % =====================================================================
     case 'AxA'   % axial-vector A': pi0/eta/eta' A'-mixing, K -> pi A'* -> pi chi chi
     % =====================================================================
-    % Draft eq. (kpichichiA), checked term by term 2026-11-17.  Changes from
-    % the mesonandCMBlimits.py transcription it replaces:
+    % Paper eq. (kpichichiA):
     %   * lambda_jpiK = i x (real).  The common i drops out of |amp|^2 but the
     %     RELATIVE signs of the pi0/eta/eta' terms do not, so the real
-    %     coefficients enter signed (were abs(); and the interference sum got
-    %     the complex lambda, so real() threw the whole term away).
+    %     coefficients enter signed.
     %   * the interference term carries the A' propagator 1/((s-mA^2)^2 +
-    %     mA^2 GA^2) (missing), and its meson denominators use m_pi+ (had m_pi0);
-    %   * the |A'|^2 term's propagator is s - mA^2 = mK^2+mpi^2 - 2 Epi mK (had
-    %     -Epi mK, which put the on-shell A' outside the Dalitz region), with
+    %     mA^2 GA^2), and its meson denominators use m_pi+;
+    %   * the |A'|^2 term's propagator is s - mA^2 = mK^2+mpi^2 - 2 Epi mK, with
     %     the width inside the F^4 mA^4 factor;
-    %   * lambda_A'K^2 mA^4 mK^4 (was lambda_A'K);
-    %   * Gamma_A' = the relic code's total width (was 0).
+    %   * lambda_A'K^2 mA^4 mK^4;
+    %   * Gamma_A' = the relic code's total width.
     % The E_chi dependence is quadratic, so the inner integral is analytic.  For
     % 2 mx < mA < mK - mpi+ the A' is on shell inside the range; that pole is
     % razor-thin (Gamma_A'/mA ~ gx^2/12pi) and NWA-notched like SxP's mediator.
@@ -443,8 +434,8 @@ end
 % [Epi* - d, Epi* + d] the Lorentzian is integrated analytically with numf frozen
 % at the pole, (atan(u_lo/w) - atan(u_hi/w))/(2 mK w), w = mphi Gphi, and the rest
 % numerically with breakpoints graded outward from the window -- the scheme of
-% the SxP/PxP mediator notch.  Without it, Gamma_phi/mphi ~ 1e-12 sent the
-% adaptive rule past the pole (r off by x5 or ->0 at gx ~ 1e-5; fixed 2026-11-17).
+% the SxP/PxP mediator notch (Gamma_phi/mphi can be ~1e-12, too narrow for the
+% adaptive rule).
 function F = bw_notch_integral(numf, mphi, Gphi, a, b, mK, mpi, extra)
     % extra: additional breakpoints (here the NA62 acceptance edges)
     extra = extra(extra > a & extra < b);

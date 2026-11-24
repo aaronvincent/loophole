@@ -198,7 +198,7 @@ JOINT_LABEL = "Several bounds jointly"
 def write_legend(active, include_combined, out_dir):
     """Write the shared legend (identical across all planes) to its own file.
 
-    Same entries the per-plane figures used to carry: survives-all, one
+    Entries: survives-all, one
     translucent (hatched) patch per active constraint, and the dotted joint-kill
     outline when any plane produced that category.  Rendered into a
     legend-only figure cropped to the legend's bounding box.  Patch labels are

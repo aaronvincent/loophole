@@ -42,8 +42,8 @@ robustly:
                            field, so already smooth; no spline needed).
   4. ``fill_region``    -- contourf a category mask (smooth filled region).
 
-``profile_grid`` / ``region_mask`` (the old binned-field primitives) are kept as
-general helpers but are no longer on the plotting path.
+``profile_grid`` / ``region_mask`` are binned-field helpers, not used by the
+plotters.
 
 All functions are pure (no global state); plotting helpers take an Axes.
 Dependencies: numpy, scipy, contourpy (vendored by matplotlib) -- NOT skimage.

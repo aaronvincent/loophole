@@ -48,15 +48,14 @@ F       = 0.0924;    % GeV, pion decay constant
 
 % --- meson -> gamma gamma couplings -------------------------------------
 %   lambda_{pi0 gg}  = e^2/(4 pi^2 F)        = alphaEM/(pi F)        (chiral)
-%   lambda_{eta gg}  = e^2/(4 pi^2 F_eta)    = alphaEM/(pi F_eta)    (data-driven
-%      as of the 2026-08-11 draft, Eq. (lambdagamma): the LO octet value
+%   lambda_{eta gg}  = e^2/(4 pi^2 F_eta)    = alphaEM/(pi F_eta)    (data-driven,
+%      paper Eq. (lambdagamma): the LO octet value
 %      alphaEM/(sqrt3 pi F) gives Gamma(eta->gg) = 0.17 keV against a measured
 %      0.52 keV -- the familiar factor 3 from taking eta = eta_8 with no
 %      eta-eta' mixing.  F_eta = 0.0925 GeV so defined, i.e. 1.73x the LO
-%      sqrt3*F = 0.1600 GeV in amplitude.  NOTE: the draft's pseudoscalar
-%      section still carries the LO form, so sppp_couplings.m /
-%      phi_partial_widths.m / mesonandCMB_ratio.m are deliberately NOT changed
-%      to match.
+%      sqrt3*F = 0.1600 GeV in amplitude.  The S(x)P/P(x)P sector
+%      (sppp_couplings.m, phi_partial_widths.m, mesonandCMB_ratio.m) uses the
+%      LO octet form, as in the paper.
 %   lambda_{eta' gg} = e^2/(4 pi^2 F_eta')   = alphaEM/(pi F_eta')   (data-driven:
 %      eta' is not a Goldstone, so F_eta' is fixed from the measured gg width,
 %      F_eta' = sqrt(alphaEM^2 m_eta'^3 / (64 pi^3 Gamma_eta'->gg)); alphaEM
@@ -68,13 +67,11 @@ F       = 0.0924;    % GeV, pion decay constant
 % Checks: the pi0 entry reproduces Gamma(pi0->gg)=7.7 eV to 0.4%, and the eta'
 % entry reproduces the measured 4.34 keV exactly (by construction).
 % F_etap = 0.0737 GeV as defined above is a DECAY CONSTANT (cf. f_pi = 0.0924),
-% so it needs the same 1/pi as F -- the earlier alphaEM/F_etap was pi too large,
-% which put pi^2 ~ 9.87 into every |amplitude|^2 through this coupling.
-% Fixed 2026-08-05.
+% so it carries the same 1/pi as F.
 F_etap   = sqrt(alphaEM^2 * m_etap^3 / (64*pi^3*G_etap_gg));
 F_eta    = sqrt(alphaEM^2 * m_eta^3  / (64*pi^3*G_eta_gg));
 lam_pigg   = alphaEM/(pi*F);
-lam_etagg  = alphaEM/(pi*F_eta);     % was alphaEM/(sqrt(3)*pi*F); see above
+lam_etagg  = alphaEM/(pi*F_eta);     % data-driven; see above
 lam_etapgg = alphaEM/(pi*F_etap);
 
 % --- A'-meson mixing masses m_{jA'} (small-mixing) ----------------------

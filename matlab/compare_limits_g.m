@@ -783,7 +783,7 @@ if ~isnan(snap_at) && snap_at < length(mx_vec)
     sglim_loop_fi(tail)  = NaN;  sglim_loop_fo(tail)  = NaN;
 end
 
-% Close the LOW-mass end of each island (2026-11-18).  With the dark sector
+% Close the LOW-mass end of each island.  With the dark sector
 % filled, chi chi <-> phi phi at fixed gx sets Oh2 by dark freeze-out: Oh2(g_q) is
 % a plateau, flat to 4 digits over ~5 decades of g_q and ~ mx^2 (mphi = 1e-9,
 % gx = 0.01).  As mx falls the
@@ -1201,7 +1201,7 @@ end
 if ~exist('gq_all_lo3', 'var')
     [gq_all_lo3, gq_all_hi3, sg_all_lo3, sg_all_hi3, vg_all_lo3, vg_all_hi3] = deal(nan(size(mx_vec)));
 end
-% ...and one from before 2026-11-17 has no mediator-relic band.
+% ...and an older cache may have no mediator-relic band.
 if ~exist('gq_med_lo', 'var')
     [gq_med_lo, gq_med_hi, sg_med_lo, sg_med_hi, vg_med_lo, vg_med_hi] = deal(nan(size(mx_vec)));
 end
@@ -1310,12 +1310,12 @@ if SHOW.pert_line && ~SHOW.nonpert
     pert_line_args = {'DisplayName', 'Perturbativity ($g_q = 1$)'};
 end
 
-% Low-mass island walls (see the loop block).  A cache from before 2026-11-18
-% has none: find them now with the same test, which costs one solve per
+% Low-mass island walls (see the loop block).  If the cache has none, find
+% them now with the same test, which costs one solve per
 % candidate mass (plus a bisection where a wall exists).  Without the test, a
 % run of lower-branch-only masses ahead of the first two-branch mass -- an
 % island open-topped there, its upper branch above g_q = 1 -- was taken for a
-% bump tip and erased (SxS, mphi = 1: the whole Oh2 = 0.12 line below 0.13 GeV).
+% bump tip and erased.
 if ~exist('relic_tip_mx', 'var') || numel(relic_tip_mx) ~= numel(mx_vec)
     tip_dec_ = 2;  if exist('COALESCE_MAX_DEC', 'var'), tip_dec_ = COALESCE_MAX_DEC; end
     relic_tip_mx = relic_island_tips(mx_vec, gqvec_loop_fi, gqvec_loop_fo, tip_dec_, ...
@@ -1324,8 +1324,7 @@ if ~exist('relic_tip_mx', 'var') || numel(relic_tip_mx) ~= numel(mx_vec)
 end
 % The loop branches on a grid with a column at each wall; an inserted column
 % carries the couplings of the mass above it.  A lone lower root just below a
-% wall (the bump tip, see the loop block; a cache from before 2026-11-18 still
-% holds it) is not drawn: its line overshoots the wall and its fill runs to
+% wall (the bump tip, see the loop block) is not drawn: its line overshoots the wall and its fill runs to
 % g_q = 1.
 lo_d_ = gqvec_loop_fi;  sglo_d_ = sglim_loop_fi;
 for j = find(isfinite(relic_tip_mx))
@@ -2013,7 +2012,7 @@ for k = 1:numel(ax)
     % The whole box comes from panel_layout, never from the current TightInset:
     % after hide_y_labels that inset no longer includes the y gutter, and
     % re-measuring it would hand the unlabelled panel a WIDER plot box than the
-    % labelled one it shares an axis with -- the regression 127099a fixed.
+    % labelled one it shares an axis with.
     p = [L.ti_left, L.ti_bottom, 1 - L.ti_left - L.ti_right, 1 - L.ti_bottom - L.ti_top];
     if p(3) > 0 && p(4) > 0
         set(ax(k), 'PositionConstraint', 'innerposition');
@@ -2528,7 +2527,7 @@ function L = panel_layout()
 % be the same size and at the same height -- which they are not if each is sized
 % from its own TightInset.
 %
-% Measured over all 15 sigma panels (2026-08-19): the left and bottom insets are
+% Measured over all 15 sigma panels: the left and bottom insets are
 % identical everywhere (0.2250 / 0.2202 -- same fonts, same tick labels), but the
 % TOP inset ranges 0.0000 to 0.0468 depending on whether the topmost y tick label
 % lands on the axis top and protrudes above it.  Sizing the axes from that spread
@@ -2539,7 +2538,7 @@ function L = panel_layout()
 % panel.  Panels needing less carry a little blank above the axes -- the same
 % amount on every panel, so they still line up.
 %
-% The horizontal layout is pinned the same way (2026-10-21).  Sized per panel,
+% The horizontal layout is pinned the same way.  Sized per panel,
 % the left gutter followed the widest y tick label: 0.1637 on S/PS/SP/PP but
 % 0.1820 on axialVector, whose plot box therefore came out 2% narrower and whose
 % row, scaled by \panelrow to fill the line, sat at a different size.  And the
@@ -2661,7 +2660,7 @@ parfor j = 1:nmx
                 % detector (exp(-L/ell); for SxS from mphi ~ 0.013 GeV), while
                 % still excluding smaller g_q.  Underflowed to 0, or tiny but
                 % nonzero, so that 1/sqrt(ratio) lands tens of decades above the
-                % band and the root-find runs out of range (was a spurious gap at
+                % band and the root-find runs out of range (a gap at
                 % mphi = 14-17 MeV, SxS): seed from a tiny g_q instead, where the
                 % phi escapes and the ratio is ~g_q^2.
                 e0 = 1e-12;  r0 = rfun{ie}(e0);

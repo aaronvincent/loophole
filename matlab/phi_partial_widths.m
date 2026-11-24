@@ -32,7 +32,7 @@ mpi_pm  = 0.13957;
 mK      = 0.493677;
 m_eta   = 0.547862;
 alphaEM = 1/137;
-B0      = 0.13957^2/(0.0022 + 0.00469);   % = mpi+^2/(mu+md) ~ 2.827 GeV (draft convention; was 2.6)
+B0      = 0.13957^2/(0.0022 + 0.00469);   % = mpi+^2/(mu+md) ~ 2.827 GeV (paper convention)
 f       = 0.0924;
 mN      = 0.938;
 m_up    = 0.0022;
@@ -148,10 +148,10 @@ function gphigg = phi_gg_coupling(mphi, gx, g, alphaEM, B0, f, mpi0, m_eta)
 if g(1) == g(2) && g(2) == g(3)
     m_etap = 0.95778; G_etap_gg = 4.34e-6;
     F_etap = sqrt(alphaEM^2 * m_etap^3 / (64*pi^3*G_etap_gg));
-    m_mix  = sppp_mixing(mphi, g);  m_mix = m_mix(3);   % draft's sqrt(6)/3 + NLO
+    m_mix  = sppp_mixing(mphi, g);  m_mix = m_mix(3);   % sqrt(6)/3 + NLO
     % alphaEM/(pi*F_etap): F_etap is a decay constant, so it carries the same
     % 1/pi as the gpigamma = alphaEM/(pi*f) convention in the else-branch below.
-    % Kept in lockstep with sppp_couplings.m:57.  Fixed 2026-08-05.
+    % Kept in lockstep with sppp_couplings.m.
     gphigg = (alphaEM/(pi*F_etap)) * m_mix / (mphi^2 - m_etap^2);
 else
     gpigamma  = alphaEM/pi/f;
@@ -161,9 +161,8 @@ else
     m2_pi0phi = m2_all(1);
     m2_etaphi = m2_all(2);
     % Both terms enter with the SAME sign: g_{phi' gg} = -sum_j g_{j gg} theta_j
-    % with theta_j = m2_{j phi}/(mphi^2-mj^2).  The pi0 term used to carry the
-    % opposite sign, which changed |gphigg| and hence Gamma(phi->gg).  Kept in
-    % lockstep with sppp_couplings.m.
+    % with theta_j = m2_{j phi}/(mphi^2-mj^2).  Kept in lockstep with
+    % sppp_couplings.m.
     gphigg = -gpigamma  * m2_pi0phi / (mphi^2 - mpi0^2) ...
              -getagamma * m2_etaphi / (mphi^2 - m_eta^2);
 end

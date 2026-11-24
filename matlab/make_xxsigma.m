@@ -102,8 +102,7 @@ function s_out = sig_pp_ps(s, mx, mphi, gx)
     s_out   = zeros(size(s));
     mask_pp = (s > 4*mphi^2);
     if any(mask_pp)
-        % REPLACED 2026-08-11 in step with xxggxsec.m: the old closed form was
-        % negative and ~1/v_rel where the true result is positive and ~v_rel.
+        % Same form as xxggxsec.m: positive and ~v_rel (no s-wave).
         % The 1/16pi already carries the identical-particle S = 1/2.
         sp    = s(mask_pp);
         kin   = sqrt((sp - 4*mx^2).*(sp - 4*mphi^2));

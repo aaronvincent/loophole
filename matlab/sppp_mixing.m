@@ -13,7 +13,7 @@ function [m2, theta, theta_max, mj] = sppp_mixing(mphi, g)
 %   from these) and by model_observables.m (which refuses points where the
 %   expansion the whole sector rests on has broken down).
 %
-%   CONVENTION (2026-08-12 draft, Eq. eq:pseudocouplingslim and the appendix
+%   CONVENTION (paper Eq. eq:pseudocouplingslim and the appendix
 %   mixing-angle block).  The mixing angle carries NO factor 2:
 %
 %       theta_j = m^2_{j phi} / (m_j^2 - m_phi^2)
@@ -21,12 +21,9 @@ function [m2, theta, theta_max, mj] = sppp_mixing(mphi, g)
 %   and the couplings that follow are g_{j chi} = +gx*theta_j (same sign for
 %   every j) with the induced g_{phi gg} = -sum_j g_{j gg} theta_j.  This code
 %   uses the opposite overall sign, theta_j = m2_j/(mphi^2 - mj^2), which is an
-%   overall sign on the whole amplitude and so drops out of |A|^2.  Earlier
-%   drafts (and this code until 2026-08-12) carried a 1/2 in every denominator;
-%   removing it doubles every SP/PP coupling and so multiplies the SP/PP cross
-%   sections and the K+ -> pi+ chi chibar rate by 4.
+%   overall sign on the whole amplitude and so drops out of |A|^2.
 %
-%   VALIDITY.  The draft states the small-mixing limit as
+%   VALIDITY.  The small-mixing limit is
 %       |m^2_{pi0 phi}| << |m_phi^2 - m_pi0^2|,  and likewise for eta and eta',
 %   i.e. |theta_j| << 1 for all three poles simultaneously.  Everything in the
 %   SP/PP sector -- the pole couplings, the induced phi-gamma-gamma coupling,
@@ -53,8 +50,6 @@ m_s  = 0.095;
 
 summ = m_up + m_dn + m_s;
 % NLO bracket shared by all three (O(p^2) B0 F plus the O(p^4) L6 piece).
-% NOTE: this bracket is 2.58x its own leading term with the draft's constants,
-% which is not a convergent chiral expansion, but is used as written here.
 K    = B0*f + 32*B0^2*L6/f*summ;
 sg   = g(1) + g(2) + g(3);
 
@@ -62,9 +57,7 @@ m2_pi0phi  = (g(1)-g(2))*K + 32*B0^2*L7/f * sg * (m_up - m_dn);
 m2_etaphi  = ( (g(1)+g(2)-2*g(3))*K ...
              + 32*B0^2*L7/f * sg * (m_up + m_dn - 2*m_s) ) / sqrt(3);
 % eta' (SU(3) singlet).  sqrt(6)/3 = sqrt(2/3) is the eta_0 coefficient of
-% Tr[g_q Pi]; the L6+L7 bracket is the draft's.  This replaced B0*f/sqrt(6)
-% (LO only, and sqrt(6)/3 -> 1/sqrt(6), together 4.3x low) on 2026-08-12, when
-% the appendix carrying that form was commented out of the draft.
+% Tr[g_q Pi]; the L6+L7 bracket is the paper's.
 m2_etapphi = sqrt(6)/3 * sg * (B0*f + (L6 + L7)*32*B0^2/f*summ);
 
 mj    = [mpi0, m_eta, m_etap];

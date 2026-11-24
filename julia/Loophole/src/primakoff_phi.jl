@@ -7,8 +7,7 @@
 using QuadGK: quadgk
 using SpecialFunctions: besselk
 # K₁/K₂ (scaled) via thermal_average.jl's Bessels.jl wrappers: SpecialFunctions'
-# besselkx(ν::Int, x) takes the complex AMOS path (~340 ns vs 20 ns) and was ~70% of
-# neff_simple's cost on 6D scans (2026-11-20).
+# besselkx(ν::Int, x) takes the complex AMOS path (~340 ns vs 20 ns).
 
 const _PR_ALPHA = 1 / 137.036
 const _PR_ME = 0.51099895e-3

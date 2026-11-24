@@ -104,13 +104,9 @@ if s > 4*mx^2
         sig = zeros(size(s));
         mask_pp = (s > 4*mphi^2);
         if use_dark && any(mask_pp)
-            % REPLACED 2026-08-11.  The previous closed form (the variant that
-            % is commented out in the draft) is not this function: it is
-            % negative and ~1/v_rel in the non-relativistic regime, where the
-            % true result is positive and ~v_rel.  A pseudoscalar chi vertex
-            % has no s-wave at all -- at threshold the two diagrams sum to
-            % vbar(pslash_1 + pslash_2)u = 0 -- so the 1/v_rel scaling was
-            % impossible.  This form matches a direct tree-level trace
+            % Positive and ~v_rel in the non-relativistic regime: a pseudoscalar
+            % chi vertex has no s-wave -- at threshold the two diagrams sum to
+            % vbar(pslash_1 + pslash_2)u = 0.  Matches a direct tree-level trace
             % calculation to all digits.
             % The 1/16pi already carries the identical-particle S = 1/2.
             sp    = s(mask_pp);
@@ -217,11 +213,8 @@ if s > 4*mx^2
             gcx = gcx_arr(jj);
             mask = (s > 4*mj^2);
             if keep_j(jj) && any(mask)
-                % REPLACED 2026-08-11, same as the heavyScalarPS phi-phi
-                % branch: the old closed form was negative and ~1/v_rel where
-                % the true result is positive and ~v_rel, which made the whole
-                % scalarPP cross section go negative for mx >~ mpi0.  Verified
-                % against a direct trace calculation.
+                % Same form as the heavyScalarPS phi-phi branch (positive,
+                % ~v_rel); verified against a direct trace calculation.
                 % The 1/16pi already carries the identical-particle S = 1/2.
                 sm   = s(mask);
                 kin  = sqrt((sm - 4*mx^2).*(sm - 4*mj^2));
