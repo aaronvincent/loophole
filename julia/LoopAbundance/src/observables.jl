@@ -2,9 +2,9 @@
 # Ports of DMnucxsec.m and model_observables.m.
 
 # --- nucleon inputs (DMnucxsec.m) --------------------------------------
-const _DU = 0.842     # proton axial charges Δq^p
-const _DD = -0.427
-const _DS = -0.085
+const _DU = 0.847     # proton spin contents Δq^p = g_A^q, FLAG 2024 (2411.04268) N_f = 2+1;
+const _DD = -0.407    # one set for a_N and h̃_P/h̃_N (same matrix element)
+const _DS = -0.035
 const _FPU = 0.02     # proton scalar couplings (constants.jl has the same;
 const _FPD = 0.026    # kept local to mirror DMnucxsec.m's own values)
 const _FPS = 0.118
@@ -26,11 +26,10 @@ _mu_red(mx) = MN * mx / (MN + mx)
 # Pseudoscalar nucleon coupling h̃_P (used by the SP/PP interactions in place of
 # the scalar h_p): proton spin content Δn_i weighted by 1/m_i with the
 # SU(3)-singlet (η′) piece projected out, (g_i − ⟨g/m⟩/⟨1/m⟩).  Port of
-# DMnucxsec.m's htildeP.  Note these spin components differ from the axial
-# charges _DU/_DD/_DS used by the axialVector σ_N.
-const _DNU = 0.84      # proton quark spin components Δn_i
-const _DND = -0.44
-const _DNS = -0.03
+# DMnucxsec.m's htildeP.  Same spin contents as the axial a_N.
+const _DNU = _DU
+const _DND = _DD
+const _DNS = _DS
 function _htildeP(g)
     invm_sum = 1 / _MUP + 1 / _MDN + 1 / _MS
     g_proj   = (g[1] / _MUP + g[2] / _MDN + g[3] / _MS) / invm_sum   # singlet projection

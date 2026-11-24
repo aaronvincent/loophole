@@ -22,10 +22,13 @@ function [hp, htildeP, a_N, htildeN, hn] = nucleon_couplings(g)
 %            it (hp + hn)/2.
 %
 % hp, htildeP and a_N are PROTON values; the neutron swaps u<->d.  References:
-% quark composition arXiv:1202.1292 (table II), proton axial/spin charges.
+% sigma terms arXiv:1202.1292 (table II); spin contents FLAG 2024 (below).
 
-% Proton axial charges Delta_q^p
-Du = 0.842;  Dd = -0.427;  Ds = -0.085;
+% Proton quark spin contents Delta_q^p = g_A^q, FLAG 2024 (arXiv:2411.04268),
+% N_f = 2+1 (eqs. 440-442).  ONE set for the axial (a_N) and pseudoscalar
+% (htildeP, htildeN) couplings: both are the same matrix element
+% <N|qbar gamma^mu gamma5 q|N>.  Neutron: swap u <-> d.
+Du = 0.847;  Dd = -0.407;  Ds = -0.035;
 mN  = 0.938;
 % Scalar sigma-term form factors
 fpu = 0.02;  fpd = 0.026;  fps = 0.118;
@@ -40,7 +43,7 @@ hn = mN*(g(1)*fpd/m_up + g(2)*fpu/m_dn + g(3)*fps/m_s);
 
 % Pseudoscalar nucleon coupling: proton spin content Dn_i weighted by 1/m_i,
 % with the SU(3)-singlet (eta') direction projected out -- (g_i - <g/m>/<1/m>).
-Dnu = 0.84;  Dnd = -0.44;  Dns = -0.03;
+Dnu = Du;  Dnd = Dd;  Dns = Ds;
 invm_sum = 1/m_up + 1/m_dn + 1/m_s;
 g_proj   = (g(1)/m_up + g(2)/m_dn + g(3)/m_s) / invm_sum;
 htildeP  = mN*( Dnu/m_up*(g(1)-g_proj) ...

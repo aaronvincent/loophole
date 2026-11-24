@@ -87,7 +87,7 @@ if "HeRALD_c4" in PROJ:
 # Spin-dependent mode (axialVector runs), set per run by set_mode().
 SD = False
 REACH = None                 # (log10 mx, log10 sigma_chiN) of survivors QUEST-DMC SD-n reaches
-DQ_P = np.array([0.842, -0.427, -0.085])   # Delta_q^p (u, d, s), as observables.jl
+DQ_P = np.array([0.847, -0.407, -0.035])   # Delta_q^p (u, d, s), FLAG 2024, as observables.jl
 DQ_N = DQ_P[[1, 0, 2]]                     # isospin: Delta_u^n = Delta_d^p, ...
 REACH_COLOR = "#000000"
 SD_STYLE = {"QUESTDMC_SDn": dict(color="#555555", ls=(0, (1.5, 2)), lw=2.2)}

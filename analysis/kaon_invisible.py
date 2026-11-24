@@ -309,7 +309,7 @@ def _ratio_sxs_pxs(mx, mphi, gx, Cu, Cd, Cs, kind, panels=None):
                if cores else _gl_panel(_accw(_integrand), a, b)
                for a, b, cores in panels)
 
-    gpiK = delta * _B0 * ((Cs + Cu) * _MPI - (Cu + Cd) * _MK) / (_MK - _MPI)
+    gpiK = delta * _B0 * ((Cs + Cu) * _MPI**2 - (Cu + Cd) * _MK**2) / (_MK**2 - _MPI**2)
     Gamma = gx ** 2 * gpiK ** 2 * Fint / (32.0 * np.pi ** 3 * _MK) / _HBAR
     return Gamma / _KINV
 

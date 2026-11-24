@@ -231,7 +231,7 @@ def kphi_ratio(mx, mphi, gx, gu, gd, gs, interaction):
         kin = np.sqrt(np.clip((_MK**2 + _MPI**2 - mphi**2)**2 - 4 * _MK**2 * _MPI**2, 0.0, None))
         if kind in ("SxS", "PxS"):
             delta = -_GF * _F**2 * _VUS * _VUD * _G8 / np.sqrt(2)
-            cpik = delta * _B0 * ((Cs + Cu) * _MPI - (Cu + Cd) * _MK) / (_MK - _MPI)
+            cpik = delta * _B0 * ((Cs + Cu) * _MPI**2 - (Cu + Cd) * _MK**2) / (_MK**2 - _MPI**2)
             Gamma = cpik**2 * kin / (16 * np.pi * _MK**3) / _HBAR
         elif kind in ("SxP", "PxP"):
             # theta_j from _sppp_theta (sppp_mixing.m: NLO, pi0, eta AND eta'); the

@@ -4,14 +4,14 @@ function verify_dmnucxsec_fullrange()
 % full mediator-mass range. sigma = int_{-T}^0 (pi/(mu^2 vrel^2)) dsigma/dOmega dt,
 % T = 4 mu^2 vrel^2.  Reports max relative error (should be ~1e-10 or better).
     mN = 0.938; vrel = 220/3e5;
-    Du = 0.842; Dd = -0.427; Ds = -0.085;
+    Du = 0.847; Dd = -0.407; Ds = -0.035;   % FLAG 2024, as nucleon_couplings.m
     g  = [0.7, -0.3, 0.15];                 % non-degenerate so htildeP ~= 0
     gx = 0.8;
     % nucleon couplings (mirror DMnucxsec.m)
     fpu=0.02; fpd=0.026; fps=0.118; mu_=0.0022; md_=0.00469; ms_=0.095;
     hp = mN*(g(1)*fpu/mu_ + g(2)*fpd/md_ + g(3)*fps/ms_);
     invm = 1/mu_+1/md_+1/ms_; gpr = (g(1)/mu_+g(2)/md_+g(3)/ms_)/invm;
-    Dnu=0.84; Dnd=-0.44; Dns=-0.03;
+    Dnu=Du; Dnd=Dd; Dns=Ds;
     htp = mN*(Dnu/mu_*(g(1)-gpr)+Dnd/md_*(g(2)-gpr)+Dns/ms_*(g(3)-gpr));
     aN  = g(1)*Du+g(2)*Dd+g(3)*Ds;
 

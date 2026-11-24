@@ -146,7 +146,7 @@ function Gamma = kphi_rate(model, P)
     switch model
     case {'SxS', 'PxS'}   % scalar phi-quark coupling (identical for SS and PS)
         delta   = -P.GF * P.F^2 * P.Vusstar * P.Vud * P.g8 / sqrt(2);
-        cpikphi = delta * P.B0 * ((P.Cs + P.Cu)*mpip - (P.Cu + P.Cd)*mk) / (mk - mpip);
+        cpikphi = delta * P.B0 * ((P.Cs + P.Cu)*mpip^2 - (P.Cu + P.Cd)*mk^2) / (mk^2 - mpip^2);
         Gamma   = cpikphi^2 * kin / (16*pi*mk^3) / P.hbar;
 
     case {'SxP', 'PxP'}   % pseudoscalar phi-quark coupling (pi0/eta poles)

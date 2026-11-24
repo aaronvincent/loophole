@@ -799,32 +799,9 @@ end
 % plateau's onset (an overabundant sliver ~0.25 dex wide in eta whose upper
 % root the etavec_fo anchor rejects); its fill would run up to eta = 1, so it
 % is dropped.
-relic_tip_mx = nan(size(mx_vec));
-both = ~isnan(etavec_loop_fi) & ~isnan(etavec_loop_fo);
-for j = 2:length(mx_vec)
-    if ~both(j) || both(j-1), continue; end
-    if abs(log10(etavec_loop_fo(j) / etavec_loop_fi(j))) <= COALESCE_MAX_DEC, continue; end
-    eta_mid = sqrt(etavec_loop_fi(j) * etavec_loop_fo(j));
-    if strcmp(solver_name, 'freeze_coupled')
-        oh_mid = @(m) freeze_coupled(m, mphi, gx, eta_mid * g_ref, interaction, T_RH, false, production);
-    else
-        oh_mid = @(m) freeze_loop(m, mphi, gx, eta_mid * g_ref, interaction, T_RH, false, production);
-    end
-    la = log(mx_vec(j-1));  lb = log(mx_vec(j));
-    try
-        fa = oh_mid(exp(la)) - Oh2_target;
-        if ~(isfinite(fa) && fa < 0), continue; end    % no wall below mx(j)
-        for it = 1:6
-            lc = 0.5 * (la + lb);
-            fc = oh_mid(exp(lc)) - Oh2_target;
-            if ~isfinite(fc), break; end
-            if fc < 0, la = lc; else, lb = lc; end
-        end
-    catch err
-        fprintf(2, '[Loop tip] mx=%.4g: %s\n', mx_vec(j), err.message);
-        continue
-    end
-    relic_tip_mx(j) = exp(0.5 * (la + lb));
+relic_tip_mx = relic_island_tips(mx_vec, etavec_loop_fi, etavec_loop_fo, COALESCE_MAX_DEC, ...
+    relic_oh2_at(solver_name, mphi, gx, g_ref, interaction, T_RH, production), Oh2_target);
+for j = find(isfinite(relic_tip_mx))
     k = j - 1;
     while k >= 1 && ~isnan(etavec_loop_fi(k)) && isnan(etavec_loop_fo(k))
         etavec_loop_fi(k) = NaN;  sglim_loop_fi(k) = NaN;  k = k - 1;
@@ -1334,18 +1311,16 @@ if SHOW.pert_line && ~SHOW.nonpert
 end
 
 % Low-mass island walls (see the loop block).  A cache from before 2026-11-18
-% has none: put the wall at the first two-branch mass, which is up to one grid
-% step inside the true edge.
+% has none: find them now with the same test, which costs one solve per
+% candidate mass (plus a bisection where a wall exists).  Without the test, a
+% run of lower-branch-only masses ahead of the first two-branch mass -- an
+% island open-topped there, its upper branch above eta = 1 -- was taken for a
+% bump tip and erased (SxS, mphi = 1: the whole Oh2 = 0.12 line below 0.13 GeV).
 if ~exist('relic_tip_mx', 'var') || numel(relic_tip_mx) ~= numel(mx_vec)
-    relic_tip_mx = nan(size(mx_vec));
     tip_dec_ = 2;  if exist('COALESCE_MAX_DEC', 'var'), tip_dec_ = COALESCE_MAX_DEC; end
-    both_ = ~isnan(etavec_loop_fi) & ~isnan(etavec_loop_fo);
-    for j = 2:numel(mx_vec)
-        if both_(j) && ~both_(j-1) && abs(log10(etavec_loop_fo(j) / etavec_loop_fi(j))) > tip_dec_
-            relic_tip_mx(j) = mx_vec(j);
-        end
-    end
-    clear tip_dec_ both_
+    relic_tip_mx = relic_island_tips(mx_vec, etavec_loop_fi, etavec_loop_fo, tip_dec_, ...
+        relic_oh2_at(solver_name, mphi, gx, g_ref, interaction, T_RH, production), Oh2_target);
+    clear tip_dec_
 end
 % The loop branches on a grid with a column at each wall; an inserted column
 % carries the couplings of the mass above it.  A lone lower root just below a
@@ -2086,25 +2061,42 @@ function overlay_rat_externals(x, Y, Yhi, cols, lbls, ytop_fill)
 % figure's final frame top so the excluded region reaches the top edge).  NaN
 % rows (constraint closed / not applicable) are skipped.  The caller sets the
 % final y-limits (see frame_yrange).
+%
+% Each contiguous finite run of Y is its own region: a NaN gap is a real hole,
+% not something to bridge.  Where a run stops inside the scan (kaon past NA62's
+% m_miss^2 acceptance, INTEGRAL at the ends of its energy window), a vertical
+% dash-dot edge joins floor to ceiling (or to the frame top), so the region
+% reads as closed.  No edge at the ends of the scan, which are the frame.  As
+% compare_limits_g_mphi.m.
 for ie = 1:size(Y, 1)
     y = Y(ie, :);
-    m = isfinite(y);
-    if ~any(m), continue; end
-    yt = ytop_fill*ones(1, sum(m));
-    yh = Yhi(ie, m);
-    yt(isfinite(yh)) = yh(isfinite(yh));
-    % The legend row is the SHADE, not the boundary line: a filled patch means
-    % "the model cannot lie here", and every exclusion has to read the same way
-    % (a line is reserved for the relic loci).  The dash-dot boundary is still
-    % drawn, it just does not claim the legend entry.
-    loglog(x(m), y(m), '-.', 'LineWidth', 2, 'Color', cols{ie}, ...
-           'HandleVisibility', 'off');
-    if any(isfinite(Yhi(ie, :)))
-        loglog(x, Yhi(ie, :), '-.', 'LineWidth', 2, 'Color', cols{ie}, ...
+    fin = isfinite(y);
+    if ~any(fin), continue; end
+    d = diff([false, fin, false]);
+    run_lo = find(d == 1);  run_hi = find(d == -1) - 1;
+    for r = 1:numel(run_lo)
+        k = run_lo(r):run_hi(r);
+        yt = ytop_fill*ones(1, numel(k));
+        yh = Yhi(ie, k);
+        yt(isfinite(yh)) = yh(isfinite(yh));
+        % The legend row is the SHADE, not the boundary line: a filled patch
+        % means "the model cannot lie here", and every exclusion has to read the
+        % same way (a line is reserved for the relic loci).  The dash-dot
+        % boundary is still drawn, it just does not claim the legend entry.
+        loglog(x(k), y(k), '-.', 'LineWidth', 2, 'Color', cols{ie}, ...
                'HandleVisibility', 'off');
+        if any(isfinite(yh))
+            loglog(x(k), yh, '-.', 'LineWidth', 2, 'Color', cols{ie}, ...
+                   'HandleVisibility', 'off');
+        end
+        for e = unique([k(1), k(end)])
+            if e == 1 || e == numel(x), continue; end   % scan edge = frame edge
+            loglog([x(e) x(e)], [y(e) yt(k == e)], '-.', 'LineWidth', 2, ...
+                   'Color', cols{ie}, 'HandleVisibility', 'off');
+        end
+        patch([x(k), fliplr(x(k))], [y(k), fliplr(yt)], cols{ie}, ...
+              'FaceAlpha', 0.15, 'EdgeColor', 'none', 'HandleVisibility', 'off');
     end
-    patch([x(m), fliplr(x(m))], [y(m), fliplr(yt)], cols{ie}, ...
-          'FaceAlpha', 0.15, 'EdgeColor', 'none', 'HandleVisibility', 'off');
     legend_swatch(cols{ie}, 0.15, lbls{ie}, '-.');
 end
 end
@@ -2663,10 +2655,15 @@ parfor j = 1:nmx
             r1 = rfun{ie}(1);
             if isfinite(r1) && r1 > 0
                 col(ie) = ratio_crit_coupling(rfun{ie}, 1/sqrt(r1));
-            else
-                % kphi can vanish at eta = 1 (phi decays visibly in the
-                % detector) while excluding smaller eta: seed from a tiny eta,
-                % where the phi escapes and the ratio is ~eta^2.
+            end
+            if ~isfinite(col(ie))
+                % kphi falls to ~0 at eta = 1 once the phi decays well inside the
+                % detector (exp(-L/ell); for SxS from mphi ~ 0.013 GeV), while
+                % still excluding smaller eta.  Underflowed to 0, or tiny but
+                % nonzero, so that 1/sqrt(ratio) lands tens of decades above the
+                % band and the root-find runs out of range (was a spurious gap at
+                % mphi = 14-17 MeV, SxS): seed from a tiny eta instead, where the
+                % phi escapes and the ratio is ~eta^2.
                 e0 = 1e-12;  r0 = rfun{ie}(e0);
                 if isfinite(r0) && r0 > 0
                     col(ie) = ratio_crit_coupling(rfun{ie}, e0/sqrt(r0));
@@ -2750,5 +2747,46 @@ for k = find(ins)
     if e1 < hi
         loglog([m m], [yof(m, e1) yof(m, hi)], '--', 'LineWidth', 2, 'Color', col, 'HandleVisibility', 'off');
     end
+end
+end
+
+
+function tips = relic_island_tips(mx_vec, eta_lo, eta_hi, max_dec, oh_at, target)
+% Low-mass walls of the relic islands; see the loop block.  At the first mass j
+% of a two-branch run whose branches are more than MAX_DEC decades apart, bisect
+% (6 steps in log mx) between mx(j-1) and mx(j) for where Oh2 at the branches'
+% mid coupling crosses TARGET.  No wall if Oh2 there is not below TARGET at
+% mx(j-1): the lower branch carries on below, open-topped.  OH_AT(m, eta) is
+% Oh2; TIPS(j) is the wall mass, NaN where there is none.
+tips = nan(size(mx_vec));
+both = ~isnan(eta_lo) & ~isnan(eta_hi);
+for j = 2:numel(mx_vec)
+    if ~both(j) || both(j-1), continue; end
+    if abs(log10(eta_hi(j) / eta_lo(j))) <= max_dec, continue; end
+    eta_mid = sqrt(eta_lo(j) * eta_hi(j));
+    la = log(mx_vec(j-1));  lb = log(mx_vec(j));
+    try
+        fa = oh_at(exp(la), eta_mid) - target;
+        if ~(isfinite(fa) && fa < 0), continue; end    % no wall below mx(j)
+        for it = 1:6
+            lc = 0.5 * (la + lb);
+            fc = oh_at(exp(lc), eta_mid) - target;
+            if ~isfinite(fc), break; end
+            if fc < 0, la = lc; else, lb = lc; end
+        end
+    catch err
+        fprintf(2, '[Loop tip] mx=%.4g: %s\n', mx_vec(j), err.message);
+        continue
+    end
+    tips(j) = exp(0.5 * (la + lb));
+end
+end
+
+function f = relic_oh2_at(solver_name, mphi, gx, g_ref, interaction, T_RH, production)
+% Oh2(m, eta) with the relic solver this panel uses.
+if strcmp(solver_name, 'freeze_coupled')
+    f = @(m, eta) freeze_coupled(m, mphi, gx, eta * g_ref, interaction, T_RH, false, production);
+else
+    f = @(m, eta) freeze_loop(m, mphi, gx, eta * g_ref, interaction, T_RH, false, production);
 end
 end

@@ -202,8 +202,8 @@ def const_input(g, name, default=None):
 MN  = 0.938
 FPU, FPD, FPS   = 0.02, 0.026, 0.118
 MUP, MDN, MS    = 0.0022, 0.00469, 0.095
-DNU, DND, DNS   = 0.84, -0.44, -0.03
-DU,  DD,  DS    = 0.842, -0.427, -0.085
+DU,  DD,  DS    = 0.847, -0.407, -0.035   # FLAG 2024 N_f=2+1, one set (as nucleon_couplings.m)
+DNU, DND, DNS   = DU, DD, DS
 HBARC_M         = 1.97e-16                    # GeV*m
 HBARC           = 1.97e-14                    # GeV*cm
 GEV_TO_G        = 1.783e-24                   # grams per GeV (for sigma/m in cm^2/g)

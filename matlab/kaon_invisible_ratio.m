@@ -128,7 +128,7 @@ function r = kaon_invisible_ratio(mx, mphi, gx, g, interaction)
         numf = @(Epi) (mKplus^2 + mpiplus^2 - 2*mKplus*Epi - 4*mx^2) .* Yfun(Epi, mx);
         numfA = @(Epi) numf(Epi) .* Aacc(mKplus^2 + mpiplus^2 - 2*mKplus*Epi);
         FSS = bw_notch_integral(numfA, mphi, Gphi, mpiplus, Epimax(mx), mKplus, mpiplus, bpE);
-        gpiKphi = delta*B0*((Cs + Cu)*mpiplus - (Cu + Cd)*mKplus)/(mKplus - mpiplus);
+        gpiKphi = delta*B0*((Cs + Cu)*mpiplus^2 - (Cu + Cd)*mKplus^2)/(mKplus^2 - mpiplus^2);
         Gamma = 1/(32*pi^3*mKplus) * gx^2 * gpiKphi^2 * FSS / hbar;
         r = Gamma / kplusinvlimit;
 
@@ -148,7 +148,7 @@ function r = kaon_invisible_ratio(mx, mphi, gx, g, interaction)
         numf = @(Epi) (mKplus^2 + mpiplus^2 - 2*mKplus*Epi) .* Yfun(Epi, mx);
         numfA = @(Epi) numf(Epi) .* Aacc(mKplus^2 + mpiplus^2 - 2*mKplus*Epi);
         FPS = bw_notch_integral(numfA, mphi, Gphi, mpiplus, Epimax(mx), mKplus, mpiplus, bpE);
-        gpiKphi = delta*B0*((Cs + Cu)*mpiplus - (Cu + Cd)*mKplus)/(mKplus - mpiplus);
+        gpiKphi = delta*B0*((Cs + Cu)*mpiplus^2 - (Cu + Cd)*mKplus^2)/(mKplus^2 - mpiplus^2);
         Gamma = 1/(32*pi^3*mKplus) * gx^2 * gpiKphi^2 * FPS / hbar;
         r = Gamma / kplusinvlimit;
 
