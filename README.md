@@ -6,6 +6,21 @@
 
 Relic abundance and constraints for sub-GeV dark matter χ coupled to light quarks through a scalar, pseudoscalar or axial-vector mediator with a loop-induced photon coupling. This code is a public condensate of the software used to generate the data and figures in Avis Kozar, Cappiello, Diamond & Vincent (arXiv:xxxx.xxxxx), prepared using Claude Opus 5.5. 
 
+## Which code
+
+| task | use | notes |
+|---|---|---|
+| single points, checks, new physics | MATLAB | reference implementation; every observable and constraint; slowest |
+| 2-D scans in (m_χ, g_q) at fixed m_φ, g_χ, ĝ | MATLAB `compare_limits_g.m` | paper's g_q figures; relic loci by root-finding, constraint curves overlaid |
+| fast relic / ΔN_eff / σ_χN evaluation | Julia `Loophole` | same physics core, validated against MATLAB (`test/runtests.jl`) |
+| global scans over (m_χ, m_φ, g_χ, g_u, g_d, g_s) | GAMBIT-light + Julia worker | likelihood = relic abundance only |
+| constraints on scan output, plots | Python `analysis/` | applies every exclusion (kaon, CMB, meson → invisible, SN, stellar, …) to GAMBIT samples |
+
+- The constraints are implemented in MATLAB and in Python (`analysis/`), cross-validated. The Julia port covers relic abundance, ΔN_eff and σ_χN.
+- Adding physics: change MATLAB first, regenerate the Julia references (`test/matlab/dump_*.m`), then port.
+
+## Physics
+
 Per model point (m_χ, m_φ, g_χ, g = [g_u, g_d, g_s]):
 
 | output | function |
@@ -26,6 +41,7 @@ Per model point (m_χ, m_φ, g_χ, g = [g_u, g_d, g_s]):
 - `heavy`/`light` prefix does not affect the relic calculation.
 - `axialVector`: `mphi` = m_A′, `gx` = λ_χ, `g` = [a_u, a_d, a_s].
 - Units: GeV.
+- Three-body channels (off by default): `LOOP_3PI=1` (χχ̄ → 3π, φ → 3π), `LOOP_PIPIPHI=1` (χχ̄ → ππφ; π⁺π⁻A′ for A⊗A). Read by MATLAB, Julia, the GAMBIT worker and the Python CMB bound.
 
 ### Which relic solver
 
@@ -39,7 +55,6 @@ Per model point (m_χ, m_φ, g_χ, g = [g_u, g_d, g_s]):
 - `freeze_loop` and `freeze_coupled` start from Y = 0 at T_RH and cover freeze-in, freeze-out and the transition. Use them for Ωh².
 - `model_observables` (MATLAB, Julia), `compare_limits_g.m` and the GAMBIT worker choose between them automatically. Call a solver directly only to cross-check.
 - Details: `docs/boltzmann_solvers.md`.
-- Three-body channels (off by default): `LOOP_3PI=1` (χχ̄ → 3π, φ → 3π), `LOOP_PIPIPHI=1` (χχ̄ → ππφ; π⁺π⁻A′ for A⊗A). Read by MATLAB, Julia, the GAMBIT worker and the Python CMB bound.
 
 ## Layout
 
@@ -54,7 +69,7 @@ docs/            implementation notes
 
 ## Requirements
 
-- MATLAB (R2024a). Parallel Computing Toolbox optional (`parfor`).
+- MATLAB R2020a or later (developed on R2024a); no toolboxes required. Parallel Computing Toolbox optional (`parfor`).
 - Julia ≥ 1.10.
 - Python ≥ 3.10: `pip install -r analysis/requirements.txt`.
 - GAMBIT-light (<https://github.com/GambitBSM/gambit_light>) with MPI and Diver; scans only.
