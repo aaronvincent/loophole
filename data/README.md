@@ -26,4 +26,4 @@ Columns: log10(m_χ / MeV), log10(σ / cm²). Used by `analysis/dd/` for the m_�
 | `QUESTDMC Spin Independent Projection.csv` | QUEST-DMC SI projection | Darvishi et al., JCAP 10 (2025) 044, arXiv:2505.17995 |
 | `QUEST DMC Neutron Only Spin Dependent.csv` | QUEST-DMC SD-neutron projection | as above |
 | `SuperCDMS Spin Independent Projection.csv` | SuperCDMS SNOLAB SI projection | Agnese et al., PRD 95 (2017) 082002, arXiv:1610.00006 |
-| `Spin Dependent Limits.csv` | existing SD-proton limits | |
+| `Spin Dependent Limits.csv` | existing SD-proton limits (envelope) | PICASSO (Behnke et al., Astropart. Phys. 90 (2017) 85, arXiv:1611.01499), SuperCDMS (PRD 97 (2018) 022002, arXiv:1707.01632), PICO (PRL 118 (2017) 251301, arXiv:1702.07666), CRESST (PRD 106 (2022) 092008, arXiv:2207.07640) |
