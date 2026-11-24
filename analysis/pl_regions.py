@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Shared profile-likelihood region/boundary helpers for the LoopAbundance
+Shared profile-likelihood region/boundary helpers for the Loophole
 constraint plot (plot_all_constraints.py).
 
 Why this module exists

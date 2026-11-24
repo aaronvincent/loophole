@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a combined Neff + external-constraint SIDECAR for a LoopAbundance scan.
+"""Build a combined Neff + external-constraint SIDECAR for a Loophole scan.
 
 A relic-only scan (neff_*_sigma = 0) is mapped by the sampler, then ALL offline
 likelihoods are applied here -- WITHOUT re-running and WITHOUT touching the raw

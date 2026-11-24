@@ -1,6 +1,6 @@
 # M3 validation: relic solvers (freeze_loop/out, Oh2_FI, freeze_coupled) vs
 # MATLAB.  Regenerate the reference with test/matlab/dump_m3.m.
-using LoopAbundance
+using Loophole
 using DelimitedFiles
 using Printf
 

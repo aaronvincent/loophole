@@ -7,7 +7,7 @@
 # Build the sysimage with gambit/build_sysimage.sh, then run with
 #   export LOOP_JULIA_SYSIMAGE=$PWD/gambit/loopabundance_sys.so
 
-using LoopAbundance
+using Loophole
 
 # (interaction, mx, mphi, gx, g) — valid points that don't trip the axial floor.
 const _PTS = [

@@ -62,14 +62,14 @@ JuliaWorker::~JuliaWorker() { shutdown(); }
 bool JuliaWorker::spawn() {
     if (project_.empty() || worker_jl_.empty()) {
         std::fprintf(stderr,
-            "[LoopAbundance] LOOP_JULIA_PROJECT and LOOP_WORKER_JL must be set "
+            "[Loophole] LOOP_JULIA_PROJECT and LOOP_WORKER_JL must be set "
             "(see README.md).\n");
         return false;
     }
 
     int in_pipe[2], out_pipe[2];     // parent->child stdin, child->parent stdout
     if (::pipe(in_pipe) != 0 || ::pipe(out_pipe) != 0) {
-        std::fprintf(stderr, "[LoopAbundance] pipe() failed\n");
+        std::fprintf(stderr, "[Loophole] pipe() failed\n");
         return false;
     }
 
@@ -125,7 +125,7 @@ bool JuliaWorker::spawn() {
     ::close(out_pipe[1]);
 
     if (rc != 0) {
-        std::fprintf(stderr, "[LoopAbundance] posix_spawnp(%s) failed: %s\n",
+        std::fprintf(stderr, "[Loophole] posix_spawnp(%s) failed: %s\n",
                      julia_bin_.c_str(), std::strerror(rc));
         ::close(in_pipe[1]);
         ::close(out_pipe[0]);
@@ -136,7 +136,7 @@ bool JuliaWorker::spawn() {
     from_child_ = ::fdopen(out_pipe[0], "r");
     pid_ = pid;
     if (!to_child_ || !from_child_) {
-        std::fprintf(stderr, "[LoopAbundance] fdopen() failed\n");
+        std::fprintf(stderr, "[Loophole] fdopen() failed\n");
         shutdown();
         return false;
     }
@@ -147,7 +147,7 @@ bool JuliaWorker::spawn() {
     while (read_line(from_child_, line)) {
         if (line == "READY") { alive_ = true; return true; }
     }
-    std::fprintf(stderr, "[LoopAbundance] worker exited before READY\n");
+    std::fprintf(stderr, "[Loophole] worker exited before READY\n");
     shutdown();
     return false;
 }

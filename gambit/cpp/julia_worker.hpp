@@ -1,4 +1,4 @@
-// Manager for the persistent LoopAbundance Julia worker process.
+// Manager for the persistent Loophole Julia worker process.
 //
 // One worker per OS process (i.e. one per MPI rank): the GAMBIT-light user lib
 // spawns `julia --project=<proj> worker.jl` on first use, then exchanges one
@@ -8,7 +8,7 @@
 // Configuration via environment variables (set before launching gambit_light;
 // see README.md and the example YAMLs):
 //   LOOP_JULIA_BIN       julia executable           (default: "julia" on PATH)
-//   LOOP_JULIA_PROJECT   path to julia/LoopAbundance (required)
+//   LOOP_JULIA_PROJECT   path to julia/Loophole (required)
 //   LOOP_WORKER_JL       path to worker/worker.jl    (required)
 //   LOOP_JULIA_SYSIMAGE  optional PackageCompiler sysimage (-J…) to cut startup
 //                        (recommended at HPC scale; see gambit/build_sysimage.sh)

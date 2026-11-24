@@ -1,6 +1,6 @@
 # M2 validation: thermal averages (svavg, svavg_grid, ggxxrate) vs MATLAB.
 # Regenerate the reference with test/matlab/dump_m2.m.
-using LoopAbundance
+using Loophole
 using DelimitedFiles
 using Printf
 

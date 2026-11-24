@@ -1,4 +1,4 @@
-module LoopAbundance
+module Loophole
 
 # --- foundation (Milestone 1) ---
 include("thermo.jl")        # gstarofT

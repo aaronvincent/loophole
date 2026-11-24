@@ -5,7 +5,7 @@
 #
 # Reference: test/ref/m7_ref.csv, regenerate with
 #   matlab -batch "run('test/matlab/dump_m7.m')"
-using LoopAbundance
+using Loophole
 using DelimitedFiles
 using Printf
 

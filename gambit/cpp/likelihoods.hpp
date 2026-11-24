@@ -1,4 +1,4 @@
-// Likelihood terms for the LoopAbundance GAMBIT-light user library.
+// Likelihood terms for the Loophole GAMBIT-light user library.
 // v1: relic Omega h^2 (Gaussian or upper-limit) + dark-sector Delta Neff.
 // All thresholds / sigmas / mode are passed in (set as fixed_value params in the
 // GAMBIT-light YAML), so they live in config rather than the binary.

@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-# GAMBIT-light relic-only scan of LoopAbundance: scalarPP.
+# GAMBIT-light relic-only scan of Loophole: scalarPP.
 #
 # Scanned axes: mx, mphi, gx, gu, gd, gs (6D).  The quark couplings g = [gu, gd,
 # gs] are independent signed-log axes (ScannerBit double_log_flat_join: log on
@@ -11,7 +11,7 @@
 # (paths relative to the repository root; see README.md):
 #   gambit/build.sh
 #   export LOOP_JULIA_BIN=julia
-#   export LOOP_JULIA_PROJECT=$PWD/julia/LoopAbundance
+#   export LOOP_JULIA_PROJECT=$PWD/julia/Loophole
 #   export LOOP_WORKER_JL=$PWD/gambit/worker/worker.jl
 #   export LOOP_JULIA_SYSIMAGE=$PWD/gambit/loopabundance_sys.so   # optional
 # and set `user_lib` below to the absolute path of gambit/cpp/loop_loglike.so.
@@ -69,10 +69,10 @@ UserModel:
 
 UserLogLikes:
 
-  loop_abundance:
+  loophole:
     lang: cpp
     # EDIT to the absolute path of the built library:
-    user_lib: /ABS/PATH/TO/loop_abundance/gambit/cpp/loop_loglike.so
+    user_lib: /ABS/PATH/TO/loophole/gambit/cpp/loop_loglike.so
     # (1) INTERACTION -- pick here: loop_heavyScalar / loop_heavyScalarPS / ... /
     # loop_axialVector (one registered function per model).
     func_name: loop_scalarPP

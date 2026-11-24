@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Combined-constraint tension plots for the LoopAbundance scan: relic + ALL the
+Combined-constraint tension plots for the Loophole scan: relic + ALL the
 Stage-2 constraints (Delta-Neff BBN/CMB + SN1987A + neutron-star + 5th force) on
 one figure, with TRANSPARENT excluded overlays so overlapping exclusions blend.
 

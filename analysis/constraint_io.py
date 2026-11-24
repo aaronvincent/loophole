@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Shared loader for the LoopAbundance constraint sidecar(s).
+Shared loader for the Loophole constraint sidecar(s).
 
 The postprocessing was unified (postprocess.py): a relic-only scan is mapped by
 Diver, then ALL offline likelihoods are applied in one pass into a single

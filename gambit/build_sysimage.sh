@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build a PackageCompiler sysimage of LoopAbundance for the GAMBIT worker.
+# Build a PackageCompiler sysimage of Loophole for the GAMBIT worker.
 # Optional: it cuts each worker's startup from tens of seconds to ~1 s.
 #
 # Usage (from anywhere):
@@ -17,12 +17,12 @@ export LOOP_SYSIMG="${LOOP_SYSIMG:-$here/loopabundance_sys.so}"
 echo "target: $LOOP_SYSIMG"
 
 cd "$repo"
-"$JULIA" --project=julia/LoopAbundance -e 'import Pkg; Pkg.instantiate()'
+"$JULIA" --project=julia/Loophole -e 'import Pkg; Pkg.instantiate()'
 "$JULIA" -e '
   import Pkg; Pkg.activate(; temp=true); Pkg.add("PackageCompiler")
   using PackageCompiler
-  create_sysimage(["LoopAbundance"];
-    project                   = "julia/LoopAbundance",
+  create_sysimage(["Loophole"];
+    project                   = "julia/Loophole",
     sysimage_path             = ENV["LOOP_SYSIMG"],
     precompile_execution_file = "gambit/worker/warmup.jl",
     cpu_target                = "generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1);skylake-avx512,base(1)")'

@@ -1,6 +1,6 @@
 # M4 validation: model_observables (relic + ΔNeff bbn/cmb + σ_χN) vs MATLAB.
 # Regenerate the reference with test/matlab/dump_m4.m.
-using LoopAbundance
+using Loophole
 using DelimitedFiles
 using Printf
 

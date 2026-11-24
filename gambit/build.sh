@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the LoopAbundance GAMBIT-light user library (loop_loglike.so).
+# Build the Loophole GAMBIT-light user library (loop_loglike.so).
 #
 # The user library is a standalone shared object (decoupled from GAMBIT's own
 # build): GAMBIT-light dlopen's it via the `user_lib` path in the YAML.  It needs
@@ -103,7 +103,7 @@ Before running gambit_light, export the worker settings (or set them in your
 shell profile / job script):
 
   export LOOP_JULIA_BIN=$(command -v julia || echo julia)
-  export LOOP_JULIA_PROJECT=$repo_root/julia/LoopAbundance
+  export LOOP_JULIA_PROJECT=$repo_root/julia/Loophole
   export LOOP_WORKER_JL=$here/worker/worker.jl
 
 Then set user_lib in one of gambit/yaml/*.yaml to $out and run gambit on it.

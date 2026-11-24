@@ -1,7 +1,7 @@
 # M5 validation: multi-pole models (SP/PP family + axialVector).  Cross sections
 # (sigma_ggxx / sigma_xxgg / sigma_xxall), mediator widths, meson poles, and
 # sigma_nucleon vs MATLAB.  Regenerate the reference with test/matlab/dump_m5.m.
-using LoopAbundance
+using Loophole
 using DelimitedFiles
 using Printf
 

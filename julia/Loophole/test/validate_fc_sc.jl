@@ -1,6 +1,6 @@
 # freeze_coupled with φ's 2→2 conversions (Primakoff, πγ→πφ) vs MATLAB, on and
 # off (ENV LOOP_PHI_SC=0).  Regenerate the reference with test/matlab/dump_fc_sc.m.
-using LoopAbundance
+using Loophole
 using DelimitedFiles
 using Printf
 

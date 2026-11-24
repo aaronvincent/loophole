@@ -3,7 +3,7 @@ matlab/output/
 matlab/figures*/
 *.asv
 # Julia
-julia/LoopAbundance/Manifest-v*.toml
+julia/Loophole/Manifest-v*.toml
 # GAMBIT build products and scan outputs
 *.so
 *.o

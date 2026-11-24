@@ -1,7 +1,7 @@
 # SP/PP three-body final states (χχ̄→3π, φ→3π, χχ̄→ππφ) and the axialVector
 # χχ̄→3π, A′→3π, χχ̄→π+π−A′ vs MATLAB, toggles on, plus the toggles-off checks.  Regenerate the reference with
 #   LOOP_3PI=1 LOOP_PIPIPHI=1 matlab -batch "dump_threebody"   (test/matlab/)
-using LoopAbundance
+using Loophole
 using DelimitedFiles
 using Printf
 
@@ -32,7 +32,7 @@ function jl_value(m, q, arg)
         return axial3pi_sigma(arg, m.mx, m.mphi, m.gx, mediator_widths(m).total, m.g)
     elseif q == "sig3";   return threebody_sigma(arg, m.mx, m.mphi, m.gx, m.Gam[2], m.g, isSP)
     elseif q == "xxall";  return sigma_xxall(m, arg)
-    elseif q == "xxhad";  return LoopAbundance.sigma_xxhad(m, arg)
+    elseif q == "xxhad";  return Loophole.sigma_xxhad(m, arg)
     elseif q == "sv_all"; return svavg(m, arg)
     elseif q == "sv_sm";  return svavg(m, arg; channel=:sm)
     else error("unknown quantity $q")
@@ -77,16 +77,16 @@ threebody_refresh!()
 for ic in ("heavyScalarSP", "heavyScalarPP"), g in ([1, 1, 1] / 3, [0.5, 0.3, 0.2])
     m = model_from_interaction(ic, 0.2, 1.0, 1.0, g)
     off = threepi_weight(2.0, g) == 0 && pipiphi_weight(2.0, 0.02, g) == 0 &&
-          mediator_widths(m).pipi == 0 && LoopAbundance._sppp_threebody(m, 2.0) == 0 &&
-          LoopAbundance._model_extra_thresh(m) == ()
+          mediator_widths(m).pipi == 0 && Loophole._sppp_threebody(m, 2.0) == 0 &&
+          Loophole._model_extra_thresh(m) == ()
     global ok &= off
     @printf("  %-5s toggles off: %s g=%s all three-body pieces zero\n", off ? "PASS" : "FAIL", ic, g)
 end
 let g = 0.01 * [2, -1, -1], m = model_from_interaction("axialVector", 0.3, 1.0, 0.01, g)
     off = axial3pi_weight(2.0, g) == (0.0, 0.0) && pipiA_weight(2.0, 0.1, g) == (0.0, 0.0) &&
           mediator_widths(m).pipi == 0 &&
-          LoopAbundance._model_extra_thresh(m) == () &&
-          length(LoopAbundance._sv_poles(m, :all)) == length(poles(m))
+          Loophole._model_extra_thresh(m) == () &&
+          length(Loophole._sv_poles(m, :all)) == length(poles(m))
     global ok &= off
     @printf("  %-5s toggles off: axialVector all 3pi, pi pi A' pieces zero, no A' pole\n", off ? "PASS" : "FAIL")
 end

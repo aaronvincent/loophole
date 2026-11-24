@@ -1,6 +1,6 @@
 # neff_simple (simple CMB ΔNeff) vs MATLAB.  Regenerate the reference with
 # test/matlab/dump_simple.m.
-using LoopAbundance
+using Loophole
 using DelimitedFiles
 using Printf
 

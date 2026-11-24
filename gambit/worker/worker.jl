@@ -1,13 +1,13 @@
 #!/usr/bin/env julia
-# Persistent LoopAbundance worker for the GAMBIT-light C++ user library.
+# Persistent Loophole worker for the GAMBIT-light C++ user library.
 #
-# Loads LoopAbundance once, then serves one observable request per input line over
+# Loads Loophole once, then serves one observable request per input line over
 # a trivial whitespace-delimited stdin/stdout protocol (no JSON dependency).  One
 # worker is spawned per MPI rank by the C++ side (cpp/julia_worker.cpp); the few-
 # second startup is paid once per scan.
 #
 # Run standalone:
-#   julia --project=julia/LoopAbundance gambit/worker/worker.jl
+#   julia --project=julia/Loophole gambit/worker/worker.jl
 # then type, e.g.:
 #   axialVector 0.05 1e-9 1e-10 2e-10 2e-10 2e-10 0.01 0.3
 #
@@ -20,7 +20,7 @@
 # (freeze_loop) or 1 (freeze_coupled).  NaN/Inf are printed verbatim and parsed
 # on the C++ side (which treats non-finite Oh2 as an invalid point).
 
-using LoopAbundance
+using Loophole
 using Printf
 using Logging
 

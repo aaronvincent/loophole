@@ -1,4 +1,4 @@
-// GAMBIT-light user library for the LoopAbundance dark-matter relic / Delta-Neff
+// GAMBIT-light user library for the Loophole dark-matter relic / Delta-Neff
 // model.  One registered log-likelihood per interaction (selected via `func_name`
 // in the YAML); each computes the observables through a persistent Julia worker
 // and returns the v1 likelihood (relic Omega h^2 + Delta Neff).

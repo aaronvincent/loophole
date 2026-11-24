@@ -706,7 +706,7 @@ git-tree-sha1 = "f00544d95982ea270145636c181ceda21c4e2575"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 version = "1.2.0"
 
-[[deps.LoopAbundance]]
+[[deps.Loophole]]
 deps = ["Bessels", "DataInterpolations", "DelimitedFiles", "LinearAlgebra", "OrdinaryDiffEqBDF", "Printf", "QuadGK", "SciMLBase", "SpecialFunctions"]
 path = "."
 uuid = "53b415df-0e01-40e6-ae35-c03fd00f07fa"

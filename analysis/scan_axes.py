@@ -1,4 +1,4 @@
-"""Shared axis registry + auto-windowing for the LoopAbundance scan plotters.
+"""Shared axis registry + auto-windowing for the Loophole scan plotters.
 
 Single source of truth (used by both ``plot_2D_profiles.py`` and
 ``plot_allowed_regions.py``) for:

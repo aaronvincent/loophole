@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Spin-independent DM-nucleon direct-detection limits, as an overlay for the
-LoopAbundance (m_chi, sigma_chiN) panels.
+Loophole (m_chi, sigma_chiN) panels.
 
 Data: Ciaran O'Hare's DirectDetectionPlots compilation, fetched into ./limits/
 by ``fetch_si_limits.sh``.  Every file is two columns, ``m_chi [GeV]`` and

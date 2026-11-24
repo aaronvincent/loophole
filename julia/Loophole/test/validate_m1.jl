@@ -1,6 +1,6 @@
 # M1 validation: compare Julia cross sections + widths against the MATLAB
 # reference dumps in test/ref/ (regenerate with test/matlab/dump_m1.m).
-using LoopAbundance
+using Loophole
 using DelimitedFiles
 using Printf
 
