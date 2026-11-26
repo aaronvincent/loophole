@@ -28,7 +28,7 @@ the existing limit actually removes samples -- is inside the frame.
 
 Usage
 -----
-    python analysis/dd/plot_sigma_mx_ddproj.py RUN_OR_SIDECAR ...    # merged run(s)
+    python analysis/dd/plot_sigma_mx_ddproj.py RUN_OR_SIDECAR ...    # scan file(s)
     python analysis/dd/plot_sigma_mx_ddproj.py --from-cache [TAG]    # restyle only (~2 s)
 
 Env knobs
@@ -61,8 +61,8 @@ import projections as P                  # noqa: E402
 REPO = base.REPO
 PLOTTING = base.PLOTTING
 DEFAULT_RUNS = [
-    os.path.join(REPO, "merged", t, "samples", f"{t}_postprocessed.hdf5")
-    for t in ("heavyScalar_relic_mphi10_merged", "heavyScalar_relic_mphi10_mfv_merged")
+    os.path.join(REPO, "runs", t, "samples", f"{t}_postprocessed.hdf5")
+    for t in ("heavyScalar_relic_mphi10", "heavyScalar_relic_mphi10_mfv")
 ]
 
 SIGMA_YMAX = os.environ.get("DDP_SIGMA_YMAX", "-26")

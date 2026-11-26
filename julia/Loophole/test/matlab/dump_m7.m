@@ -2,7 +2,7 @@
 % Run from anywhere:  matlab -batch "run('.../test/matlab/dump_m7.m')"
 % Writes test/ref/m7_ref.csv  (key,value -- one scalar per row).
 %
-% M7 covers the physics merged from `main` into the port: the pseudoscalar
+% M7 covers the pseudoscalar
 % nucleon coupling h~_P for SP/PP (DMnucxsec), the axialVector EFT-validity
 % ceilings/floors and the isolated chi chibar -> A'A' piece.
 %

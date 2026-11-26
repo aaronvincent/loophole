@@ -3,8 +3,7 @@
 The combined-constraint (m_chi, sigma_chiN) panel with the published
 spin-independent direct-detection limits laid over it.
 
-Default run is the MFV S(x)S merged scan
-(``merged/heavyScalar_relic_mfv_merged``).
+Default run is the MFV S(x)S scan (``runs/heavyScalar_relic_mfv``).
 
 How it reuses the main plotter
 ------------------------------------
@@ -67,8 +66,8 @@ import si_limits
 PLANE = "mx:sigma_chiN"
 TARGET = "all_overlay__mx__sigma_chiN"
 DEFAULT_RUN = os.path.join(
-    REPO, "merged", "heavyScalar_relic_mfv_merged", "samples",
-    "heavyScalar_relic_mfv_merged_postprocessed.hdf5")
+    REPO, "runs", "heavyScalar_relic_mfv", "samples",
+    "heavyScalar_relic_mfv_postprocessed.hdf5")
 
 MODE = os.environ.get("DD_MODE", "envelope")
 FILL = os.environ.get("DD_FILL", "band")          # band | full | none

@@ -1,4 +1,4 @@
-# M7 validation: the physics merged from `main` into the Julia port — the
+# M7 validation: the
 # pseudoscalar nucleon coupling h̃_P for SP/PP (DMnucxsec), the axialVector
 # EFT-validity ceilings/floors (axial_gx_ceiling / axial_gq_ceiling /
 # axial_mixing_floor) and the isolated χχ̄→A′A′ piece (sigma_xxphiphi / svavg_phiphi).

@@ -49,7 +49,7 @@ import plot_style
 import plot_sigma_mx_dd as drv
 
 PAC = os.path.join(PLOTTING, "plot_all_constraints.py")
-TAG_DEFAULT = "heavyScalar_relic_mfv_merged"
+TAG_DEFAULT = "heavyScalar_relic_mfv"
 
 
 def pac_constants():

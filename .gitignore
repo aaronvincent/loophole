@@ -8,7 +8,6 @@ julia/Loophole/Manifest-v*.toml
 *.so
 *.o
 runs/
-merged/
 # analysis outputs and downloaded limits
 analysis/plots/
 analysis/dd/limits/

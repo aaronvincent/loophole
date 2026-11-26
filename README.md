@@ -62,7 +62,7 @@ Per model point (m_χ, m_φ, g_χ, g = [g_u, g_d, g_s]):
 matlab/          reference implementation; g_q scan figures (compare_limits_g.m)
 julia/Loophole/  Julia port of the physics core; tests against MATLAB references
 gambit/          GAMBIT-light library (C++), Julia worker, one YAML per model
-analysis/        merge, postprocess and plot GAMBIT scans (Python)
+analysis/        postprocess and plot GAMBIT scans (Python)
 data/            digitised external limits
 docs/            implementation notes
 ```
@@ -137,13 +137,12 @@ References: `test/ref/*.csv`, written by `test/matlab/dump_*.m`.
    ```
    Output: `runs/<model>_relic/samples/*.hdf5`.
 
-4. **Merge, postprocess, plot:**
+4. **Postprocess, plot:**
    ```bash
-   python analysis/merge_raw_scans.py merged/heavyScalar.hdf5 runs/heavyScalar_relic*/samples/*.hdf5
    POSTPROC_RELIC_MU=0.12 POSTPROC_RELIC_SIGMA=0.012 \
-       python analysis/postprocess.py merged/heavyScalar.hdf5 data
-   python analysis/plot_all_constraints.py merged/heavyScalar.hdf5 data
-   python analysis/dd/plot_sigma_mx_ddproj.py merged/heavyScalar_postprocessed.hdf5   # m_φ = 10 GeV: DD overlay
+       python analysis/postprocess.py runs/heavyScalar_relic/samples/heavyScalar_relic.hdf5 data
+   python analysis/plot_all_constraints.py runs/heavyScalar_relic/samples/heavyScalar_relic.hdf5 data
+   python analysis/dd/plot_sigma_mx_ddproj.py runs/heavyScalar_relic/samples/heavyScalar_relic_postprocessed.hdf5   # m_φ = 10 GeV: DD overlay
    ```
    - Plots: `analysis/plots/<tag>_allconstraints/`, `<tag>_ddproj/`.
    - `postprocess.py` writes `*_postprocessed.hdf5` with `LogLike_<constraint>` and `excluded_<constraint>` per bound. Bound strengths: environment variables at the top of the file.
@@ -160,8 +159,6 @@ References: `test/ref/*.csv`, written by `test/matlab/dump_*.m`.
   ```
   Renumber fixed entries (`T_RH`, `s_mix`, …) from `p8`; `initial_guesses` = (mx, mphi, gx, gq).
 - Set `output_file` and `default_output_path` per variant.
-
-Paper panels merge Diver, t-walk and profile-likelihood scans of each configuration (`merge_raw_scans.py`). One Diver run gives the same shapes, more sparsely sampled.
 
 ## Docs
 

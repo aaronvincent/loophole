@@ -176,11 +176,9 @@ def const_input(g, name, default=None):
     if key in g:
         arr = np.asarray(g[key])
         # Fixed-value params are constant on VALID rows, but row 0 can be an
-        # unwritten fill/invalid row (all zeros) for some scanners -- notably
-        # paraprof, whose orchestrator rank leaves the first slot empty.  Reading
-        # g[key][0] there silently returned relic_sigma=0, which disabled the
-        # relic Gaussian (relic_loglike short-circuits to 0 for sigma<=0) and
-        # made the whole box look on-shell.  Pick the first VALID finite row.
+        # unwritten fill/invalid row (all zeros) for some scanners; reading it
+        # would give e.g. relic_sigma=0 and disable the relic Gaussian.  Pick the
+        # first VALID finite row.
         if "LogLike_isvalid" in g:
             valid = np.asarray(g["LogLike_isvalid"]).astype(bool)
             vv = arr[valid]
